@@ -235,6 +235,9 @@
     "Print, packaging and large-format production - crafted, colour-accurate and delivered to spec.",
     "AI-powered creative and media buying that optimise spend and scale performance in real time."
   ];
+  // clicking a settled grid card opens /services#<slug>; services-section.js scrolls its pinned
+  // stack to the matching panel (index matches CARDS - keep both lists in the same order)
+  const SLUG=["brand-identity","web-design-development","seo-google-ads","social-media-content","commercial-print-production","ai-driven-advertising"];
 
   const _cardCache={};
   const DMV=[]; let dmSeen=false;   // card videos start cold; fetched + played only once .dm approaches
@@ -387,14 +390,18 @@
     let hoverI=-1, shownI=-1, swap=null;
     function render(e){ const ci=GRID_IDX[e]; tipT.textContent=CARDS[ci][1]; tipB.textContent=DESC[ci]; shownI=e; }
     function hide(){ if(hoverI===-1) return; hoverI=-1; if(swap){ clearTimeout(swap); swap=null; } tip.style.opacity="0"; tip.style.transform="translateY(8px)"; canvas.style.cursor=""; }
-    function move(ev){
-      if(curH<0.72){ hide(); return; }
+    // grid card under the pointer, or -1 while the grid has not settled / nothing is hit
+    function hitAt(ev){
+      if(curH<0.72) return -1;
       const rect=canvas.getBoundingClientRect();
       const nx=((ev.clientX-rect.left)/rect.width)*2-1, ny=-((ev.clientY-rect.top)/rect.height)*2+1;
       ray.setFromCamera({x:nx,y:ny}, camera);
       const hits=ray.intersectObjects(grid.filter(g=>g.visible), false);
-      if(!hits.length){ hide(); return; }
-      const e=grid.indexOf(hits[0].object);
+      return hits.length ? grid.indexOf(hits[0].object) : -1;
+    }
+    function move(ev){
+      const e=hitAt(ev);
+      if(e<0){ hide(); return; }
       canvas.style.cursor="pointer";
       tip.style.left=Math.min(ev.clientX+18, innerWidth-306)+"px";
       tip.style.top=Math.min(ev.clientY+18, innerHeight-150)+"px";
@@ -408,6 +415,12 @@
     }
     canvas.addEventListener("mousemove", move);
     canvas.addEventListener("mouseleave", hide);
+    // click (or tap) a settled card -> that service's panel on the Services page. Raycasts at the
+    // click point itself, so it never depends on the tooltip's delayed cross-fade.
+    canvas.addEventListener("click", function(ev){
+      const e=hitAt(ev); if(e<0) return;
+      location.href="/services#"+SLUG[GRID_IDX[e]];
+    });
   })();
 
   // ---- scroll drive (Lenis-style continuous smoothing) ----

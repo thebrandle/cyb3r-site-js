@@ -10,3 +10,10 @@ time as CDN caches expire. Scripts live here so they stay reliably servable.
 Design in Motion helix. It is loaded by `home-loader.js`; because that loader is a
 registered Webflow script pinned to a commit and the Custom Code API is OAuth-only, the
 site head rewrites the chained URL to point here.
+
+`services-section.js` builds the Services page stacked-panel scroll section. It is loaded
+directly as the registered Webflow script `cyb3rSvcSection` (Services page footer), so a
+new commit needs a new registered version, not a head rewrite. It also handles deep links:
+`/services#<slug>` (slugs in its `services` array) scrolls to that service's panel. The
+homepage helix cards link there via the matching `SLUG` list in `cyb3r-sections.js` - keep
+the two lists in the same order.
