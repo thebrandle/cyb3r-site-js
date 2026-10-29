@@ -1,0 +1,142 @@
+{
+ "h1": "Web Design & Development",
+ "slug": "web-design-development",
+ "intro": "High-fidelity websites and web apps designed to attract, engage and convert, built for speed, search and scale.",
+ "cards": [
+  {
+   "img": "6ae3331da1321960692d7dd1_cyb3r-web-ux-ui-design.webp",
+   "name": "UX & UI design",
+   "alt": "Designer arranging paper wireframe cards for a website layout",
+   "line": "Interfaces built around how people browse and buy: research, wireframes and polished designs that make every page clear and easy to act on."
+  },
+  {
+   "img": "6ae3331d95f1451c77ba114f_cyb3r-web-webflow-headless-builds.webp",
+   "name": "Webflow & headless builds",
+   "alt": "Developer typing at a backlit keyboard in front of a website layout",
+   "line": "Fast, secure sites built on Webflow or a headless stack, so your team can edit pages and publish content without waiting on a developer."
+  },
+  {
+   "img": "6ae3331de9a6cc5bdbf33054_cyb3r-web-responsive-motion-ui.webp",
+   "name": "Responsive, motion-first UI",
+   "alt": "Phone, tablet and laptop showing the same responsive layout",
+   "line": "Layouts that adapt cleanly to every screen, with motion that guides the eye and gives your brand a feel visitors remember."
+  },
+  {
+   "img": "6ae3331de9a6cc5bdbf33080_cyb3r-web-landing-pages-funnels.webp",
+   "name": "Landing pages & funnels",
+   "alt": "Thumb about to tap a glowing call-to-action button on a phone",
+   "line": "Campaign pages built to convert, from the first headline to the final form, ready for Google Ads, social traffic and testing."
+  },
+  {
+   "img": "6ae3331ed7e3c1cfe1d97cf1_cyb3r-web-cms-integrations.webp",
+   "name": "CMS & integrations",
+   "alt": "Network cables plugged into a server panel with teal status lights",
+   "line": "Content structures that fit how you publish, connected to the CRM, forms, email and analytics tools you already use."
+  },
+  {
+   "img": "6ae3331ee9a6cc5bdbf33161_cyb3r-web-performance-seo.webp",
+   "name": "Performance & SEO foundations",
+   "alt": "Light trails of fast traffic curving along a motorway at night",
+   "line": "Clean code, quick load times and search-ready structure from day one: Core Web Vitals, metadata, schema and sitemaps handled before launch."
+  }
+ ],
+ "pairs_h2": "What our web design and development covers",
+ "pairs": [
+  [
+   "B",
+   "Web design",
+   "l",
+   "UX research"
+  ],
+  [
+   "l",
+   "Wireframes",
+   "B",
+   "Prototypes"
+  ],
+  [
+   "B",
+   "UI design",
+   "l",
+   "Design systems"
+  ],
+  [
+   "l",
+   "Webflow",
+   "B",
+   "Headless CMS"
+  ],
+  [
+   "B",
+   "Responsive builds",
+   "l",
+   "Interactions"
+  ],
+  [
+   "l",
+   "GSAP animation",
+   "B",
+   "3D & WebGL"
+  ],
+  [
+   "B",
+   "Landing pages",
+   "l",
+   "Sales funnels"
+  ],
+  [
+   "l",
+   "Conversion tracking",
+   "B",
+   "Lead forms"
+  ],
+  [
+   "B",
+   "CMS setup",
+   "B",
+   "Integrations"
+  ],
+  [
+   "l",
+   "Memberships",
+   "B",
+   "Client portals"
+  ],
+  [
+   "B",
+   "Migrations",
+   "l",
+   "Redesigns"
+  ],
+  [
+   "l",
+   "Analytics",
+   "B",
+   "GA4 setup"
+  ],
+  [
+   "B",
+   "Site speed",
+   "l",
+   "Core Web Vitals"
+  ],
+  [
+   "l",
+   "Technical SEO",
+   "B",
+   "Schema markup"
+  ],
+  [
+   "B",
+   "Accessibility",
+   "l",
+   "Spam protection"
+  ],
+  [
+   "l",
+   "Maintenance",
+   "B",
+   "Webflow hosting"
+  ]
+ ]
+}

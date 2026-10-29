@@ -1,0 +1,71 @@
+<style>
+/* Service page card lineup (alanmenken.com-style). Markup lives in this embed so search
+   engines and screen readers get every service; behaviour is the hosted brand-lineup.js. */
+.bl{--bl-bg:#1A232D;--bl-ink:#fff;--bl-dim:#A7ACB4;--bl-accent:#39F1E0;--bl-gut:clamp(16px,5vw,80px);
+  position:relative;min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:center;
+  padding:clamp(92px,12vh,120px) 0 clamp(60px,8vh,88px);background:var(--bl-bg);color:var(--bl-ink);overflow:hidden;
+  font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased}
+.bl,.bl *{box-sizing:border-box}
+.bl-row{list-style:none;margin:0 auto;padding:0;display:flex;align-items:flex-start;gap:clamp(8px,1.4vw,20px);
+  width:min(1180px,calc(100% - 2*var(--bl-gut)));height:calc(min(46vh,470px) + 7vh)}
+.bl-card{--off:0px;position:relative;flex:1 1 0;min-width:0;height:min(46vh,470px);margin-top:var(--off);overflow:hidden;
+  background:#0d1116;cursor:pointer;outline:none;opacity:1;transition:flex-grow .8s cubic-bezier(.22,1,.36,1)}   /* the theme dims every <li> to .7 */
+.bl-card:nth-child(6n+2),.bl-card:nth-child(6n+4){--off:3.3vh}
+.bl-card:nth-child(6n+3),.bl-card:nth-child(6n+6){--off:7vh}
+.bl-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) brightness(.62) contrast(.95);
+  transform:scale(1.06);transition:filter .7s ease,transform 1.4s cubic-bezier(.22,1,.36,1)}
+.bl-card::after{content:"";position:absolute;inset:0;background:rgba(26,35,45,.38);transition:opacity .7s ease;pointer-events:none}
+.bl-card.is-on{flex-grow:2.3}
+.bl-card.is-on img{filter:none;transform:scale(1)}
+.bl-card.is-on::after{opacity:0}
+.bl.has-on .bl-card:not(.is-on) img{filter:grayscale(1) brightness(.46) contrast(.95)}
+.bl-card:focus-visible{outline:2px solid var(--bl-accent);outline-offset:4px}
+.bl-copy{text-align:center;margin-top:clamp(16px,3.2vh,40px);padding:0 16px}
+.bl-eyebrow{font:500 12px/1.5 ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--bl-dim);margin:0 0 14px;transition:opacity .35s ease}
+.bl-title{font:500 clamp(34px,4vw,64px)/1.04 Inter,sans-serif;letter-spacing:-.04em;margin:0 auto;white-space:nowrap;
+  min-height:1.04em;color:var(--bl-ink)}
+.bl-title .bl-w{display:inline-block;white-space:nowrap}
+.bl-title .bl-l{display:inline-block;opacity:0;transform:translateY(.32em);filter:blur(8px);
+  transition:opacity .6s ease var(--d,0ms),transform .9s cubic-bezier(.22,1,.36,1) var(--d,0ms),filter .6s ease var(--d,0ms)}
+.bl-title .bl-l.in{opacity:1;transform:none;filter:blur(0)}
+.bl-title .bl-l.out{transition-duration:.22s,.3s,.22s}
+.bl-title .bl-dot{color:var(--bl-accent)}
+.bl-sub{font:500 clamp(15px,1.2vw,18px)/1.5 Inter,sans-serif;letter-spacing:-.01em;color:var(--bl-dim);margin:16px auto 0;
+  max-width:40em;text-wrap:balance;transition:opacity .35s ease}
+.bl-eyebrow,.bl-title,.bl-sub{opacity:1}   /* the theme dims every <p> to .7 */
+.bl-fade{opacity:0}
+.bl-foot{position:absolute;left:var(--bl-gut);right:var(--bl-gut);bottom:clamp(18px,3.4vh,34px);display:flex;justify-content:space-between;
+  align-items:center;font:500 11px/1 ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--bl-dim)}
+.bl-foot a{color:inherit;text-decoration:none;transition:color .3s ease}
+.bl-foot a:hover,.bl-foot a:focus-visible{color:var(--bl-accent)}
+.bl-hint-touch{display:none}
+@media (hover:none){.bl-hint-hover{display:none}.bl-hint-touch{display:inline}}
+/* until the script runs: hidden, with a 3s safety reveal if it never loads */
+.bl.bl-pre .bl-card,.bl.bl-pre .bl-copy{opacity:0;animation:blShow 0s 3s forwards}
+@keyframes blShow{to{opacity:1}}
+@media (max-width:767px){
+  /* svh = the screen with the browser bars showing, so the whole lineup fits the first view */
+  .bl{justify-content:flex-start;padding-top:clamp(84px,13vh,120px);padding-top:clamp(84px,13svh,120px);padding-bottom:60px}
+  .bl-row{height:calc(38vh + 5vh);height:calc(38svh + 5vh)}
+  .bl-card{height:38vh;height:38svh}
+  .bl-copy{margin-top:clamp(14px,3vh,28px)}
+  .bl-sub{max-width:none}
+  .bl-card:nth-child(6n+2),.bl-card:nth-child(6n+4){--off:2.4vh}
+  .bl-card:nth-child(6n+3),.bl-card:nth-child(6n+6){--off:5vh}
+  .bl-card.is-on{flex-grow:3}
+  .bl-title{font-size:clamp(30px,8.4vw,40px);white-space:normal;min-height:2.1em;display:flex;flex-wrap:wrap;justify-content:center;
+    align-content:center;column-gap:.26em}
+}
+@media (prefers-reduced-motion:reduce){
+  .bl-card,.bl-card img,.bl-title .bl-l,.bl-eyebrow,.bl-sub{transition:none}
+  .bl.bl-pre .bl-card,.bl.bl-pre .bl-copy{animation:none;opacity:1}
+}
+</style>
+<section class="bl bl-pre" aria-labelledby="bl-h">
+<h1 id="bl-h" class="sr-only">Web Design &amp; Development</h1>
+<p class="sr-only">High-fidelity websites and web apps designed to attract, engage and convert, built for speed, search and scale.</p>
+<ul class="bl-row" role="list"><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae3331da1321960692d7dd1_cyb3r-web-ux-ui-design.webp" alt="Designer arranging paper wireframe cards for a website layout" width="800" height="1400" decoding="async"><div class="sr-only"><h2>UX &amp; UI design</h2><p>Interfaces built around how people browse and buy: research, wireframes and polished designs that make every page clear and easy to act on.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae3331d95f1451c77ba114f_cyb3r-web-webflow-headless-builds.webp" alt="Developer typing at a backlit keyboard in front of a website layout" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Webflow &amp; headless builds</h2><p>Fast, secure sites built on Webflow or a headless stack, so your team can edit pages and publish content without waiting on a developer.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae3331de9a6cc5bdbf33054_cyb3r-web-responsive-motion-ui.webp" alt="Phone, tablet and laptop showing the same responsive layout" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Responsive, motion-first UI</h2><p>Layouts that adapt cleanly to every screen, with motion that guides the eye and gives your brand a feel visitors remember.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae3331de9a6cc5bdbf33080_cyb3r-web-landing-pages-funnels.webp" alt="Thumb about to tap a glowing call-to-action button on a phone" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Landing pages &amp; funnels</h2><p>Campaign pages built to convert, from the first headline to the final form, ready for Google Ads, social traffic and testing.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae3331ed7e3c1cfe1d97cf1_cyb3r-web-cms-integrations.webp" alt="Network cables plugged into a server panel with teal status lights" width="800" height="1400" decoding="async"><div class="sr-only"><h2>CMS &amp; integrations</h2><p>Content structures that fit how you publish, connected to the CRM, forms, email and analytics tools you already use.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae3331ee9a6cc5bdbf33161_cyb3r-web-performance-seo.webp" alt="Light trails of fast traffic curving along a motorway at night" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Performance &amp; SEO foundations</h2><p>Clean code, quick load times and search-ready structure from day one: Core Web Vitals, metadata, schema and sitemaps handled before launch.</p></div></li></ul>
+<div class="bl-copy" aria-hidden="true"><p class="bl-eyebrow">Services</p><p class="bl-title">Web Design &amp; Development.</p><p class="bl-sub">High-fidelity websites and web apps designed to attract, engage and convert, built for speed, search and scale.</p></div>
+<div class="bl-foot"><a href="/services#web-design-development">&larr; All services</a><span><span class="bl-hint-hover">Hover a card to explore</span><span class="bl-hint-touch">Tap a card to explore</span></span></div>
+</section>
