@@ -82,10 +82,10 @@
   "@media (prefers-reduced-motion:reduce){.cyb-svc .cap-row .cap-line{transform:scaleX(1)!important}.cyb-svc .p-caption .w{opacity:1!important;filter:none!important}}" +
   /* "Learn more" = the homepage Selected Works button (cyb3r-sections.css), rescoped */
   ".cyb-svc .cta-row{ margin-top:28px; }" +
-  ".cyb-svc .button_wrapper{ --step:30ms; --base-dur:300ms; --dur-step:30ms; --run:28px; --out-time:200ms; --in-time:320ms;" +
-  ".cyb-svc .button_wrapper .btn{ position:relative; display:block; text-decoration:none; color:var(--ink); font-family:\"Inter\",Helvetica,Arial,system-ui,sans-serif;" +
+  ".cyb-svc .button_wrapper{ --step:30ms; --base-dur:300ms; --dur-step:30ms; --run:28px; --out-time:200ms; --in-time:320ms; --ul-out-time:1000ms; --ul-in-time:500ms; --arrow-gap:10px; --inset-min:8px; position:relative; display:inline-block; }" +
+  ".cyb-svc .button_wrapper .btn{ position:relative; display:block; text-decoration:none; color:var(--ink); font-family:\"Inter\",Helvetica,Arial,system-ui,sans-serif; font-weight:500; text-transform:none; letter-spacing:-.5px; font-size:1rem; padding:8px 0 10px; width:15rem; overflow:hidden; cursor:pointer; }" +
   ".cyb-svc .button_wrapper .word{ display:inline-flex; transform:translate(0); position:relative; z-index:1; }" +
-  ".cyb-svc .button_wrapper .text{ display:inline-block; white-space:pre; transition-property:transform; transition-duration:var(--dur,var(--base-dur));" +
+  ".cyb-svc .button_wrapper .text{ display:inline-block; white-space:pre; transition-property:transform; transition-duration:var(--dur,var(--base-dur)); transition-timing-function:ease; transition-delay:var(--delay,0s); transform:translate(0); }" +
   ".cyb-svc .button_wrapper.is-hovered .text{ transform:translateX(var(--group-move,0px)); }" +
   ".cyb-svc .button_wrapper .arrow{ position:absolute; top:50%; transform:translateY(-50%); width:20px; height:1em; overflow:hidden; }" +
   ".cyb-svc .button_wrapper .arrow.arrow-right{ right:2px; }" +
@@ -122,8 +122,8 @@
     const uR=document.createElement("span"); uR.className="u-right"; const uL=document.createElement("span"); uL.className="u-left";
     const word=document.createElement("span"); word.className="word";
     [...label].forEach(ch=>{ const s=document.createElement("span"); s.className="text"; s.textContent=ch; word.appendChild(s); });
-    const aR=document.createElement("span"); aR.className="arrow arrow-right"; aR.innerHTML='<span class="arrow-sprite">→</span>';
-    const aL=document.createElement("span"); aL.className="arrow arrow-left"; aL.innerHTML='<span class="arrow-sprite">→</span>';
+    const aR=document.createElement("span"); aR.className="arrow arrow-right"; aR.setAttribute("aria-hidden","true"); aR.innerHTML='<span class="arrow-sprite">→</span>';
+    const aL=document.createElement("span"); aL.className="arrow arrow-left"; aL.setAttribute("aria-hidden","true"); aL.innerHTML='<span class="arrow-sprite">→</span>';
     btn.append(uR,uL,word,aR,aL); wrap.append(btn); if(!opts.href) btn.addEventListener("click",e=>e.preventDefault());
     const num=(el,k,d)=>{ const v=parseFloat(getComputedStyle(el).getPropertyValue(k)); return Number.isFinite(v)?v:d; };
     const kill=el=>el&&el.getAnimations().forEach(a=>{ try{a.commitStyles();}catch(e){} a.cancel(); });
