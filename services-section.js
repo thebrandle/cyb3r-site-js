@@ -117,7 +117,7 @@
   function makeButton(label, opts){
     opts=opts||{};
     const wrap=document.createElement("span"); wrap.className="button_wrapper";
-    const btn=document.createElement("a"); btn.className="btn"; btn.href=opts.href||"#";
+    const btn=document.createElement("a"); btn.className="btn"; btn.href=opts.href||"#"; btn.setAttribute("aria-label",label);   // the label is split into per-letter spans below
     if(opts.target){ btn.target=opts.target; btn.rel="noopener"; }
     const uR=document.createElement("span"); uR.className="u-right"; const uL=document.createElement("span"); uL.className="u-left";
     const word=document.createElement("span"); word.className="word";
