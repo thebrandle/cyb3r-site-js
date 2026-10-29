@@ -3,13 +3,13 @@
    engines and screen readers get every service; behaviour is the hosted brand-lineup.js. */
 .bl{--bl-bg:#1A232D;--bl-ink:#fff;--bl-dim:#A7ACB4;--bl-accent:#39F1E0;--bl-gut:clamp(16px,5vw,80px);
   position:relative;min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:center;
-  padding:clamp(92px,12vh,120px) 0 clamp(68px,9vh,88px);background:var(--bl-bg);color:var(--bl-ink);overflow:hidden;
+  padding:clamp(92px,12vh,120px) 0 clamp(60px,8vh,88px);background:var(--bl-bg);color:var(--bl-ink);overflow:hidden;
   font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased}
 .bl,.bl *{box-sizing:border-box}
 .bl-row{list-style:none;margin:0 auto;padding:0;display:flex;align-items:flex-start;gap:clamp(8px,1.4vw,20px);
-  width:min(1180px,calc(100% - 2*var(--bl-gut)));height:calc(min(50vh,500px) + 7vh)}
-.bl-card{--off:0px;position:relative;flex:1 1 0;min-width:0;height:min(50vh,500px);margin-top:var(--off);overflow:hidden;
-  background:#0d1116;cursor:pointer;outline:none;transition:flex-grow .8s cubic-bezier(.22,1,.36,1)}
+  width:min(1180px,calc(100% - 2*var(--bl-gut)));height:calc(min(46vh,470px) + 7vh)}
+.bl-card{--off:0px;position:relative;flex:1 1 0;min-width:0;height:min(46vh,470px);margin-top:var(--off);overflow:hidden;
+  background:#0d1116;cursor:pointer;outline:none;opacity:1;transition:flex-grow .8s cubic-bezier(.22,1,.36,1)}   /* the theme dims every <li> to .7 */
 .bl-card:nth-child(6n+2),.bl-card:nth-child(6n+4){--off:3.3vh}
 .bl-card:nth-child(6n+3),.bl-card:nth-child(6n+6){--off:7vh}
 .bl-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) brightness(.62) contrast(.95);
@@ -20,7 +20,7 @@
 .bl-card.is-on::after{opacity:0}
 .bl.has-on .bl-card:not(.is-on) img{filter:grayscale(1) brightness(.46) contrast(.95)}
 .bl-card:focus-visible{outline:2px solid var(--bl-accent);outline-offset:4px}
-.bl-copy{text-align:center;margin-top:clamp(18px,4vh,44px);padding:0 16px}
+.bl-copy{text-align:center;margin-top:clamp(16px,3.2vh,40px);padding:0 16px}
 .bl-eyebrow{font:500 12px/1.5 ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:.14em;text-transform:uppercase;
   color:var(--bl-dim);margin:0 0 14px;transition:opacity .35s ease}
 .bl-title{font:500 clamp(34px,4vw,64px)/1.04 Inter,sans-serif;letter-spacing:-.04em;margin:0 auto;white-space:nowrap;
@@ -32,7 +32,7 @@
 .bl-title .bl-l.out{transition-duration:.22s,.3s,.22s}
 .bl-title .bl-dot{color:var(--bl-accent)}
 .bl-sub{font:500 clamp(15px,1.2vw,18px)/1.5 Inter,sans-serif;letter-spacing:-.01em;color:var(--bl-dim);margin:16px auto 0;
-  max-width:46ch;text-wrap:balance;transition:opacity .35s ease}
+  max-width:40em;text-wrap:balance;transition:opacity .35s ease}
 .bl-eyebrow,.bl-title,.bl-sub{opacity:1}   /* the theme dims every <p> to .7 */
 .bl-fade{opacity:0}
 .bl-foot{position:absolute;left:var(--bl-gut);right:var(--bl-gut);bottom:clamp(18px,3.4vh,34px);display:flex;justify-content:space-between;
@@ -46,9 +46,11 @@
 @keyframes blShow{to{opacity:1}}
 @media (max-width:767px){
   /* svh = the screen with the browser bars showing, so the whole lineup fits the first view */
-  .bl{justify-content:flex-start;padding-top:clamp(88px,14vh,120px);padding-top:clamp(88px,14svh,120px);padding-bottom:60px}
-  .bl-row{height:calc(43vh + 5vh);height:calc(43svh + 5vh)}
-  .bl-card{height:43vh;height:43svh}
+  .bl{justify-content:flex-start;padding-top:clamp(84px,13vh,120px);padding-top:clamp(84px,13svh,120px);padding-bottom:60px}
+  .bl-row{height:calc(38vh + 5vh);height:calc(38svh + 5vh)}
+  .bl-card{height:38vh;height:38svh}
+  .bl-copy{margin-top:clamp(14px,3vh,28px)}
+  .bl-sub{max-width:none}
   .bl-card:nth-child(6n+2),.bl-card:nth-child(6n+4){--off:2.4vh}
   .bl-card:nth-child(6n+3),.bl-card:nth-child(6n+6){--off:5vh}
   .bl-card.is-on{flex-grow:3}
@@ -62,8 +64,8 @@
 </style>
 <section class="bl bl-pre" aria-labelledby="bl-h">
 <h1 id="bl-h" class="sr-only">Brand &amp; Identity</h1>
-<p class="sr-only">Identity systems built to travel across every touchpoint.</p>
-<ul class="bl-row" role="list"><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae316d84689182a2263dde6_cyb3r-brand-brand-strategy-positioning.webp" alt="Hands arranging cards and colour swatches into a brand positioning map" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Brand strategy &amp; positioning</h2><p>Find the space only you can own, and the story that wins it.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae316d84689182a2263ddfc_cyb3r-brand-visual-identity-systems.webp" alt="Navy brand stationery carrying a teal emblem" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Visual identity systems</h2><p>Logo, colour, type and imagery working as one system, everywhere.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae316d9aa9e6b8642546547_cyb3r-brand-logo-wordmark-design.webp" alt="Designer sketching a geometric logo mark on tracing paper" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Logo &amp; wordmark design</h2><p>A mark that holds up at every size, from favicon to billboard.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae316d99d726adc1cca6222_cyb3r-brand-brand-guidelines.webp" alt="Open brand guidelines book showing colour swatches" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Brand guidelines</h2><p>Clear rules that keep every team and supplier on brand.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae316d998027c56080dbcd9_cyb3r-brand-creative-direction.webp" alt="Creative director studying a lit photo-shoot set" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Creative direction</h2><p>One vision steering every shoot, campaign and launch.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae316d9aa68f14ab3149578_cyb3r-brand-messaging-tone-of-voice.webp" alt="Woman speaking into a studio microphone" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Messaging &amp; tone of voice</h2><p>Words that sound like you, from headline to helpdesk.</p></div></li></ul>
-<div class="bl-copy" aria-hidden="true"><p class="bl-eyebrow">Services</p><p class="bl-title">Brand &amp; Identity.</p><p class="bl-sub">Identity systems built to travel across every touchpoint.</p></div>
+<p class="sr-only">Brand strategy, visual identity and tone of voice, built as one system that travels across every touchpoint.</p>
+<ul class="bl-row" role="list"><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae316d84689182a2263dde6_cyb3r-brand-brand-strategy-positioning.webp" alt="Hands arranging cards and colour swatches into a brand positioning map" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Brand strategy &amp; positioning</h2><p>Find the space only you can own. We research your market, audience and competitors, then shape the story and position that wins it.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae316d84689182a2263ddfc_cyb3r-brand-visual-identity-systems.webp" alt="Navy brand stationery carrying a teal emblem" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Visual identity systems</h2><p>Logo, colour, type and imagery working as one system, consistent across your website, social channels, print and packaging, wherever your brand shows up.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae316d9aa9e6b8642546547_cyb3r-brand-logo-wordmark-design.webp" alt="Designer sketching a geometric logo mark on tracing paper" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Logo &amp; wordmark design</h2><p>A mark that holds up at every size, from favicon to billboard, crafted, tested and delivered in every file format your team and printers need.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae316d99d726adc1cca6222_cyb3r-brand-brand-guidelines.webp" alt="Open brand guidelines book showing colour swatches" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Brand guidelines</h2><p>Clear rules that keep every team and supplier on brand: logo use, colour, type, tone and ready-made templates in one guide anyone can follow.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae316d998027c56080dbcd9_cyb3r-brand-creative-direction.webp" alt="Creative director studying a lit photo-shoot set" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Creative direction</h2><p>One vision steering every shoot, campaign and launch. We set the look, brief the talent and keep every piece of content unmistakably yours.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae316d9aa68f14ab3149578_cyb3r-brand-messaging-tone-of-voice.webp" alt="Woman speaking into a studio microphone" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Messaging &amp; tone of voice</h2><p>Words that sound like you, from headline to helpdesk. Taglines, key messages and a voice guide so everyone who writes for you gets it right.</p></div></li></ul>
+<div class="bl-copy" aria-hidden="true"><p class="bl-eyebrow">Services</p><p class="bl-title">Brand &amp; Identity.</p><p class="bl-sub">Brand strategy, visual identity and tone of voice, built as one system that travels across every touchpoint.</p></div>
 <div class="bl-foot"><a href="/services#brand-identity">&larr; All services</a><span><span class="bl-hint-hover">Hover a card to explore</span><span class="bl-hint-touch">Tap a card to explore</span></span></div>
 </section>

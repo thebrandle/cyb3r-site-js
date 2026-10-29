@@ -23,6 +23,20 @@
     return { e: pad(i + 1) + " / " + pad(cards.length), t: /[.!?]$/.test(name) ? name : name + ".", s: c.querySelector("p").textContent.trim() };
   });
 
+  /* ---- the line under the title always keeps the height of the longest one, so swapping cards never
+     changes the section's height (that moved the whole lineup up and down on some cards) ---- */
+  function reserveSub() {
+    var keep = sub.textContent, max = 0;
+    sub.style.minHeight = "0px";
+    [def].concat(data).forEach(function (d) { sub.textContent = d.s; max = Math.max(max, sub.offsetHeight); });
+    sub.textContent = keep;
+    sub.style.minHeight = max + "px";
+  }
+  reserveSub();
+  var rsT = 0;
+  addEventListener("resize", function () { cancelAnimationFrame(rsT); rsT = requestAnimationFrame(reserveSub); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(reserveSub);
+
   /* ---- title: letters in random order, the closing full stop in teal ---- */
   var swapT = 0;
   function build(text) {

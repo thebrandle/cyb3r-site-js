@@ -1,0 +1,47 @@
+<style>
+/* Brand & Identity "3" pairs (bennettandclive.com clients list): two columns of what the service covers,
+   meeting at the centre; the CYB3R 3 rides the middle of the screen and the rows part around it as the
+   page scrolls. Behaviour: hosted service-pairs.js. */
+.bp{--bp-bg:#1A232D;--bp-ink:#fff;--bp-accent:#39F1E0;position:relative;overflow:hidden;overflow:clip;background:var(--bp-bg);
+  color:var(--bp-ink);padding:clamp(72px,14vh,160px) 0;font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased}
+.bp,.bp *{box-sizing:border-box}
+.bp-wrap{position:relative;font-size:3.125vw;line-height:.95;letter-spacing:-.05em}
+.bp-list{list-style:none;margin:0;padding:0}
+.bp-row{display:flex;justify-content:center;column-gap:.52vw;white-space:nowrap;margin:0;padding:0;
+  font-size:inherit;line-height:inherit;font-weight:inherit;letter-spacing:inherit;opacity:1}   /* the theme sizes and dims every <li> */
+.bp-l,.bp-r{flex:0 0 50%;font-weight:300;letter-spacing:-.04em;will-change:transform}
+.bp-l{text-align:right}
+.bp .bp-b{font-weight:700;letter-spacing:-.05em}
+/* the 3 travels between the first and last row centres, held at the middle of the screen in between */
+.bp-track{position:absolute;left:0;right:0;top:.025em;bottom:.025em;pointer-events:none}
+.bp-mark{position:sticky;top:calc(50vh - .45em);display:block;width:.724em;height:.9em;margin:0 auto;color:var(--bp-accent)}
+.bp-mark svg{display:block;width:100%;height:100%}
+.bp.bp-pre .bp-mark{visibility:hidden}
+@media (min-width:1920px){.bp-row{column-gap:1rem}}
+@media (max-width:767px){.bp-wrap{font-size:4.4vw}.bp-row{column-gap:1.6vw}}
+@media (prefers-reduced-motion:reduce){.bp-track{display:none}}
+</style>
+<section class="bp bp-pre" aria-labelledby="bp-h">
+<h2 id="bp-h" class="sr-only">What our branding covers</h2>
+<div class="bp-wrap">
+<ul class="bp-list" role="list">
+<li class="bp-row"><span class="bp-l bp-b">Brand strategy</span> <span class="bp-r">Positioning</span></li>
+<li class="bp-row"><span class="bp-l">Audience insight</span> <span class="bp-r bp-b">Brand story</span></li>
+<li class="bp-row"><span class="bp-l bp-b">Visual identity</span> <span class="bp-r">Logo design</span></li>
+<li class="bp-row"><span class="bp-l">Wordmarks</span> <span class="bp-r bp-b">Monograms</span></li>
+<li class="bp-row"><span class="bp-l bp-b">Typography</span> <span class="bp-r">Colour systems</span></li>
+<li class="bp-row"><span class="bp-l">Iconography</span> <span class="bp-r bp-b">Imagery</span></li>
+<li class="bp-row"><span class="bp-l bp-b">Brand guidelines</span> <span class="bp-r">Design systems</span></li>
+<li class="bp-row"><span class="bp-l">Templates</span> <span class="bp-r bp-b">Asset libraries</span></li>
+<li class="bp-row"><span class="bp-l bp-b">Creative direction</span> <span class="bp-r bp-b">Art direction</span></li>
+<li class="bp-row"><span class="bp-l">Campaign concepts</span> <span class="bp-r bp-b">Photo direction</span></li>
+<li class="bp-row"><span class="bp-l bp-b">Tone of voice</span> <span class="bp-r">Messaging</span></li>
+<li class="bp-row"><span class="bp-l">Taglines</span> <span class="bp-r bp-b">Copywriting</span></li>
+<li class="bp-row"><span class="bp-l bp-b">Rebrands</span> <span class="bp-r bp-b">Brand refresh</span></li>
+<li class="bp-row"><span class="bp-l">Stationery</span> <span class="bp-r bp-b">Packaging</span></li>
+<li class="bp-row"><span class="bp-l bp-b">Pitch decks</span> <span class="bp-r">Social templates</span></li>
+<li class="bp-row"><span class="bp-l">Brand audits</span> <span class="bp-r bp-b">Launch kits</span></li>
+</ul>
+<div class="bp-track" aria-hidden="true"><span class="bp-mark"><svg viewBox="400 205 1600 1990" focusable="false"><path fill="currentColor" d="M973.766 1120.05C1023.48 1026.79 1076.58 940.226 1130.61 849.918C1195.94 739.307 1261.83 629.029 1328.27 519.085L1433.24 343.718C1449.26 317.308 1466.84 286.575 1485.54 262.113C1489.72 255.693 1498.15 253.606 1505.62 253.227C1548.69 251.037 1593.46 252.456 1636.51 252.635L1882.92 252.001C1917.1 251.938 1961.94 254.487 1994 252.831C1971.53 284.848 1948.35 324.941 1927.21 358.629C1887.54 420.643 1848.2 482.863 1809.19 545.287C1718.37 688.645 1622.08 833.786 1535.79 979.531C1559.26 981.557 1579.3 988.064 1602.08 993.349C1997.08 1085.01 2084.76 1603.63 1885.03 1908C1786.81 2057.68 1631.77 2131.9 1458.48 2164.67C1420.2 2171.91 1410.12 2174.01 1359.47 2179.34L1303.48 2184.67C1271.48 2187.33 1289.32 2184.67 1212 2190H1154.18C1138.18 2188.45 1122.18 2190 1098.19 2187.33C1115.6 2181.74 1111.7 2182.06 1127.52 2179.34C1127.52 2179.34 1156.03 2187.43 1143.51 2184.67L1098.19 2187.33C1042.49 2179.74 985.71 2177.75 929.221 2168.36C565.456 2107.83 397.916 1905.12 405.229 1533.91C580.129 1533.06 755.034 1533.17 929.934 1534.24C933.536 1651.27 946.564 1799.33 1034.49 1884.86C1085.09 1934.07 1133.31 1951.56 1203.21 1951.6C1266.14 1951.63 1325.68 1928.59 1369.43 1883.35C1450.47 1799.55 1476.85 1651.28 1474.75 1539.32C1472.64 1426.29 1456.76 1290.49 1370.55 1208.3C1298.95 1140.04 1222.6 1135.19 1129.42 1127.02C1075.07 1122.25 1028.27 1119.41 973.766 1120.05Z"/><path fill="currentColor" d="M694.468 210.744C843.459 193.91 977.968 300.834 995.177 449.781C1012.39 598.728 905.805 733.509 756.902 751.096C607.465 768.748 472.094 661.699 454.823 512.218C437.55 362.734 544.94 227.637 694.468 210.744Z"/></svg></span></div>
+</div>
+</section>
