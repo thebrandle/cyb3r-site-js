@@ -50,13 +50,13 @@
   function makeButton(label, opts){
     opts=opts||{};
     const wrap=document.createElement("span"); wrap.className="button_wrapper";
-    const btn=document.createElement("a"); btn.className="btn"; btn.href=opts.href||"#";
+    const btn=document.createElement("a"); btn.className="btn"; btn.href=opts.href||"#"; btn.setAttribute("aria-label",label);   // the label is split into per-letter spans below
     if(opts.target){ btn.target=opts.target; btn.rel="noopener"; }
     const uR=document.createElement("span"); uR.className="u-right"; const uL=document.createElement("span"); uL.className="u-left";
     const word=document.createElement("span"); word.className="word";
     [...label].forEach(ch=>{ const s=document.createElement("span"); s.className="text"; s.textContent=ch; word.appendChild(s); });
-    const aR=document.createElement("span"); aR.className="arrow arrow-right"; aR.innerHTML='<span class="arrow-sprite">→</span>';
-    const aL=document.createElement("span"); aL.className="arrow arrow-left"; aL.innerHTML='<span class="arrow-sprite">→</span>';
+    const aR=document.createElement("span"); aR.className="arrow arrow-right"; aR.setAttribute("aria-hidden","true"); aR.innerHTML='<span class="arrow-sprite">→</span>';
+    const aL=document.createElement("span"); aL.className="arrow arrow-left"; aL.setAttribute("aria-hidden","true"); aL.innerHTML='<span class="arrow-sprite">→</span>';
     btn.append(uR,uL,word,aR,aL); wrap.append(btn); if(!opts.href) btn.addEventListener("click",e=>e.preventDefault());
     const num=(el,k,d)=>{ const v=parseFloat(getComputedStyle(el).getPropertyValue(k)); return Number.isFinite(v)?v:d; };
     const kill=el=>el&&el.getAnimations().forEach(a=>{ try{a.commitStyles();}catch(e){} a.cancel(); });
