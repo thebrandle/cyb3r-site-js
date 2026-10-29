@@ -1,0 +1,143 @@
+{
+ "h1": "SEO & Google Ads",
+ "short": "SEO & Ads",
+ "slug": "seo-google-ads",
+ "intro": "Organic search and paid media built to put you in front of high-intent buyers and turn their searches into qualified leads.",
+ "cards": [
+  {
+   "img": "6ae3a5aa3781d291b2384215_cyb3r-seo-technical-on-page-seo.webp",
+   "name": "Technical & on-page SEO",
+   "alt": "Magnifying glass catching teal light over scattered blank paper cards",
+   "line": "Fast, crawlable pages with clean structure, metadata and schema, so search engines understand your site and rank it for the right terms."
+  },
+  {
+   "img": "6ae3a5aa569524a554ffc0a1_cyb3r-seo-content-link-strategy.webp",
+   "name": "Content & link strategy",
+   "alt": "Chain of dark metal links with one link glowing teal",
+   "line": "Keyword-led content plans and earned links that build authority, answer real buyer questions and keep organic traffic growing."
+  },
+  {
+   "img": "6ae3a5aa0c995eb8d551164f_cyb3r-seo-google-ads-campaigns.webp",
+   "name": "Google Ads campaigns",
+   "alt": "Lighthouse beam sweeping across a dark sea at night",
+   "line": "Search and Performance Max campaigns structured around intent, with tight keywords, strong ads and budgets aimed at your best customers."
+  },
+  {
+   "img": "6ae3a5aa0b4f561557603aeb_cyb3r-seo-paid-media-management.webp",
+   "name": "Paid media management",
+   "alt": "Hand moving a chess piece on a dark chessboard",
+   "line": "Hands-on management of your ad accounts, from bids and budgets to audiences and creative, so your spend goes where it performs best."
+  },
+  {
+   "img": "6ae3a5abac510daa62b7608c_cyb3r-seo-conversion-tracking.webp",
+   "name": "Conversion tracking",
+   "alt": "Arrow struck in the centre of a dark target",
+   "line": "Calls, forms and purchases measured properly in GA4 and Google Ads, so every campaign optimises towards the leads that actually matter."
+  },
+  {
+   "img": "6ae3a5ab2224cf631bd34416_cyb3r-seo-reporting-optimisation.webp",
+   "name": "Reporting & optimisation",
+   "alt": "Hands holding a tablet showing rising teal bars",
+   "line": "Clear reports that show what each channel delivers, with ongoing tests that improve results instead of just describing them."
+  }
+ ],
+ "pairs_h2": "What our SEO and Google Ads work covers",
+ "pairs": [
+  [
+   "B",
+   "Technical SEO",
+   "l",
+   "Site audits"
+  ],
+  [
+   "l",
+   "Keyword research",
+   "B",
+   "On-page SEO"
+  ],
+  [
+   "B",
+   "Content strategy",
+   "l",
+   "Blog content"
+  ],
+  [
+   "l",
+   "Link building",
+   "B",
+   "Digital PR"
+  ],
+  [
+   "B",
+   "Local SEO",
+   "l",
+   "Maps listings"
+  ],
+  [
+   "l",
+   "Schema markup",
+   "B",
+   "Core Web Vitals"
+  ],
+  [
+   "B",
+   "Google Ads",
+   "l",
+   "Search campaigns"
+  ],
+  [
+   "l",
+   "Performance Max",
+   "B",
+   "Shopping ads"
+  ],
+  [
+   "B",
+   "YouTube ads",
+   "B",
+   "Display ads"
+  ],
+  [
+   "l",
+   "Remarketing",
+   "B",
+   "Customer lists"
+  ],
+  [
+   "B",
+   "Bid strategy",
+   "l",
+   "Budget pacing"
+  ],
+  [
+   "l",
+   "Ad copy",
+   "B",
+   "Landing pages"
+  ],
+  [
+   "B",
+   "Call tracking",
+   "l",
+   "Lead quality"
+  ],
+  [
+   "l",
+   "Conversion tracking",
+   "B",
+   "Tag Manager"
+  ],
+  [
+   "B",
+   "A/B testing",
+   "l",
+   "Search terms"
+  ],
+  [
+   "l",
+   "Client reporting",
+   "B",
+   "Dashboards"
+  ]
+ ]
+}

@@ -1,0 +1,143 @@
+{
+ "h1": "Social Media & Content",
+ "short": "Social",
+ "slug": "social-media-content",
+ "intro": "Social-first content and community that build your audience, earn authority and bring in a steady stream of inbound interest.",
+ "cards": [
+  {
+   "img": "6ae3a5abac510daa62b761a9_cyb3r-social-strategy.webp",
+   "name": "Social strategy",
+   "alt": "Hands arranging square photo prints into a grid on a dark table",
+   "line": "Channel plans built on who your buyers are and where they spend time, with clear goals, content pillars and a posting rhythm you can keep."
+  },
+  {
+   "img": "6ae3aac1aee0be8890c6d973_cyb3r-social-content-production-v2.webp",
+   "name": "Content production",
+   "alt": "Hand adjusting a glass bottle on a stone plinth under studio light",
+   "line": "Photography, design and copy produced in batches, so every channel gets polished, on-brand content without the last-minute scramble."
+  },
+  {
+   "img": "6ae3a5ac569524a554ffc1d6_cyb3r-social-short-form-video.webp",
+   "name": "Short-form video",
+   "alt": "Phone on a tripod recording a creator in a studio",
+   "line": "Reels, TikToks and Shorts scripted, filmed and edited to stop the scroll, hold attention and turn viewers into followers and leads."
+  },
+  {
+   "img": "6ae3a5ac1959fe50be86f797_cyb3r-social-community-management.webp",
+   "name": "Community management",
+   "alt": "Hands holding glowing phones around a dark table",
+   "line": "Comments, messages and mentions answered quickly and in your voice, turning followers into conversations and conversations into customers."
+  },
+  {
+   "img": "6ae3a5acfd4e7d4d25d9a8ae_cyb3r-social-paid-social.webp",
+   "name": "Paid social",
+   "alt": "Megaphone rim lit in teal on a dark surface",
+   "line": "Meta, TikTok and LinkedIn campaigns that put your best content in front of the right audiences, with spend tied to measurable results."
+  },
+  {
+   "img": "6ae3a5ac9cd510666843092e_cyb3r-social-influencer-partnerships.webp",
+   "name": "Influencer & partnerships",
+   "alt": "Two hands passing a small navy gift box over a dark table",
+   "line": "Creators and partners matched to your audience, with clear briefs, fair deals and content that keeps working long after the post goes live."
+  }
+ ],
+ "pairs_h2": "What our social media and content work covers",
+ "pairs": [
+  [
+   "B",
+   "Social strategy",
+   "l",
+   "Content pillars"
+  ],
+  [
+   "l",
+   "Audience research",
+   "B",
+   "Content calendar"
+  ],
+  [
+   "B",
+   "Instagram",
+   "l",
+   "TikTok"
+  ],
+  [
+   "l",
+   "LinkedIn",
+   "B",
+   "YouTube Shorts"
+  ],
+  [
+   "B",
+   "Reels",
+   "l",
+   "Carousels"
+  ],
+  [
+   "l",
+   "Photography",
+   "B",
+   "Video editing"
+  ],
+  [
+   "B",
+   "Scriptwriting",
+   "l",
+   "Captions"
+  ],
+  [
+   "l",
+   "Motion graphics",
+   "B",
+   "UGC content"
+  ],
+  [
+   "B",
+   "Community",
+   "B",
+   "Moderation"
+  ],
+  [
+   "l",
+   "Paid social",
+   "B",
+   "Meta ads"
+  ],
+  [
+   "B",
+   "TikTok ads",
+   "l",
+   "LinkedIn ads"
+  ],
+  [
+   "l",
+   "Influencers",
+   "B",
+   "Creator briefs"
+  ],
+  [
+   "B",
+   "Partnerships",
+   "l",
+   "Brand collabs"
+  ],
+  [
+   "l",
+   "Trend tracking",
+   "B",
+   "Analytics"
+  ],
+  [
+   "B",
+   "Social listening",
+   "l",
+   "Reporting"
+  ],
+  [
+   "l",
+   "Growth audits",
+   "B",
+   "Account setup"
+  ]
+ ]
+}

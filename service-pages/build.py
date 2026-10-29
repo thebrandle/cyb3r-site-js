@@ -1,29 +1,32 @@
-# Builds a service page's two embeds from the Brand & Identity templates (same CSS) and service-pages/<slug>.json.
-# Usage (repo root): python3 service-pages/build.py web-design-development  ->  <slug>-embed.html + <slug>-pairs-embed.html
-import json, re, sys, html, os
-S = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-slug = sys.argv[1]
-c = json.load(open(f'{S}/service-pages/{slug}.json', encoding='utf-8'))
-e = lambda s: html.escape(s, quote=True)
+# Builds the service pages' two embeds (card lineup + "3" pairs) from the shared templates in this folder
+# and service-pages/<slug>.json. Each lineup ends with "All services" (back to its /services panel) and
+# "Next: <service>" (the following page, the last loops to the first), so the six pages link in a ring.
+# Usage (repo root): python3 service-pages/build.py  ->  <slug>-embed.html + <slug>-pairs-embed.html for every slug
+import json, os, html
+D = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(D)
+ORDER = ["brand-identity", "web-design-development", "seo-google-ads", "social-media-content",
+         "commercial-print-production", "ai-driven-advertising"]
 CDN = 'https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/'
-style = re.search(r'<style>[\s\S]*?</style>', open(f'{S}/brand-identity-embed.html', encoding='utf-8').read()).group(0)
-style = style.replace('/* Brand & Identity service lineup (alanmenken.com-style).', '/* Service page card lineup (alanmenken.com-style).')
-cards = ''.join(f'<li class="bl-card" tabindex="0"><img src="{CDN}{k["img"]}" alt="{e(k["alt"])}" width="800" height="1400" decoding="async">'
-                f'<div class="sr-only"><h2>{e(k["name"])}</h2><p>{e(k["line"])}</p></div></li>' for k in c['cards'])
-lineup = f'''{style}
+e = lambda s: html.escape(s, quote=True)
+read = lambda f: open(os.path.join(D, f), encoding='utf-8').read().strip()
+style, pstyle, mark = read('lineup-style.html'), read('pairs-style.html'), read('mark.html')
+pages = {s: json.load(open(os.path.join(D, s + '.json'), encoding='utf-8')) for s in ORDER if os.path.exists(os.path.join(D, s + '.json'))}
+live = [s for s in ORDER if s in pages]
+for i, slug in enumerate(live):
+    c, nx = pages[slug], pages[live[(i + 1) % len(live)]]
+    cards = ''.join(f'<li class="bl-card" tabindex="0"><img src="{CDN}{k["img"]}" alt="{e(k["alt"])}" width="800" height="1400" decoding="async">'
+                    f'<div class="sr-only"><h2>{e(k["name"])}</h2><p>{e(k["line"])}</p></div></li>' for k in c['cards'])
+    lineup = f'''{style}
 <section class="bl bl-pre" aria-labelledby="bl-h">
 <h1 id="bl-h" class="sr-only">{e(c["h1"])}</h1>
 <p class="sr-only">{e(c["intro"])}</p>
 <ul class="bl-row" role="list">{cards}</ul>
 <div class="bl-copy" aria-hidden="true"><p class="bl-eyebrow">Services</p><p class="bl-title">{e(c["h1"])}.</p><p class="bl-sub">{e(c["intro"])}</p></div>
-<div class="bl-foot"><a href="/services#{c["slug"]}">&larr; All services</a><span><span class="bl-hint-hover">Hover a card to explore</span><span class="bl-hint-touch">Tap a card to explore</span></span></div>
+<div class="bl-foot"><a href="/services#{slug}">&larr; All services</a><a class="bl-next" href="/{nx["slug"]}">Next<span class="bl-nx-full">: {e(nx["h1"])}</span><span class="bl-nx-short" aria-hidden="true">: {e(nx["short"])}</span> &rarr;</a></div>
 </section>'''
-p = open(f'{S}/brand-identity-pairs-embed.html', encoding='utf-8').read()
-pstyle = re.search(r'<style>[\s\S]*?</style>', p).group(0).replace('/* Brand & Identity "3" pairs', '/* Service page "3" pairs')
-mark = re.search(r'<div class="bp-track"[\s\S]*?</div>', p).group(0)
-cls = lambda side, w: f'bp-{side}' + (' bp-b' if w == 'B' else '')
-rows = '\n'.join(f'<li class="bp-row"><span class="{cls("l", a)}">{e(l)}</span> <span class="{cls("r", b)}">{e(r)}</span></li>' for a, l, b, r in c['pairs'])
-pairs = f'''{pstyle}
+    cls = lambda side, w: f'bp-{side}' + (' bp-b' if w == 'B' else '')
+    rows = '\n'.join(f'<li class="bp-row"><span class="{cls("l", a)}">{e(l)}</span> <span class="{cls("r", b)}">{e(r)}</span></li>' for a, l, b, r in c['pairs'])
+    pairs = f'''{pstyle}
 <section class="bp bp-pre" aria-labelledby="bp-h">
 <h2 id="bp-h" class="sr-only">{e(c["pairs_h2"])}</h2>
 <div class="bp-wrap">
@@ -34,6 +37,8 @@ pairs = f'''{pstyle}
 </div>
 </section>
 '''
-open(f'{S}/{slug}-embed.html', 'w', encoding='utf-8').write(lineup)
-open(f'{S}/{slug}-pairs-embed.html', 'w', encoding='utf-8').write(pairs)
-print('lineup', len(lineup), 'pairs', len(pairs), '| em/en dashes:', sum(lineup.count(x) + pairs.count(x) for x in '—–'))
+    assert len(c['cards']) == 6 and len(c['pairs']) == 16, slug
+    assert not any(ch in lineup + pairs for ch in '—–'), slug + ': long dash'
+    open(os.path.join(ROOT, f'{slug}-embed.html'), 'w', encoding='utf-8').write(lineup)
+    open(os.path.join(ROOT, f'{slug}-pairs-embed.html'), 'w', encoding='utf-8').write(pairs)
+    print(f'{slug}: lineup {len(lineup)}  pairs {len(pairs)}  next -> {nx["slug"]}')

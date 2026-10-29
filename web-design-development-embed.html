@@ -39,8 +39,8 @@
   align-items:center;font:500 11px/1 ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--bl-dim)}
 .bl-foot a{color:inherit;text-decoration:none;transition:color .3s ease}
 .bl-foot a:hover,.bl-foot a:focus-visible{color:var(--bl-accent)}
-.bl-hint-touch{display:none}
-@media (hover:none){.bl-hint-hover{display:none}.bl-hint-touch{display:inline}}
+/* "Next: <service>" link; phones show the short name, the full one stays for screen readers and search */
+.bl-nx-short{display:none}
 /* until the script runs: hidden, with a 3s safety reveal if it never loads */
 .bl.bl-pre .bl-card,.bl.bl-pre .bl-copy{opacity:0;animation:blShow 0s 3s forwards}
 @keyframes blShow{to{opacity:1}}
@@ -51,6 +51,8 @@
   .bl-card{height:38vh;height:38svh}
   .bl-copy{margin-top:clamp(14px,3vh,28px)}
   .bl-sub{max-width:none}
+  .bl-nx-full{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .bl-nx-short{display:inline}
   .bl-card:nth-child(6n+2),.bl-card:nth-child(6n+4){--off:2.4vh}
   .bl-card:nth-child(6n+3),.bl-card:nth-child(6n+6){--off:5vh}
   .bl-card.is-on{flex-grow:3}
@@ -67,5 +69,5 @@
 <p class="sr-only">High-fidelity websites and web apps designed to attract, engage and convert, built for speed, search and scale.</p>
 <ul class="bl-row" role="list"><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae3331da1321960692d7dd1_cyb3r-web-ux-ui-design.webp" alt="Designer arranging paper wireframe cards for a website layout" width="800" height="1400" decoding="async"><div class="sr-only"><h2>UX &amp; UI design</h2><p>Interfaces built around how people browse and buy: research, wireframes and polished designs that make every page clear and easy to act on.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae3331d95f1451c77ba114f_cyb3r-web-webflow-headless-builds.webp" alt="Developer typing at a backlit keyboard in front of a website layout" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Webflow &amp; headless builds</h2><p>Fast, secure sites built on Webflow or a headless stack, so your team can edit pages and publish content without waiting on a developer.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae3331de9a6cc5bdbf33054_cyb3r-web-responsive-motion-ui.webp" alt="Phone, tablet and laptop showing the same responsive layout" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Responsive, motion-first UI</h2><p>Layouts that adapt cleanly to every screen, with motion that guides the eye and gives your brand a feel visitors remember.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae3331de9a6cc5bdbf33080_cyb3r-web-landing-pages-funnels.webp" alt="Thumb about to tap a glowing call-to-action button on a phone" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Landing pages &amp; funnels</h2><p>Campaign pages built to convert, from the first headline to the final form, ready for Google Ads, social traffic and testing.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae3331ed7e3c1cfe1d97cf1_cyb3r-web-cms-integrations.webp" alt="Network cables plugged into a server panel with teal status lights" width="800" height="1400" decoding="async"><div class="sr-only"><h2>CMS &amp; integrations</h2><p>Content structures that fit how you publish, connected to the CRM, forms, email and analytics tools you already use.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae3331ee9a6cc5bdbf33161_cyb3r-web-performance-seo.webp" alt="Light trails of fast traffic curving along a motorway at night" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Performance &amp; SEO foundations</h2><p>Clean code, quick load times and search-ready structure from day one: Core Web Vitals, metadata, schema and sitemaps handled before launch.</p></div></li></ul>
 <div class="bl-copy" aria-hidden="true"><p class="bl-eyebrow">Services</p><p class="bl-title">Web Design &amp; Development.</p><p class="bl-sub">High-fidelity websites and web apps designed to attract, engage and convert, built for speed, search and scale.</p></div>
-<div class="bl-foot"><a href="/services#web-design-development">&larr; All services</a><span><span class="bl-hint-hover">Hover a card to explore</span><span class="bl-hint-touch">Tap a card to explore</span></span></div>
+<div class="bl-foot"><a href="/services#web-design-development">&larr; All services</a><a class="bl-next" href="/seo-google-ads">Next<span class="bl-nx-full">: SEO &amp; Google Ads</span><span class="bl-nx-short" aria-hidden="true">: SEO &amp; Ads</span> &rarr;</a></div>
 </section>

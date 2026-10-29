@@ -1,0 +1,73 @@
+<style>
+/* Service page card lineup (alanmenken.com-style). Markup lives in this embed so search
+   engines and screen readers get every service; behaviour is the hosted brand-lineup.js. */
+.bl{--bl-bg:#1A232D;--bl-ink:#fff;--bl-dim:#A7ACB4;--bl-accent:#39F1E0;--bl-gut:clamp(16px,5vw,80px);
+  position:relative;min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:center;
+  padding:clamp(92px,12vh,120px) 0 clamp(60px,8vh,88px);background:var(--bl-bg);color:var(--bl-ink);overflow:hidden;
+  font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased}
+.bl,.bl *{box-sizing:border-box}
+.bl-row{list-style:none;margin:0 auto;padding:0;display:flex;align-items:flex-start;gap:clamp(8px,1.4vw,20px);
+  width:min(1180px,calc(100% - 2*var(--bl-gut)));height:calc(min(46vh,470px) + 7vh)}
+.bl-card{--off:0px;position:relative;flex:1 1 0;min-width:0;height:min(46vh,470px);margin-top:var(--off);overflow:hidden;
+  background:#0d1116;cursor:pointer;outline:none;opacity:1;transition:flex-grow .8s cubic-bezier(.22,1,.36,1)}   /* the theme dims every <li> to .7 */
+.bl-card:nth-child(6n+2),.bl-card:nth-child(6n+4){--off:3.3vh}
+.bl-card:nth-child(6n+3),.bl-card:nth-child(6n+6){--off:7vh}
+.bl-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) brightness(.62) contrast(.95);
+  transform:scale(1.06);transition:filter .7s ease,transform 1.4s cubic-bezier(.22,1,.36,1)}
+.bl-card::after{content:"";position:absolute;inset:0;background:rgba(26,35,45,.38);transition:opacity .7s ease;pointer-events:none}
+.bl-card.is-on{flex-grow:2.3}
+.bl-card.is-on img{filter:none;transform:scale(1)}
+.bl-card.is-on::after{opacity:0}
+.bl.has-on .bl-card:not(.is-on) img{filter:grayscale(1) brightness(.46) contrast(.95)}
+.bl-card:focus-visible{outline:2px solid var(--bl-accent);outline-offset:4px}
+.bl-copy{text-align:center;margin-top:clamp(16px,3.2vh,40px);padding:0 16px}
+.bl-eyebrow{font:500 12px/1.5 ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--bl-dim);margin:0 0 14px;transition:opacity .35s ease}
+.bl-title{font:500 clamp(34px,4vw,64px)/1.04 Inter,sans-serif;letter-spacing:-.04em;margin:0 auto;white-space:nowrap;
+  min-height:1.04em;color:var(--bl-ink)}
+.bl-title .bl-w{display:inline-block;white-space:nowrap}
+.bl-title .bl-l{display:inline-block;opacity:0;transform:translateY(.32em);filter:blur(8px);
+  transition:opacity .6s ease var(--d,0ms),transform .9s cubic-bezier(.22,1,.36,1) var(--d,0ms),filter .6s ease var(--d,0ms)}
+.bl-title .bl-l.in{opacity:1;transform:none;filter:blur(0)}
+.bl-title .bl-l.out{transition-duration:.22s,.3s,.22s}
+.bl-title .bl-dot{color:var(--bl-accent)}
+.bl-sub{font:500 clamp(15px,1.2vw,18px)/1.5 Inter,sans-serif;letter-spacing:-.01em;color:var(--bl-dim);margin:16px auto 0;
+  max-width:40em;text-wrap:balance;transition:opacity .35s ease}
+.bl-eyebrow,.bl-title,.bl-sub{opacity:1}   /* the theme dims every <p> to .7 */
+.bl-fade{opacity:0}
+.bl-foot{position:absolute;left:var(--bl-gut);right:var(--bl-gut);bottom:clamp(18px,3.4vh,34px);display:flex;justify-content:space-between;
+  align-items:center;font:500 11px/1 ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--bl-dim)}
+.bl-foot a{color:inherit;text-decoration:none;transition:color .3s ease}
+.bl-foot a:hover,.bl-foot a:focus-visible{color:var(--bl-accent)}
+/* "Next: <service>" link; phones show the short name, the full one stays for screen readers and search */
+.bl-nx-short{display:none}
+/* until the script runs: hidden, with a 3s safety reveal if it never loads */
+.bl.bl-pre .bl-card,.bl.bl-pre .bl-copy{opacity:0;animation:blShow 0s 3s forwards}
+@keyframes blShow{to{opacity:1}}
+@media (max-width:767px){
+  /* svh = the screen with the browser bars showing, so the whole lineup fits the first view */
+  .bl{justify-content:flex-start;padding-top:clamp(84px,13vh,120px);padding-top:clamp(84px,13svh,120px);padding-bottom:60px}
+  .bl-row{height:calc(38vh + 5vh);height:calc(38svh + 5vh)}
+  .bl-card{height:38vh;height:38svh}
+  .bl-copy{margin-top:clamp(14px,3vh,28px)}
+  .bl-sub{max-width:none}
+  .bl-nx-full{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .bl-nx-short{display:inline}
+  .bl-card:nth-child(6n+2),.bl-card:nth-child(6n+4){--off:2.4vh}
+  .bl-card:nth-child(6n+3),.bl-card:nth-child(6n+6){--off:5vh}
+  .bl-card.is-on{flex-grow:3}
+  .bl-title{font-size:clamp(30px,8.4vw,40px);white-space:normal;min-height:2.1em;display:flex;flex-wrap:wrap;justify-content:center;
+    align-content:center;column-gap:.26em}
+}
+@media (prefers-reduced-motion:reduce){
+  .bl-card,.bl-card img,.bl-title .bl-l,.bl-eyebrow,.bl-sub{transition:none}
+  .bl.bl-pre .bl-card,.bl.bl-pre .bl-copy{animation:none;opacity:1}
+}
+</style>
+<section class="bl bl-pre" aria-labelledby="bl-h">
+<h1 id="bl-h" class="sr-only">Commercial Print &amp; Production</h1>
+<p class="sr-only">Print, packaging and physical collateral produced to the same standard as everything your brand does online.</p>
+<ul class="bl-row" role="list"><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae3a5ac3781d291b2384329_cyb3r-print-packaging-design.webp" alt="Blank navy gift boxes and packaging on dark stone" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Print &amp; packaging design</h2><p>Brochures, packaging and printed pieces designed to feel as considered in the hand as your brand looks on screen, ready for any print run.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae3a5ac220a3a424574460e_cyb3r-print-merchandise.webp" alt="Folded navy t-shirts, a tote bag and a cap with teal emblems" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Merchandise</h2><p>Branded apparel, gifts and giveaways people actually keep, sourced and produced to match your colours, standards and budget.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae3a5adac510daa62b76263_cyb3r-print-large-format-signage.webp" alt="Blank illuminated sign glowing teal on a city wall at night" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Large-format &amp; signage</h2><p>Banners, window graphics, wall wraps and signage produced to stay sharp at any scale, indoors or out, in materials chosen to last.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae3a5ad0b4f561557603bff_cyb3r-print-event-retail-collateral.webp" alt="Empty exhibition stand with navy panels and a teal light strip" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Event &amp; retail collateral</h2><p>Stands, displays, menus and point-of-sale pieces that make your brand hard to miss at events, in store and on the shop floor.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae3a5ad1d1454e608287a0c_cyb3r-print-artwork-pre-press.webp" alt="Printer&#x27;s loupe over cyan and navy halftone dots" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Artwork &amp; pre-press</h2><p>Print-ready files checked for colour, bleed, resolution and finishes, so every job goes to press right first time with no costly reprints.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae3a5adcbf69101a69fa259_cyb3r-print-production-management.webp" alt="Printing press rollers running paper in a dark print works" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Production management</h2><p>One point of contact managing suppliers, proofs, schedules and delivery, so your print arrives on time, on budget and exactly as approved.</p></div></li></ul>
+<div class="bl-copy" aria-hidden="true"><p class="bl-eyebrow">Services</p><p class="bl-title">Commercial Print &amp; Production.</p><p class="bl-sub">Print, packaging and physical collateral produced to the same standard as everything your brand does online.</p></div>
+<div class="bl-foot"><a href="/services#commercial-print-production">&larr; All services</a><a class="bl-next" href="/ai-driven-advertising">Next<span class="bl-nx-full">: AI-Driven Advertising</span><span class="bl-nx-short" aria-hidden="true">: AI Ads</span> &rarr;</a></div>
+</section>

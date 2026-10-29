@@ -1,0 +1,143 @@
+{
+ "h1": "Commercial Print & Production",
+ "short": "Print",
+ "slug": "commercial-print-production",
+ "intro": "Print, packaging and physical collateral produced to the same standard as everything your brand does online.",
+ "cards": [
+  {
+   "img": "6ae3a5ac3781d291b2384329_cyb3r-print-packaging-design.webp",
+   "name": "Print & packaging design",
+   "alt": "Blank navy gift boxes and packaging on dark stone",
+   "line": "Brochures, packaging and printed pieces designed to feel as considered in the hand as your brand looks on screen, ready for any print run."
+  },
+  {
+   "img": "6ae3a5ac220a3a424574460e_cyb3r-print-merchandise.webp",
+   "name": "Merchandise",
+   "alt": "Folded navy t-shirts, a tote bag and a cap with teal emblems",
+   "line": "Branded apparel, gifts and giveaways people actually keep, sourced and produced to match your colours, standards and budget."
+  },
+  {
+   "img": "6ae3a5adac510daa62b76263_cyb3r-print-large-format-signage.webp",
+   "name": "Large-format & signage",
+   "alt": "Blank illuminated sign glowing teal on a city wall at night",
+   "line": "Banners, window graphics, wall wraps and signage produced to stay sharp at any scale, indoors or out, in materials chosen to last."
+  },
+  {
+   "img": "6ae3a5ad0b4f561557603bff_cyb3r-print-event-retail-collateral.webp",
+   "name": "Event & retail collateral",
+   "alt": "Empty exhibition stand with navy panels and a teal light strip",
+   "line": "Stands, displays, menus and point-of-sale pieces that make your brand hard to miss at events, in store and on the shop floor."
+  },
+  {
+   "img": "6ae3a5ad1d1454e608287a0c_cyb3r-print-artwork-pre-press.webp",
+   "name": "Artwork & pre-press",
+   "alt": "Printer's loupe over cyan and navy halftone dots",
+   "line": "Print-ready files checked for colour, bleed, resolution and finishes, so every job goes to press right first time with no costly reprints."
+  },
+  {
+   "img": "6ae3a5adcbf69101a69fa259_cyb3r-print-production-management.webp",
+   "name": "Production management",
+   "alt": "Printing press rollers running paper in a dark print works",
+   "line": "One point of contact managing suppliers, proofs, schedules and delivery, so your print arrives on time, on budget and exactly as approved."
+  }
+ ],
+ "pairs_h2": "What our print and production work covers",
+ "pairs": [
+  [
+   "B",
+   "Brochures",
+   "l",
+   "Business cards"
+  ],
+  [
+   "l",
+   "Packaging",
+   "B",
+   "Labels"
+  ],
+  [
+   "B",
+   "Stationery",
+   "l",
+   "Letterheads"
+  ],
+  [
+   "l",
+   "Catalogues",
+   "B",
+   "Lookbooks"
+  ],
+  [
+   "B",
+   "Signage",
+   "l",
+   "Window graphics"
+  ],
+  [
+   "l",
+   "Banners",
+   "B",
+   "Wall wraps"
+  ],
+  [
+   "B",
+   "Event stands",
+   "l",
+   "Pop-up displays"
+  ],
+  [
+   "l",
+   "Point of sale",
+   "B",
+   "Menus"
+  ],
+  [
+   "B",
+   "Branded apparel",
+   "B",
+   "Merchandise"
+  ],
+  [
+   "l",
+   "Corporate gifts",
+   "B",
+   "Gift packs"
+  ],
+  [
+   "B",
+   "Large format",
+   "l",
+   "Vinyl graphics"
+  ],
+  [
+   "l",
+   "Foiling",
+   "B",
+   "Embossing"
+  ],
+  [
+   "B",
+   "Artwork",
+   "l",
+   "Pre-press"
+  ],
+  [
+   "l",
+   "Colour proofs",
+   "B",
+   "Print management"
+  ],
+  [
+   "B",
+   "Paper sourcing",
+   "l",
+   "Finishes"
+  ],
+  [
+   "l",
+   "Print runs",
+   "B",
+   "Quality checks"
+  ]
+ ]
+}

@@ -1,5 +1,5 @@
 <style>
-/* Brand & Identity service lineup (alanmenken.com-style). Markup lives in this embed so search
+/* Service page card lineup (alanmenken.com-style). Markup lives in this embed so search
    engines and screen readers get every service; behaviour is the hosted brand-lineup.js. */
 .bl{--bl-bg:#1A232D;--bl-ink:#fff;--bl-dim:#A7ACB4;--bl-accent:#39F1E0;--bl-gut:clamp(16px,5vw,80px);
   position:relative;min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:center;
@@ -39,8 +39,8 @@
   align-items:center;font:500 11px/1 ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--bl-dim)}
 .bl-foot a{color:inherit;text-decoration:none;transition:color .3s ease}
 .bl-foot a:hover,.bl-foot a:focus-visible{color:var(--bl-accent)}
-.bl-hint-touch{display:none}
-@media (hover:none){.bl-hint-hover{display:none}.bl-hint-touch{display:inline}}
+/* "Next: <service>" link; phones show the short name, the full one stays for screen readers and search */
+.bl-nx-short{display:none}
 /* until the script runs: hidden, with a 3s safety reveal if it never loads */
 .bl.bl-pre .bl-card,.bl.bl-pre .bl-copy{opacity:0;animation:blShow 0s 3s forwards}
 @keyframes blShow{to{opacity:1}}
@@ -51,6 +51,8 @@
   .bl-card{height:38vh;height:38svh}
   .bl-copy{margin-top:clamp(14px,3vh,28px)}
   .bl-sub{max-width:none}
+  .bl-nx-full{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .bl-nx-short{display:inline}
   .bl-card:nth-child(6n+2),.bl-card:nth-child(6n+4){--off:2.4vh}
   .bl-card:nth-child(6n+3),.bl-card:nth-child(6n+6){--off:5vh}
   .bl-card.is-on{flex-grow:3}
@@ -67,5 +69,5 @@
 <p class="sr-only">Brand strategy, visual identity and tone of voice, built as one system that travels across every touchpoint.</p>
 <ul class="bl-row" role="list"><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae316d84689182a2263dde6_cyb3r-brand-brand-strategy-positioning.webp" alt="Hands arranging cards and colour swatches into a brand positioning map" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Brand strategy &amp; positioning</h2><p>Find the space only you can own. We research your market, audience and competitors, then shape the story and position that wins it.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae316d84689182a2263ddfc_cyb3r-brand-visual-identity-systems.webp" alt="Navy brand stationery carrying a teal emblem" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Visual identity systems</h2><p>Logo, colour, type and imagery working as one system, consistent across your website, social channels, print and packaging, wherever your brand shows up.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae316d9aa9e6b8642546547_cyb3r-brand-logo-wordmark-design.webp" alt="Designer sketching a geometric logo mark on tracing paper" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Logo &amp; wordmark design</h2><p>A mark that holds up at every size, from favicon to billboard, crafted, tested and delivered in every file format your team and printers need.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae316d99d726adc1cca6222_cyb3r-brand-brand-guidelines.webp" alt="Open brand guidelines book showing colour swatches" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Brand guidelines</h2><p>Clear rules that keep every team and supplier on brand: logo use, colour, type, tone and ready-made templates in one guide anyone can follow.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae316d998027c56080dbcd9_cyb3r-brand-creative-direction.webp" alt="Creative director studying a lit photo-shoot set" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Creative direction</h2><p>One vision steering every shoot, campaign and launch. We set the look, brief the talent and keep every piece of content unmistakably yours.</p></div></li><li class="bl-card" tabindex="0"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6ae316d9aa68f14ab3149578_cyb3r-brand-messaging-tone-of-voice.webp" alt="Woman speaking into a studio microphone" width="800" height="1400" decoding="async"><div class="sr-only"><h2>Messaging &amp; tone of voice</h2><p>Words that sound like you, from headline to helpdesk. Taglines, key messages and a voice guide so everyone who writes for you gets it right.</p></div></li></ul>
 <div class="bl-copy" aria-hidden="true"><p class="bl-eyebrow">Services</p><p class="bl-title">Brand &amp; Identity.</p><p class="bl-sub">Brand strategy, visual identity and tone of voice, built as one system that travels across every touchpoint.</p></div>
-<div class="bl-foot"><a href="/services#brand-identity">&larr; All services</a><span><span class="bl-hint-hover">Hover a card to explore</span><span class="bl-hint-touch">Tap a card to explore</span></span></div>
+<div class="bl-foot"><a href="/services#brand-identity">&larr; All services</a><a class="bl-next" href="/web-design-development">Next<span class="bl-nx-full">: Web Design &amp; Development</span><span class="bl-nx-short" aria-hidden="true">: Web Design</span> &rarr;</a></div>
 </section>

@@ -1,0 +1,143 @@
+{
+ "h1": "AI-Driven Advertising",
+ "short": "AI Ads",
+ "slug": "ai-driven-advertising",
+ "intro": "AI-assisted creative, targeting and optimisation that make every advertising budget work harder across the whole funnel.",
+ "cards": [
+  {
+   "img": "6ae3a5ad569524a554ffc3dd_cyb3r-ai-creative-iteration.webp",
+   "name": "AI creative & iteration",
+   "alt": "Wall of glowing abstract image tiles in teal and navy",
+   "line": "Ad concepts, headlines and visuals generated and refined in rapid rounds, so you test more ideas and find winning creative faster."
+  },
+  {
+   "img": "6ae3a5adcad9c49bcf45760f_cyb3r-ai-audience-modelling.webp",
+   "name": "Audience modelling",
+   "alt": "Glowing points forming clusters of seated figures in dark space",
+   "line": "Models built from your own customer data to find and reach the people most likely to buy, across search, social and display."
+  },
+  {
+   "img": "6ae3a5ad2224cf631bd344b1_cyb3r-ai-automated-bidding-budgets.webp",
+   "name": "Automated bidding & budgets",
+   "alt": "Robotic arm placing glowing teal cubes in rows",
+   "line": "Smart bidding and budget rules that move spend towards the campaigns, audiences and hours converting best, adjusting as results change."
+  },
+  {
+   "img": "6ae3a5ae953fd3d0e6dd7407_cyb3r-ai-predictive-optimisation.webp",
+   "name": "Predictive optimisation",
+   "alt": "Glass prism casting a beam of teal light across a dark table",
+   "line": "Forecasts that flag what is likely to perform before money is spent, so campaigns scale winners early and cut losers fast."
+  },
+  {
+   "img": "6ae3a5b0ffedbe8516e59860_cyb3r-ai-full-funnel-measurement.webp",
+   "name": "Full-funnel measurement",
+   "alt": "Glass funnel with glowing teal particles streaming through it",
+   "line": "Attribution that connects first click to final sale, showing how each channel and campaign contributes to revenue, not just clicks."
+  },
+  {
+   "img": "6ae3a5b09cd5106668430cea_cyb3r-ai-continuous-experimentation.webp",
+   "name": "Continuous experimentation",
+   "alt": "Laboratory flasks holding glowing teal liquid",
+   "line": "Structured tests across creative, audiences, bids and landing pages, run continuously so performance keeps improving instead of stalling."
+  }
+ ],
+ "pairs_h2": "What our AI-driven advertising work covers",
+ "pairs": [
+  [
+   "B",
+   "AI creative",
+   "l",
+   "Ad variations"
+  ],
+  [
+   "l",
+   "Copy generation",
+   "B",
+   "Visual testing"
+  ],
+  [
+   "B",
+   "Audience models",
+   "l",
+   "Lookalike reach"
+  ],
+  [
+   "l",
+   "First-party data",
+   "B",
+   "Segmentation"
+  ],
+  [
+   "B",
+   "Smart bidding",
+   "l",
+   "Budget rules"
+  ],
+  [
+   "l",
+   "Bid automation",
+   "B",
+   "Dayparting"
+  ],
+  [
+   "B",
+   "Forecasting",
+   "l",
+   "Scenario models"
+  ],
+  [
+   "l",
+   "Anomaly alerts",
+   "B",
+   "Scaling rules"
+  ],
+  [
+   "B",
+   "Attribution",
+   "B",
+   "Incrementality"
+  ],
+  [
+   "l",
+   "Media mix",
+   "B",
+   "Funnel analytics"
+  ],
+  [
+   "B",
+   "Creative testing",
+   "l",
+   "Holdout tests"
+  ],
+  [
+   "l",
+   "Landing tests",
+   "B",
+   "Test design"
+  ],
+  [
+   "B",
+   "Performance Max",
+   "l",
+   "Advantage+"
+  ],
+  [
+   "l",
+   "Feed optimisation",
+   "B",
+   "Product feeds"
+  ],
+  [
+   "B",
+   "Dashboards",
+   "l",
+   "Insights"
+  ],
+  [
+   "l",
+   "Automation",
+   "B",
+   "AI workflows"
+  ]
+ ]
+}
