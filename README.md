@@ -17,3 +17,8 @@ new commit needs a new registered version, not a head rewrite. It also handles d
 `/services#<slug>` (slugs in its `services` array) scrolls to that service's panel. The
 homepage helix cards link there via the matching `SLUG` list in `cyb3r-sections.js` - keep
 the two lists in the same order.
+
+`brand-lineup.js` drives the card lineup on /brand-identity (alanmenken.com-style): cards fly out
+from the centre, a hovered/tapped/focused card widens and turns to colour, the title rebuilds letter
+by letter. The section's markup + CSS live in an HtmlEmbed on that page (copy kept in
+`brand-identity-embed.html`); the script only reads it. Registered Webflow script `cyb3rBrandLineup`.
