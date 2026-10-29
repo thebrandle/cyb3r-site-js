@@ -16,11 +16,12 @@
   var row = root.querySelector(".bl-row");
   var cards = [].slice.call(root.querySelectorAll(".bl-card"));
   var title = root.querySelector(".bl-title"), eyebrow = root.querySelector(".bl-eyebrow"), sub = root.querySelector(".bl-sub");
-  var pad = function (n) { return (n < 10 ? "0" : "") + n; };
   var def = { e: eyebrow.textContent, t: title.textContent, s: sub.textContent };
-  var data = cards.map(function (c, i) {
+  // an active card's eyebrow names the page's service (Services > Brand & Identity > card), not a "03 / 06" counter
+  var group = (root.querySelector("h1") || title).textContent.trim().replace(/[.!?]$/, "");
+  var data = cards.map(function (c) {
     var name = c.querySelector("h2").textContent.trim();
-    return { e: pad(i + 1) + " / " + pad(cards.length), t: /[.!?]$/.test(name) ? name : name + ".", s: c.querySelector("p").textContent.trim() };
+    return { e: group, t: /[.!?]$/.test(name) ? name : name + ".", s: c.querySelector("p").textContent.trim() };
   });
 
   /* ---- the line under the title always keeps the height of the longest one, so swapping cards never
