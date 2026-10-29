@@ -33,6 +33,7 @@
 .bl-title .bl-dot{color:var(--bl-accent)}
 .bl-sub{font:500 clamp(15px,1.2vw,18px)/1.5 Inter,sans-serif;letter-spacing:-.01em;color:var(--bl-dim);margin:16px auto 0;
   max-width:46ch;text-wrap:balance;transition:opacity .35s ease}
+.bl-eyebrow,.bl-title,.bl-sub{opacity:1}   /* the theme dims every <p> to .7 */
 .bl-fade{opacity:0}
 .bl-foot{position:absolute;left:var(--bl-gut);right:var(--bl-gut);bottom:clamp(18px,3.4vh,34px);display:flex;justify-content:space-between;
   align-items:center;font:500 11px/1 ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--bl-dim)}
@@ -44,9 +45,10 @@
 .bl.bl-pre .bl-card,.bl.bl-pre .bl-copy{opacity:0;animation:blShow 0s 3s forwards}
 @keyframes blShow{to{opacity:1}}
 @media (max-width:767px){
-  .bl{justify-content:flex-start;padding-top:clamp(88px,14vh,120px)}
-  .bl-row{height:calc(46vh + 5vh)}
-  .bl-card{height:46vh}
+  /* svh = the screen with the browser bars showing, so the whole lineup fits the first view */
+  .bl{justify-content:flex-start;padding-top:clamp(88px,14vh,120px);padding-top:clamp(88px,14svh,120px);padding-bottom:60px}
+  .bl-row{height:calc(43vh + 5vh);height:calc(43svh + 5vh)}
+  .bl-card{height:43vh;height:43svh}
   .bl-card:nth-child(6n+2),.bl-card:nth-child(6n+4){--off:2.4vh}
   .bl-card:nth-child(6n+3),.bl-card:nth-child(6n+6){--off:5vh}
   .bl-card.is-on{flex-grow:3}
