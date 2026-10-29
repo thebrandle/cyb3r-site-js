@@ -7,6 +7,9 @@
    Load once on the Services page (registered hosted script, footer).
    Deep links: /services#<slug> (slugs in the services array below; the homepage
    Design in Motion cards link here) lands on that service's panel.
+   Each panel ends in a "Learn more" button to /<slug>, the service's own page (same
+   button as the homepage Selected Works "Explore project"). Those pages are not built
+   yet, so a button only appears once its page answers 200; /services?ctapreview shows all.
    ========================================================================== */
 (function () {
   "use strict";
@@ -77,6 +80,21 @@
   ".cyb-svc .cap-row .cap-txt{font-size:1.04rem;letter-spacing:-.01em;color:var(--ink)}" +
   "@media(max-width:860px){.cyb-svc .svc-pin{height:auto}.cyb-svc .svc-stage{position:static;height:auto;overflow:visible}.cyb-svc .panel{position:relative;inset:auto;flex-direction:column;transform:none!important}.cyb-svc .pinner{position:relative;inset:auto;flex-direction:column;transform:none!important}.cyb-svc .col-left,.cyb-svc .col-right{width:100%}.cyb-svc .divider{display:none}.cyb-svc .col-left{padding:40px 24px}.cyb-svc .col-right{padding:34px 24px 48px}.cyb-svc .cap-row .cap-line{transform:scaleX(1)!important}}" +
   "@media (prefers-reduced-motion:reduce){.cyb-svc .cap-row .cap-line{transform:scaleX(1)!important}.cyb-svc .p-caption .w{opacity:1!important;filter:none!important}}" +
+  /* "Learn more" = the homepage Selected Works button (cyb3r-sections.css), rescoped */
+  ".cyb-svc .cta-row{ margin-top:28px; }" +
+  ".cyb-svc .button_wrapper{ --step:30ms; --base-dur:300ms; --dur-step:30ms; --run:28px; --out-time:200ms; --in-time:320ms;" +
+  ".cyb-svc .button_wrapper .btn{ position:relative; display:block; text-decoration:none; color:var(--ink); font-family:\"Inter\",Helvetica,Arial,system-ui,sans-serif;" +
+  ".cyb-svc .button_wrapper .word{ display:inline-flex; transform:translate(0); position:relative; z-index:1; }" +
+  ".cyb-svc .button_wrapper .text{ display:inline-block; white-space:pre; transition-property:transform; transition-duration:var(--dur,var(--base-dur));" +
+  ".cyb-svc .button_wrapper.is-hovered .text{ transform:translateX(var(--group-move,0px)); }" +
+  ".cyb-svc .button_wrapper .arrow{ position:absolute; top:50%; transform:translateY(-50%); width:20px; height:1em; overflow:hidden; }" +
+  ".cyb-svc .button_wrapper .arrow.arrow-right{ right:2px; }" +
+  ".cyb-svc .button_wrapper .arrow.arrow-left{ left:0; }" +
+  ".cyb-svc .button_wrapper .arrow-sprite{ display:inline-block; will-change:transform,opacity; }" +
+  ".cyb-svc .button_wrapper .u-right, .cyb-svc .button_wrapper .u-left{ position:absolute; left:0; bottom:2px; height:1px; width:100%; }" +
+  ".cyb-svc .button_wrapper .u-right{ background:var(--ink); }" +
+  ".cyb-svc .button_wrapper .u-left{ background:var(--accent); }" +
+  ".cyb-svc .button_wrapper:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }" +
   ".dm{display:none!important}"; /* replaces the old Work in Motion section */
 
   function boot() {
@@ -93,6 +111,52 @@
     else if (hero) hero.insertAdjacentElement("afterend", wrap);
     else mc.insertBefore(wrap, mc.firstChild);
     build();
+  }
+
+  /* Selected Works button, verbatim from cyb3r-sections.js makeButton (keep the two in step) */
+  function makeButton(label, opts){
+    opts=opts||{};
+    const wrap=document.createElement("span"); wrap.className="button_wrapper";
+    const btn=document.createElement("a"); btn.className="btn"; btn.href=opts.href||"#";
+    if(opts.target){ btn.target=opts.target; btn.rel="noopener"; }
+    const uR=document.createElement("span"); uR.className="u-right"; const uL=document.createElement("span"); uL.className="u-left";
+    const word=document.createElement("span"); word.className="word";
+    [...label].forEach(ch=>{ const s=document.createElement("span"); s.className="text"; s.textContent=ch; word.appendChild(s); });
+    const aR=document.createElement("span"); aR.className="arrow arrow-right"; aR.innerHTML='<span class="arrow-sprite">→</span>';
+    const aL=document.createElement("span"); aL.className="arrow arrow-left"; aL.innerHTML='<span class="arrow-sprite">→</span>';
+    btn.append(uR,uL,word,aR,aL); wrap.append(btn); if(!opts.href) btn.addEventListener("click",e=>e.preventDefault());
+    const num=(el,k,d)=>{ const v=parseFloat(getComputedStyle(el).getPropertyValue(k)); return Number.isFinite(v)?v:d; };
+    const kill=el=>el&&el.getAnimations().forEach(a=>{ try{a.commitStyles();}catch(e){} a.cancel(); });
+    const slide=(el,tx,op,dur,delay=0)=>{ if(!el)return; el.getAnimations().forEach(a=>a.cancel());
+      const cs=getComputedStyle(el); const m=new DOMMatrixReadOnly(cs.transform==="none"?"":cs.transform).m41;
+      const a=el.animate([{transform:`translateX(${m}px)`,opacity:cs.opacity},{transform:`translateX(${tx})`,opacity:op}],{duration:dur,delay,easing:"ease",fill:"forwards"});
+      a.onfinish=()=>{ el.style.transform=`translateX(${tx})`; el.style.opacity=String(op); }; };
+    const scaleUL=(el,origin,to,dur,delay=0)=>{ if(!el)return; el.style.transformOrigin=`${origin} center`; kill(el);
+      const cs=getComputedStyle(el); const mm=new DOMMatrixReadOnly(cs.transform==="none"?"":cs.transform); const from=Math.hypot(mm.m11,mm.m12)||1;
+      const a=el.animate([{transform:`scaleX(${from})`},{transform:`scaleX(${to})`}],{duration:dur,delay,easing:"ease",fill:"forwards"}); a.onfinish=()=>el.style.transform=`scaleX(${to})`; };
+    const texts=[...word.querySelectorAll(".text")]; const step=30,baseDur=300,durStep=30,reentry=0.5;
+    function groupMove(mode){
+      const br=btn.getBoundingClientRect(),wr=word.getBoundingClientRect(); const padR=parseFloat(getComputedStyle(btn).paddingRight)||0;
+      let target; if(mode==="in") target=br.right-padR+1;
+      else { const arw=aR.getBoundingClientRect().width; const gap=num(wrap,"--arrow-gap",10); const inset=Math.max(num(wrap,"--inset-min",8),0.5*padR); target=br.right-inset-arw-gap; }
+      const move=Math.max(0,target-wr.right); const n=texts.length;
+      texts.forEach((el,r)=>{ const o=mode==="in"?n-r-1:r; el.style.setProperty("--group-move",move+"px"); el.style.setProperty("--delay",(o*step)+"ms"); el.style.setProperty("--dur",(baseDur+o*durStep)+"ms"); });
+      return Math.max(120,Math.round(((n-1)*step+(baseDur+(n-1)*durStep))*reentry));
+    }
+    requestAnimationFrame(()=>{ groupMove("out"); const spR=aR.querySelector(".arrow-sprite"),spL=aL.querySelector(".arrow-sprite");
+      spR.style.opacity="1"; spR.style.transform="translateX(0)"; spL.style.opacity="0"; spL.style.transform="translateX(-120%)";
+      uR.style.transformOrigin="right center"; uR.style.transform="scaleX(1)"; uL.style.transformOrigin="left center"; uL.style.transform="scaleX(0)"; });
+    let inT,outT;
+    const enter=()=>{ clearTimeout(outT); const s=groupMove("in"); btn.offsetWidth; wrap.classList.add("is-hovered");
+      const run=getComputedStyle(wrap).getPropertyValue("--run").trim()||"28px";
+      slide(aR.querySelector(".arrow-sprite"),run,0,200,0); slide(aL.querySelector(".arrow-sprite"),"0px",1,320,s);
+      scaleUL(uR,"right",0,1000,0); inT=setTimeout(()=>scaleUL(uL,"left",1,500,0),s); };
+    const leave=()=>{ clearTimeout(inT); const i=groupMove("out"); btn.offsetWidth; wrap.classList.remove("is-hovered");
+      const run=getComputedStyle(wrap).getPropertyValue("--run").trim()||"28px";
+      slide(aL.querySelector(".arrow-sprite"),`calc(-1 * ${run})`,0,200,0); slide(aR.querySelector(".arrow-sprite"),"0px",1,320,i);
+      scaleUL(uL,"left",0,1000,0); outT=setTimeout(()=>scaleUL(uR,"right",1,500,0),i); };
+    btn.addEventListener("mouseenter",enter); btn.addEventListener("mouseleave",leave); btn.addEventListener("focus",enter); btn.addEventListener("blur",leave);
+    return wrap;
   }
 
   function build() {
@@ -115,6 +179,7 @@
             '<p class="s-desc">' + esc(s.desc) + '</p>' +
             '<div class="s-label">Our core capabilities</div>' +
             s.caps.map(function (c) { return '<div class="cap-row"><span class="cap-line"></span><span class="cap-txt">' + esc(c) + '</span></div>'; }).join("") +
+            '<div class="cta-row" hidden></div>' +
           '</div>' +
         '</div>';
       stage.appendChild(p);
@@ -204,6 +269,16 @@
       requestAnimationFrame(render);
     }
     render();
+
+    /* "Learn more" -> /<slug>, the service's own page. Hidden until that page answers 200 (it 404s
+     * until published), so a page going live shows its button with no code change. */
+    var ctaPreview = /[?&]ctapreview\b/.test(location.search);
+    panels.forEach(function (pn, i) {
+      var row = pn.el.querySelector(".cta-row"), href = "/" + services[i].slug;
+      function show() { row.appendChild(makeButton("Learn more", { href: href })); row.hidden = false; }
+      if (ctaPreview) return show();
+      fetch(href, { method: "HEAD" }).then(function (r) { if (r.ok) show(); }).catch(function () {});
+    });
 
     /* deep link: /services#<slug> scrolls to that service's panel. Desktop = the pinned stack, so
      * scroll to the point where panel i has fully slid in (slide ends at 70% of its segment; 85%
