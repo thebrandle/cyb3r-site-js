@@ -70,7 +70,7 @@
     const texts=[...word.querySelectorAll(".text")]; const step=30,baseDur=300,durStep=30,reentry=0.5;
     function groupMove(mode){
       const br=btn.getBoundingClientRect(),wr=word.getBoundingClientRect(); const padR=parseFloat(getComputedStyle(btn).paddingRight)||0;
-      let target; if(mode==="in") target=br.right-padR+1;
+      let target; if(mode==="in") target=br.right-padR-2;   // stop 2px inside the clip; +1 cut the last letter
       else { const arw=aR.getBoundingClientRect().width; const gap=num(wrap,"--arrow-gap",10); const inset=Math.max(num(wrap,"--inset-min",8),0.5*padR); target=br.right-inset-arw-gap; }
       const move=Math.max(0,target-wr.right); const n=texts.length;
       texts.forEach((el,r)=>{ const o=mode==="in"?n-r-1:r; el.style.setProperty("--group-move",move+"px"); el.style.setProperty("--delay",(o*step)+"ms"); el.style.setProperty("--dur",(baseDur+o*durStep)+"ms"); });
