@@ -1,0 +1,100 @@
+<style>
+/* Homepage services (akaru.fr "Expertises" layout): six full-screen panels in brand colours. Desktop: the stage pins and
+   each panel slides in from the right over the last, the next two waiting as narrowing strips, every panel's photo
+   sized to its strip; heading, text and progress stay put while the panels wipe across them (services-xp.js).
+   Phones, tablets and reduced motion: the panels stack as cards. */
+.sx{--sx-ar:1.379;position:relative;background:#1A232D;color:#fff;font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased}
+.sx,.sx *{box-sizing:border-box}
+.sx-panel{position:relative;background:var(--sx-bg);color:var(--sx-ink)}
+.sx-head{margin:0;font:400 clamp(48px,13vw,96px)/1 Inter,sans-serif;letter-spacing:-.045em;color:inherit;white-space:nowrap}
+.sx-head-v{display:inline-block}
+.sx-cw{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.1em;margin-bottom:-.1em}
+.sx-c{display:inline-block}
+.sx.sx-split .sx-c{transform:translate3d(0,108%,0);transition:transform .9s cubic-bezier(.22,1,.36,1) calc(var(--i)*45ms)}
+.sx.sx-split.is-in .sx-c{transform:none}
+.sx-index{font:600 11px/1 Inter,sans-serif;letter-spacing:.02em;color:var(--sx-ink)}
+.sx-title{margin:0;font:500 clamp(24px,2.22vw,42px)/1.15 Inter,sans-serif;letter-spacing:-.025em;color:var(--sx-ink);text-wrap:balance}
+.sx-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,max-content);gap:.45em 1.7em;
+  font:500 clamp(11px,.83vw,14px)/1.45 Inter,sans-serif;letter-spacing:.03em;text-transform:uppercase}
+.sx-list li{position:relative;margin:0;padding:0 0 0 1.05em;font:inherit;line-height:inherit;letter-spacing:inherit;opacity:1;color:var(--sx-ink);text-wrap:balance}   /* the theme sizes and dims every <li> */
+.sx-list li::before{content:"/";content:"/" / "";position:absolute;left:0;top:0;color:var(--sx-ink2)}
+/* Learn more: outlined pill, a dot on the right; hover fills it from below and the dot opens into a circle with an arrow */
+.sx .sx-cta,.sx .sx-cta:hover{color:var(--sx-ink);text-decoration:none}
+.sx-cta{--h:clamp(50px,4.17vw,64px);position:relative;display:inline-flex;align-items:center;gap:2.2em;height:var(--h);padding:0 7px 0 2.3em;
+  border:1px solid currentColor;border-radius:999px;overflow:hidden;isolation:isolate;font:600 clamp(10px,.76vw,12px)/1 Inter,sans-serif;
+  letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.sx-cta::before{content:"";position:absolute;inset:-1px;z-index:-1;border-radius:inherit;background:var(--sx-ink);transform:translate3d(0,102%,0);
+  transition:transform .5s cubic-bezier(.22,1,.36,1)}
+.sx-cta-l{transition:color .35s ease}
+.sx-cta-d{position:relative;flex:0 0 auto;width:calc(var(--h) - 16px);height:calc(var(--h) - 16px);display:grid;place-items:center}
+.sx-cta-d::before{content:"";position:absolute;inset:0;margin:auto;width:8px;height:8px;border-radius:50%;background:currentColor;
+  transition:width .5s cubic-bezier(.22,1,.36,1),height .5s cubic-bezier(.22,1,.36,1),background-color .35s ease}
+.sx-cta-d svg{position:relative;width:36%;height:36%;color:var(--sx-ink);opacity:0;transform:translate3d(-70%,70%,0);
+  transition:transform .5s cubic-bezier(.22,1,.36,1) .05s,opacity .3s ease .05s}
+.sx-cta:hover::before,.sx-cta:focus-visible::before{transform:none}
+.sx-cta:hover .sx-cta-l,.sx-cta:focus-visible .sx-cta-l{color:var(--sx-bg)}
+.sx-cta:hover .sx-cta-d::before,.sx-cta:focus-visible .sx-cta-d::before{width:100%;height:100%;background:var(--sx-bg)}
+.sx-cta:hover .sx-cta-d svg,.sx-cta:focus-visible .sx-cta-d svg{opacity:1;transform:none}
+.sx-cta:focus-visible{outline:2px solid var(--sx-ink);outline-offset:4px}
+.sx-media{position:relative;overflow:hidden;aspect-ratio:var(--sx-ar);background:rgba(0,0,0,.18)}
+.sx-media img{display:block;width:100%;height:100%;max-width:none;object-fit:cover}
+.sx-copy,.sx-nav{display:none}
+/* stacked cards (phones, tablets, reduced motion): each card sticks as the next one slides up over it; its top band is as
+   tall as the site header (--sx-hh, measured by the script), so the header always sits on the card colour */
+.sx{padding-top:clamp(72px,12vh,120px)}
+.sx-stage>.sx-head{padding:0 16px clamp(24px,5vw,40px)}
+.sx-panel{position:sticky;top:0;padding:var(--sx-hh,64px) 12px 36px}
+.sx-inner{display:flex;flex-direction:column}
+.sx-media{order:-1;width:100%;max-height:38svh}
+.sx-content{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:18px;padding:22px 6px 0}
+.sx-index{grid-row:1;align-self:center}
+.sx-title,.sx-list,.sx-cta{grid-column:2}
+.sx-list{margin:14px 0 22px}
+.sx-cta{justify-self:start}
+@media (min-width:600px){.sx-panel{padding:var(--sx-hh,72px) 16px 44px}.sx-list{grid-template-columns:repeat(2,minmax(0,max-content))}}
+@media (min-width:992px){
+  .sx-inner{flex-direction:row;align-items:center;gap:5vw;padding:5vw 6vw}
+  .sx-media{order:0;width:42%;flex:0 0 42%}
+  .sx-content{flex:1}
+}
+@media (prefers-reduced-motion:reduce){.sx-panel{position:relative}.sx.sx-split .sx-c{transform:none;transition:none}}
+/* pinned horizontal panels (desktop) */
+@media (min-width:992px) and (prefers-reduced-motion:no-preference){
+  .sx{padding-top:0}
+  .sx-pin{height:calc(100vh + 5 * 110vh + 20vh)}
+  .sx-stage{position:sticky;top:0;height:100vh;overflow:hidden;overflow:clip}
+  .sx-panels{position:absolute;inset:0}
+  .sx-panel{position:absolute;inset:0;padding:0;overflow:hidden;will-change:transform}
+  .sx-panel:nth-child(2){transform:translate3d(80%,0,0)}
+  .sx-panel:nth-child(3){transform:translate3d(95%,0,0)}
+  .sx-panel:nth-child(n+4){transform:translate3d(100%,0,0)}
+  .sx-inner{position:absolute;inset:0;display:block;padding:0;will-change:transform}
+  .sx-stage>.sx-head,.sx-copy.sx-head{position:absolute;z-index:3;left:var(--sx-gx,11.11vw);top:var(--sx-ht,12vh);padding:0;
+    font-size:var(--sx-hs,6.67vw);color:#0F0E0E}
+  .sx-copy.sx-head{z-index:auto;color:var(--sx-ink)}
+  .sx-content{position:absolute;left:var(--sx-gx,11.11vw);top:var(--sx-ct,calc(81.4vh - 24.17vw));width:var(--sx-cw,32vw);display:block;padding:0}
+  .sx-index{display:none}
+  .sx-list{margin:1.6em 0 3.1em;grid-template-columns:repeat(2,minmax(0,max-content))}
+  .sx-media{position:absolute;left:0;top:0;width:var(--sx-iw,33.333vw);max-height:none;flex:none;transform-origin:0 0;will-change:transform;
+    transform:translate3d(46.667vw,calc(81.4vh - 24.17vw),0)}
+  .sx-nav{position:absolute;z-index:3;left:var(--sx-gx,11.11vw);right:var(--sx-gx,11.11vw);top:var(--sx-nt,91.9vh);display:grid;
+    grid-template-columns:repeat(6,minmax(0,1fr));font:600 clamp(10px,.7vw,12px)/1.4 Inter,sans-serif;letter-spacing:.02em;
+    text-transform:uppercase;color:#0F0E0E}
+  .sx-copy.sx-nav{z-index:auto;color:var(--sx-ink)}
+  .sx-nav-i{display:flex;gap:2.2em;white-space:nowrap;overflow:hidden}
+  .sx-nav-t{opacity:0;transition:opacity .35s ease}
+  .sx-nav-t.on{opacity:1}
+  .sx-nav-bar{position:absolute;left:0;right:0;top:calc(100% + 1.9em);height:1px;overflow:hidden}
+  .sx-nav-bar span{position:absolute;inset:0;background:currentColor;transform-origin:0 50%;transform:scaleX(.1667)}
+  .sx-live .sx-copy{display:block}
+  .sx-live .sx-copy.sx-nav{display:grid}
+  .sx-live .sx-stage>.sx-nav{display:none}
+  .sx-live .sx-stage>.sx-head{width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+  .sx-live .sx-peek{cursor:pointer}
+}
+/* the site header over light panels: dark logo and menu lines (set by services-xp.js while a light panel is under them) */
+html.sx-cover .blur-effect{visibility:hidden}   /* its backdrop blur smears the strip edges behind the header */
+html.sx-logo-dark .navigation-top .logo-first{filter:brightness(0)}
+html.sx-menu-dark .navigation-top .hamburger-flex:not(.cy-burger-open) .hamburger-line{background-color:#0F0E0E}
+.navigation-top .hamburger-line{transition:transform .4s cubic-bezier(.4,0,.2,1),background-color .25s ease}
+</style>
