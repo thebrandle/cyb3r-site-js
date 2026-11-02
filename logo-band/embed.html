@@ -1,0 +1,26 @@
+<style>
+/* Homepage logo band (learnwithzero.com wave): the client logos on three curved rows over the brand teal, heading centred
+   above (site section-title classes). logo-band.js builds and moves the logos; it reads them from the CMS ticker below,
+   which stays on the page only as the data source (Ticker Logos collection), so a logo added there appears here too. */
+section.ticker-reveal{display:none!important}
+.lb{position:relative;height:100svh;min-height:560px;max-height:1000px;overflow:hidden;background:#39F1E0;color:#0F0E0E}
+.lb .lb-head{position:absolute;left:0;right:0;top:0;z-index:1;box-sizing:border-box;margin:0 auto;max-width:none;padding:0 16px;
+  font-weight:600;color:#0F0E0E;text-align:center;text-wrap:balance;pointer-events:none}
+.lb-w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.08em;margin-bottom:-.08em}
+.lb-w>span{display:inline-block}
+.lb.lb-split .lb-w>span{transform:translate3d(0,110%,0);transition:transform .2s cubic-bezier(.4,0,1,1)}
+.lb.lb-split.is-in .lb-w>span{transform:none;transition:transform .85s cubic-bezier(.16,1,.3,1) calc(var(--i) * 70ms)}
+.lb-rows{position:absolute;inset:0;overflow:hidden}
+.lb-logo{position:absolute;left:0;top:0;display:block;transform:translate3d(-200vw,0,0);transform-origin:50% 50%;will-change:transform}
+.lb-logo i{position:absolute;inset:0;background-repeat:no-repeat;transition:transform .35s cubic-bezier(.22,1,.36,1)}
+.lb-logo:hover i{transform:scale(1.12)}
+.lb .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.lb.lb-split .lb-w>span{transform:none;transition:none}}
+/* the site header over the teal: dark logo and menu lines (set by logo-band.js while the band is behind them) */
+html.lb-dark .navigation-top .logo-first{filter:brightness(0)}
+html.lb-dark .navigation-top .hamburger-flex:not(.cy-burger-open) .hamburger-line{background-color:#0F0E0E}
+</style>
+<section class="lb" aria-labelledby="lb-h">
+<h2 class="h1 for-h2 lb-head" id="lb-h">Brands we have worked with</h2>
+<div class="lb-rows" role="group" aria-labelledby="lb-h"></div>
+</section>
