@@ -1,10 +1,11 @@
 /* ============================================================================
-   CYB3R Media - Services dropdown in the overlay (hamburger) menu
-   A small + on the "Services" row opens the six service pages as a sub-list in small type
-   under it; "Services" itself still goes to /services, and the page you are on is marked.
-   The menu panel scrolls when the open list makes it taller than the screen.
-   Site-wide (registered hosted script, footer).
+   CYB3R Media - site menu + FAQ helpers (registered "cyb3rMenuFaq", site-wide footer)
+   1. FAQ single-open and click-inside-the-menu-to-close: the original inline cyb3rMenuFaq 0.0.1, verbatim.
+   2. Services dropdown in the overlay menu (was menu-services.js): a + on the Services row opens the six
+      service pages in small type; the menu panel scrolls if the open list makes it taller than the screen.
+   One file because the site allows 15 site-wide scripts and all 15 slots are taken.
    ========================================================================== */
+(function(){document.addEventListener('click',function(e){var t=e.target;if(!t||!t.closest)return;var tg=t.closest('.fq2-toggle');if(tg){var it=tg.closest('.fq2-item');var op=document.querySelectorAll('.fq2-item.open');for(var i=0;i<op.length;i++){if(op[i]!==it)op[i].classList.remove('open');}return;}var bur=document.querySelector('.hamburger-flex');if(!bur||!bur.classList.contains('cy-burger-open'))return;if(bur.contains(t)||t.closest('a'))return;var fm=document.querySelector('.fixed-menu');if(fm&&fm.contains(t))bur.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true}));},false);})();
 (function () {
   "use strict";
   var a = document.querySelector(".fixed-menu .menu-big-first a.button-big-menu[href='/services']");
