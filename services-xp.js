@@ -8,7 +8,8 @@
    Every panel carries its own copy of the heading and the progress row in its own ink colour, which keeps
    them readable wherever a light and a dark panel meet. The site header turns dark over light panels.
    Videos (the service clips, poster first) load and play only while their panel is on screen. "Learn more" is
-   the Services page button (makeButton below). Phones, tablets and reduced motion get stacked cards (CSS).
+   the Services page button (makeButton below); each clip is a link to its page as well. Phones, tablets and
+   reduced motion get cards in normal flow (CSS): a clip loads a screen ahead and plays while a third is visible.
    ========================================================================== */
 (function () {
   "use strict";
@@ -138,8 +139,8 @@
     var cover = r.top <= L.bandY && r.bottom >= L.bandY;   // the pinned stage is behind the header
     header(cover, darkAt(L.logoX), darkAt(L.burgerX));
   }
-  function header(cover, dark1, dark2) {
-    html.classList.toggle("sx-cover", cover);
+  function header(cover, dark1, dark2, blur) {   // blur: keep the site's header blur (cards scroll under it in normal flow)
+    html.classList.toggle("sx-cover", cover && !blur);
     html.classList.toggle("sx-logo-dark", cover && !dark1);
     html.classList.toggle("sx-menu-dark", cover && !dark2);
   }
@@ -152,7 +153,7 @@
       var r = panels[i].getBoundingClientRect();
       if (r.top <= y && r.bottom >= y) {
         var m = panels[i].querySelector(".sx-media").getBoundingClientRect(), dark = (m.top <= y && m.bottom >= y) || panels[i].classList.contains("sx-dark");
-        return header(true, dark, dark);
+        return header(true, dark, dark, true);
       }
     }
     header(false);
@@ -173,11 +174,6 @@
     videos.forEach(function (v) { run(v, false); });
     header(false);
     L = null; request();
-  }
-
-  function headerHeight() {   // card top band = the header's height (stacked layout)
-    var nb = document.querySelector(".navigation-top .navbar");
-    if (nb && nb.offsetHeight) root.style.setProperty("--sx-hh", nb.offsetHeight + 8 + "px");
   }
 
   /* the Services page "Learn more" button, verbatim from services-section.js makeButton (keep the copies in step) */
@@ -233,7 +229,6 @@
     a.parentNode.replaceChild(wrap, a);
   });
 
-  headerHeight();
   [].forEach.call(root.querySelectorAll(".sx-head-v"), split);
   root.classList.add("sx-split");
   if (mq.matches) on();
@@ -244,12 +239,13 @@
     if (!near) { videos.forEach(function (v) { run(v, false); }); if (!L) header(false); }
     request();
   }).observe(root);
-  // stacked cards: a clip plays while a third of it is on screen
+  // stacked cards: a clip starts loading a screen before it arrives and plays while a third of it is on screen
+  var pio = new IntersectionObserver(function (es) { if (!L && !still) es.forEach(function (e) { if (e.isIntersecting) load(e.target); }); }, { rootMargin: "100% 0px" });
   var vio = new IntersectionObserver(function (es) { if (!L) es.forEach(function (e) { run(e.target, e.intersectionRatio >= 0.34); }); }, { threshold: [0, 0.34] });
-  videos.forEach(function (v) { if (v) vio.observe(v); });
+  videos.forEach(function (v) { if (v) { pio.observe(v); vio.observe(v); } });
 
   addEventListener("scroll", function () { if (L || near) request(); }, { passive: true });
-  addEventListener("resize", function () { headerHeight(); if (L) layout(); request(); });
+  addEventListener("resize", function () { if (L) layout(); request(); });
   (mq.addEventListener ? mq.addEventListener.bind(mq, "change") : mq.addListener.bind(mq))(function () { if (mq.matches) on(); else off(); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (L) { layout(); request(); } });
 
@@ -260,8 +256,8 @@
     if (i > -1 && Math.abs(lastP - i) > 0.01) scrollToPanel(i, false);
   });
   root.addEventListener("click", function (e) {
-    if (!L || e.target.closest("a")) return;
+    if (!L || e.target.closest(".button_wrapper, .sx-cta")) return;
     var i = panels.indexOf(e.target.closest(".sx-panel"));
-    if (i > -1 && i - lastP > 0.5) scrollToPanel(i, true);
+    if (i > -1 && i - lastP > 0.5) { e.preventDefault(); scrollToPanel(i, true); }   // a waiting strip, its clip link too, slides in first
   });
 })();
