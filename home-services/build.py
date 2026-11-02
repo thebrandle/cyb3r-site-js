@@ -1,6 +1,6 @@
 # Builds the homepage services section embed (akaru.fr "Expertises" layout) from the six service-pages/<slug>.json files:
 # panel title = the page h1, list = its six card names, media = the service's video (the clips the Work in Motion
-# helix used, posters cut from them; SEO = the coded search-results loop in home-services/seo-clip/), Learn more -> /<slug> (services-xp.js turns it into the site's Learn more button); the clip links there too.
+# helix used, posters cut from them; SEO = the coded search-results loop in home-services/seo-clip/), Learn more -> /<slug> (services-xp.js turns it into the site's Learn more button); the clip links there too (its sr-only text gives the link an anchor text for SEO checkers).
 # Usage (repo root): python3 home-services/build.py  ->  home-services/services-xp-embed.html
 import json, os, html
 D = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(D)
@@ -28,7 +28,7 @@ for i, (slug, clip, poster, t, bg, theme) in enumerate(PANELS):
         f'<div class="sx-content"><span class="sx-index" aria-hidden="true">{n}</span><h3 class="sx-title" id="sx-t{i + 1}">{e(c["h1"])}</h3>'
         f'<ul class="sx-list" role="list">{items}</ul>'
         f'<a class="sx-cta" href="/{slug}">Learn more<span class="sr-only"> about {e(c["h1"])}</span></a></div>'
-        f'<a class="sx-media" href="/{slug}" tabindex="-1" aria-hidden="true"><video muted loop playsinline disablepictureinpicture disableremoteplayback preload="none" tabindex="-1" aria-hidden="true" '
+        f'<a class="sx-media" href="/{slug}" tabindex="-1" aria-hidden="true"><span class="sr-only">{e(c["h1"])} services</span><video muted loop playsinline disablepictureinpicture disableremoteplayback preload="none" tabindex="-1" aria-hidden="true" '
         f'poster="{CDN}{poster}" data-src="{SVC}{clip}_w_800.mp4" data-src-sm="{SVC}{clip}_w_480.mp4" data-t="{t}"></video></a>'
         f'</div></article>')
     nav.append(f'<div class="sx-nav-i"><span>{n}</span><span class="sx-nav-t{" on" if i == 0 else ""}">{e(c["short"])}</span></div>')
