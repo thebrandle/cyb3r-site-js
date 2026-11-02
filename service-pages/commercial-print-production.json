@@ -41,31 +41,43 @@
    "line": "One point of contact managing suppliers, proofs, schedules and delivery, so your print arrives on time, on budget and exactly as approved."
   }
  ],
- "pairs_h2": "What our print and production work covers",
+ "pairs_h2": "What our commercial printing service covers",
  "pairs": [
   [
    "B",
-   "Brochures",
+   "Commercial printing",
+   "l",
+   "London & Dubai"
+  ],
+  [
+   "l",
+   "Print management",
+   "B",
+   "Print production"
+  ],
+  [
+   "B",
+   "Brochure printing",
    "l",
    "Business cards"
   ],
   [
    "l",
-   "Packaging",
+   "Packaging printing",
    "B",
-   "Labels"
+   "Label printing"
   ],
   [
    "B",
-   "Stationery",
+   "Leaflets & flyers",
    "l",
-   "Letterheads"
+   "Catalogues"
   ],
   [
    "l",
-   "Catalogues",
+   "Large format print",
    "B",
-   "Lookbooks"
+   "Banners"
   ],
   [
    "B",
@@ -75,39 +87,39 @@
   ],
   [
    "l",
-   "Banners",
+   "Exhibition stands",
    "B",
-   "Wall wraps"
-  ],
-  [
-   "B",
-   "Event stands",
-   "l",
    "Pop-up displays"
   ],
   [
-   "l",
-   "Point of sale",
    "B",
-   "Menus"
+   "Point of sale",
+   "l",
+   "Shelf displays"
+  ],
+  [
+   "l",
+   "Branded merchandise",
+   "B",
+   "Corporate gifts"
   ],
   [
    "B",
    "Branded apparel",
-   "B",
-   "Merchandise"
-  ],
-  [
    "l",
-   "Corporate gifts",
-   "B",
    "Gift packs"
   ],
   [
-   "B",
-   "Large format",
    "l",
-   "Vinyl graphics"
+   "Stationery printing",
+   "B",
+   "Letterheads"
+  ],
+  [
+   "B",
+   "Vinyl graphics",
+   "l",
+   "Wall wraps"
   ],
   [
    "l",
@@ -117,25 +129,13 @@
   ],
   [
    "B",
-   "Artwork",
+   "Artwork & pre-press",
    "l",
-   "Pre-press"
+   "Colour proofs"
   ],
   [
    "l",
-   "Colour proofs",
-   "B",
-   "Print management"
-  ],
-  [
-   "B",
-   "Paper sourcing",
-   "l",
-   "Finishes"
-  ],
-  [
-   "l",
-   "Print runs",
+   "Paper & finishes",
    "B",
    "Quality checks"
   ]

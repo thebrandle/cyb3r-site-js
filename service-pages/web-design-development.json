@@ -41,13 +41,61 @@
    "line": "Clean code, quick load times and search-ready structure from day one: Core Web Vitals, metadata, schema and sitemaps handled before launch."
   }
  ],
- "pairs_h2": "What our web design and development covers",
+ "pairs_h2": "What our web design agency covers",
  "pairs": [
   [
    "B",
-   "Web design",
+   "Web design agency",
    "l",
-   "UX research"
+   "London & Dubai"
+  ],
+  [
+   "l",
+   "Website design",
+   "B",
+   "Web development"
+  ],
+  [
+   "B",
+   "Webflow agency",
+   "l",
+   "Headless CMS"
+  ],
+  [
+   "l",
+   "UX design",
+   "B",
+   "UI design"
+  ],
+  [
+   "B",
+   "Website redesign",
+   "l",
+   "Site migrations"
+  ],
+  [
+   "l",
+   "Landing page design",
+   "B",
+   "Sales funnels"
+  ],
+  [
+   "B",
+   "Web app development",
+   "l",
+   "Client portals"
+  ],
+  [
+   "l",
+   "Webflow development",
+   "B",
+   "Integrations"
+  ],
+  [
+   "B",
+   "Responsive design",
+   "l",
+   "Interactions"
   ],
   [
    "l",
@@ -57,85 +105,37 @@
   ],
   [
    "B",
-   "UI design",
-   "l",
-   "Design systems"
-  ],
-  [
-   "l",
-   "Webflow",
-   "B",
-   "Headless CMS"
-  ],
-  [
-   "B",
-   "Responsive builds",
-   "l",
-   "Interactions"
-  ],
-  [
-   "l",
    "GSAP animation",
-   "B",
+   "l",
    "3D & WebGL"
   ],
   [
-   "B",
-   "Landing pages",
    "l",
-   "Sales funnels"
+   "Site speed",
+   "B",
+   "Core Web Vitals"
+  ],
+  [
+   "B",
+   "Technical SEO",
+   "l",
+   "Schema markup"
   ],
   [
    "l",
    "Conversion tracking",
    "B",
-   "Lead forms"
-  ],
-  [
-   "B",
-   "CMS setup",
-   "B",
-   "Integrations"
-  ],
-  [
-   "l",
-   "Memberships",
-   "B",
-   "Client portals"
-  ],
-  [
-   "B",
-   "Migrations",
-   "l",
-   "Redesigns"
-  ],
-  [
-   "l",
-   "Analytics",
-   "B",
    "GA4 setup"
   ],
   [
    "B",
-   "Site speed",
+   "Web accessibility",
    "l",
-   "Core Web Vitals"
+   "Lead forms"
   ],
   [
    "l",
-   "Technical SEO",
-   "B",
-   "Schema markup"
-  ],
-  [
-   "B",
-   "Accessibility",
-   "l",
-   "Spam protection"
-  ],
-  [
-   "l",
-   "Maintenance",
+   "Website maintenance",
    "B",
    "Webflow hosting"
   ]

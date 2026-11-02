@@ -41,61 +41,49 @@
    "line": "Creators and partners matched to your audience, with clear briefs, fair deals and content that keeps working long after the post goes live."
   }
  ],
- "pairs_h2": "What our social media and content work covers",
+ "pairs_h2": "What our social media agency covers",
  "pairs": [
   [
    "B",
-   "Social strategy",
+   "Social media agency",
    "l",
-   "Content pillars"
+   "London & Dubai"
   ],
   [
    "l",
-   "Audience research",
+   "Social strategy",
    "B",
+   "Content creation"
+  ],
+  [
+   "B",
+   "Content marketing",
+   "l",
    "Content calendar"
   ],
   [
-   "B",
-   "Instagram",
    "l",
-   "TikTok"
+   "Instagram marketing",
+   "B",
+   "TikTok marketing"
   ],
   [
-   "l",
-   "LinkedIn",
    "B",
+   "LinkedIn marketing",
+   "l",
    "YouTube Shorts"
   ],
   [
-   "B",
-   "Reels",
    "l",
-   "Carousels"
-  ],
-  [
-   "l",
-   "Photography",
+   "Short-form video",
    "B",
-   "Video editing"
+   "Reels & Stories"
   ],
   [
    "B",
-   "Scriptwriting",
+   "Video production",
    "l",
-   "Captions"
-  ],
-  [
-   "l",
-   "Motion graphics",
-   "B",
-   "UGC content"
-  ],
-  [
-   "B",
-   "Community",
-   "B",
-   "Moderation"
+   "Photography"
   ],
   [
    "l",
@@ -105,39 +93,51 @@
   ],
   [
    "B",
-   "TikTok ads",
+   "Facebook ads",
    "l",
-   "LinkedIn ads"
+   "TikTok ads"
   ],
   [
    "l",
-   "Influencers",
+   "LinkedIn ads",
    "B",
-   "Creator briefs"
+   "Lead gen ads"
   ],
   [
    "B",
-   "Partnerships",
+   "Influencer outreach",
    "l",
-   "Brand collabs"
+   "UGC content"
   ],
   [
    "l",
-   "Trend tracking",
+   "Account management",
    "B",
-   "Analytics"
+   "Moderation"
+  ],
+  [
+   "B",
+   "Copywriting",
+   "l",
+   "Captions"
+  ],
+  [
+   "l",
+   "Motion graphics",
+   "B",
+   "Carousels"
   ],
   [
    "B",
    "Social listening",
    "l",
-   "Reporting"
+   "Analytics"
   ],
   [
    "l",
-   "Growth audits",
+   "Social media audits",
    "B",
-   "Account setup"
+   "Reporting"
   ]
  ]
 }

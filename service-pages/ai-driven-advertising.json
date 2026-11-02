@@ -41,79 +41,55 @@
    "line": "Structured tests across creative, audiences, bids and landing pages, run continuously so performance keeps improving instead of stalling."
   }
  ],
- "pairs_h2": "What our AI-driven advertising work covers",
+ "pairs_h2": "What our AI advertising service covers",
  "pairs": [
   [
    "B",
-   "AI creative",
+   "AI advertising",
+   "l",
+   "London & Dubai"
+  ],
+  [
+   "l",
+   "AI marketing agency",
+   "B",
+   "AI ad creative"
+  ],
+  [
+   "B",
+   "Generative AI ads",
    "l",
    "Ad variations"
   ],
   [
    "l",
-   "Copy generation",
+   "AI copywriting",
    "B",
    "Visual testing"
   ],
   [
    "B",
-   "Audience models",
+   "Predictive models",
    "l",
-   "Lookalike reach"
+   "Forecasting"
   ],
   [
    "l",
-   "First-party data",
+   "Audience modelling",
    "B",
+   "Lookalikes"
+  ],
+  [
+   "B",
+   "First-party data",
+   "l",
    "Segmentation"
   ],
   [
-   "B",
+   "l",
    "Smart bidding",
-   "l",
+   "B",
    "Budget rules"
-  ],
-  [
-   "l",
-   "Bid automation",
-   "B",
-   "Dayparting"
-  ],
-  [
-   "B",
-   "Forecasting",
-   "l",
-   "Scenario models"
-  ],
-  [
-   "l",
-   "Anomaly alerts",
-   "B",
-   "Scaling rules"
-  ],
-  [
-   "B",
-   "Attribution",
-   "B",
-   "Incrementality"
-  ],
-  [
-   "l",
-   "Media mix",
-   "B",
-   "Funnel analytics"
-  ],
-  [
-   "B",
-   "Creative testing",
-   "l",
-   "Holdout tests"
-  ],
-  [
-   "l",
-   "Landing tests",
-   "B",
-   "Test design"
   ],
   [
    "B",
@@ -123,21 +99,45 @@
   ],
   [
    "l",
-   "Feed optimisation",
+   "Bid automation",
    "B",
-   "Product feeds"
+   "Dayparting"
   ],
   [
    "B",
-   "Dashboards",
+   "Ad automation",
    "l",
-   "Insights"
-  ],
-  [
-   "l",
-   "Automation",
-   "B",
    "AI workflows"
+  ],
+  [
+   "l",
+   "Creative testing",
+   "B",
+   "Holdout tests"
+  ],
+  [
+   "B",
+   "Attribution",
+   "l",
+   "Incrementality"
+  ],
+  [
+   "l",
+   "Media mix modelling",
+   "B",
+   "Funnel analytics"
+  ],
+  [
+   "B",
+   "Product feeds",
+   "l",
+   "Feed audits"
+  ],
+  [
+   "l",
+   "Anomaly alerts",
+   "B",
+   "AI dashboards"
   ]
  ]
 }

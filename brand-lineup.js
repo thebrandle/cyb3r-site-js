@@ -3,6 +3,8 @@
    Drives the .bl section that lives in an HtmlEmbed on /brand-identity: the cards fly out
    from the centre on load, a hovered (or tapped / focused) card widens and turns to colour,
    and the big title below rebuilds letter by letter while the eyebrow and line crossfade.
+   On its own the lineup plays through the cards, 2 s each, looping; hovering, focusing or
+   tapping a card hands control to the visitor, and play resumes after they leave.
    Every service's name and line are real HTML inside its card (h2 + p, screen-reader only);
    this script only reads them. Markup + CSS: see the embed. Reusable for other service pages.
    ========================================================================== */
@@ -84,23 +86,33 @@
     var d = i > -1 ? data[i] : def;
     swapTitle(d.t); crossfade(eyebrow, d.e); crossfade(sub, d.s);
   }
+  /* ---- autoplay: the cards take turns, STEP ms each, looping, while the lineup is on screen ---- */
+  var STEP = 2000, timer = 0, holdT = 0, last = -1, ready = false, seen = false, held = false;
+  function next() { last = (last + 1) % cards.length; setActive(last); }
+  function play() { if (reduce || timer || held || !ready || !seen || document.hidden) return; next(); timer = setInterval(next, STEP); }
+  function stop() { clearInterval(timer); timer = 0; }
+  function hold(ms) { held = true; stop(); clearTimeout(holdT); if (ms) holdT = setTimeout(function () { held = false; play(); }, ms); }   // 0 = until released
+  new IntersectionObserver(function (es) { seen = es[0].isIntersecting; if (seen) play(); else stop(); }, { threshold: .35 }).observe(row);
+  document.addEventListener("visibilitychange", function () { if (document.hidden) stop(); else play(); });
+
   var leaveT = 0;
   cards.forEach(function (c, i) {
-    c.addEventListener("pointerenter", function (e) { if (e.pointerType === "mouse") { clearTimeout(leaveT); setActive(i); } });
+    c.addEventListener("pointerenter", function (e) { if (e.pointerType === "mouse") { clearTimeout(leaveT); hold(0); last = i; setActive(i); } });
     // keyboard focus only: a tap also focuses the card, and the click below already handles taps
-    c.addEventListener("focus", function () { if (c.matches(":focus-visible")) { clearTimeout(leaveT); setActive(i); } });
-    // touch: tap opens a card, a second tap on it closes it again
-    c.addEventListener("click", function () { if (!canHover) setActive(cur === i ? -1 : i); });
+    c.addEventListener("focus", function () { if (c.matches(":focus-visible")) { clearTimeout(leaveT); hold(0); last = i; setActive(i); } });
+    // touch: tap opens a card, a second tap on it closes it again; play picks up again a few seconds later
+    c.addEventListener("click", function () { if (!canHover) { hold(6000); last = i; setActive(cur === i ? -1 : i); } });
     c.addEventListener("keydown", function (e) { if (e.key === "Escape") { setActive(-1); c.blur(); } });
   });
-  row.addEventListener("pointerleave", function (e) { if (e.pointerType === "mouse") leaveT = setTimeout(function () { setActive(-1); }, 140); });
-  row.addEventListener("focusout", function (e) { if (!row.contains(e.relatedTarget)) setActive(-1); });
+  row.addEventListener("pointerleave", function (e) { if (e.pointerType === "mouse") { leaveT = setTimeout(function () { setActive(-1); }, 140); hold(1200); } });
+  row.addEventListener("focusout", function (e) { if (!row.contains(e.relatedTarget)) { setActive(-1); hold(1500); } });
 
   /* ---- entrance: cards gather at the centre, then spread into the row; title builds after ---- */
   function enter() {
     root.classList.remove("bl-pre");
     build(def.t);
     if (reduce) return;
+    setTimeout(function () { ready = true; play(); }, 2400);   // the first card opens once the entrance has landed
     title.querySelectorAll(".bl-l").forEach(function (l) { l.style.setProperty("--d", 650 + Math.round(Math.random() * 420) + "ms"); });
     [eyebrow, sub].forEach(function (el, k) {
       el.animate([{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], { duration: 700, delay: 900 + k * 120, easing: "ease", fill: "backwards" });

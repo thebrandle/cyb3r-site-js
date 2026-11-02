@@ -41,8 +41,20 @@
    "line": "Words that sound like you, from headline to helpdesk. Taglines, key messages and a voice guide so everyone who writes for you gets it right."
   }
  ],
- "pairs_h2": "What our branding covers",
+ "pairs_h2": "What our branding agency covers",
  "pairs": [
+  [
+   "B",
+   "Branding agency",
+   "l",
+   "London & Dubai"
+  ],
+  [
+   "l",
+   "Brand identity",
+   "B",
+   "Logo design"
+  ],
   [
    "B",
    "Brand strategy",
@@ -51,93 +63,81 @@
   ],
   [
    "l",
-   "Audience insight",
-   "B",
-   "Brand story"
-  ],
-  [
-   "B",
    "Visual identity",
-   "l",
-   "Logo design"
-  ],
-  [
-   "l",
-   "Wordmarks",
    "B",
-   "Monograms"
+   "Brand naming"
   ],
   [
    "B",
-   "Typography",
+   "Rebranding",
    "l",
-   "Colour systems"
+   "Brand refresh"
   ],
   [
    "l",
-   "Iconography",
-   "B",
-   "Imagery"
-  ],
-  [
-   "B",
    "Brand guidelines",
-   "l",
+   "B",
    "Design systems"
   ],
   [
-   "l",
-   "Templates",
    "B",
-   "Asset libraries"
+   "Corporate identity",
+   "l",
+   "Wordmarks"
+  ],
+  [
+   "l",
+   "Brand messaging",
+   "B",
+   "Tone of voice"
   ],
   [
    "B",
+   "Packaging design",
+   "l",
+   "Brand assets"
+  ],
+  [
+   "l",
    "Creative direction",
    "B",
    "Art direction"
   ],
   [
-   "l",
-   "Campaign concepts",
    "B",
-   "Photo direction"
-  ],
-  [
-   "B",
-   "Tone of voice",
+   "Typography",
    "l",
-   "Messaging"
+   "Colour palettes"
   ],
   [
    "l",
-   "Taglines",
+   "Brand consultancy",
    "B",
-   "Copywriting"
+   "Brand audits"
   ],
   [
    "B",
-   "Rebrands",
-   "B",
-   "Brand refresh"
+   "Brand architecture",
+   "l",
+   "Sub-brands"
   ],
   [
    "l",
-   "Stationery",
+   "Employer branding",
    "B",
-   "Packaging"
+   "Brand launches"
   ],
   [
    "B",
-   "Pitch decks",
+   "Graphic design",
    "l",
-   "Social templates"
+   "Iconography"
   ],
   [
    "l",
-   "Brand audits",
+   "Brand storytelling",
    "B",
-   "Launch kits"
+   "Taglines"
   ]
  ]
 }

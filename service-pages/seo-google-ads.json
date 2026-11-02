@@ -41,25 +41,37 @@
    "line": "Clear reports that show what each channel delivers, with ongoing tests that improve results instead of just describing them."
   }
  ],
- "pairs_h2": "What our SEO and Google Ads work covers",
+ "pairs_h2": "What our SEO and Google Ads agency covers",
  "pairs": [
   [
    "B",
-   "Technical SEO",
+   "SEO agency",
    "l",
-   "Site audits"
+   "London & Dubai"
   ],
   [
    "l",
-   "Keyword research",
+   "SEO services",
    "B",
-   "On-page SEO"
+   "Technical SEO"
   ],
   [
    "B",
-   "Content strategy",
+   "Local SEO",
    "l",
-   "Blog content"
+   "Maps rankings"
+  ],
+  [
+   "l",
+   "SEO audits",
+   "B",
+   "Keyword research"
+  ],
+  [
+   "B",
+   "On-page SEO",
+   "l",
+   "Content strategy"
   ],
   [
    "l",
@@ -69,57 +81,45 @@
   ],
   [
    "B",
-   "Local SEO",
-   "l",
-   "Maps listings"
-  ],
-  [
-   "l",
    "Schema markup",
-   "B",
+   "l",
    "Core Web Vitals"
   ],
   [
-   "B",
-   "Google Ads",
    "l",
-   "Search campaigns"
-  ],
-  [
-   "l",
-   "Performance Max",
+   "Google Ads agency",
    "B",
-   "Shopping ads"
+   "PPC management"
   ],
   [
    "B",
-   "YouTube ads",
-   "B",
-   "Display ads"
+   "Search campaigns",
+   "l",
+   "Performance Max"
   ],
   [
    "l",
-   "Remarketing",
+   "Google Shopping",
    "B",
-   "Customer lists"
+   "YouTube ads"
   ],
   [
    "B",
-   "Bid strategy",
+   "Display ads",
    "l",
-   "Budget pacing"
+   "Remarketing"
   ],
   [
    "l",
-   "Ad copy",
+   "Pay per click",
    "B",
+   "Bid strategy"
+  ],
+  [
+   "B",
+   "Ad copywriting",
+   "l",
    "Landing pages"
-  ],
-  [
-   "B",
-   "Call tracking",
-   "l",
-   "Lead quality"
   ],
   [
    "l",
@@ -129,13 +129,13 @@
   ],
   [
    "B",
-   "A/B testing",
+   "Call tracking",
    "l",
-   "Search terms"
+   "Lead quality"
   ],
   [
    "l",
-   "Client reporting",
+   "SEO & PPC reporting",
    "B",
    "Dashboards"
   ]
