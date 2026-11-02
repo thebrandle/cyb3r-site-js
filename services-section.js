@@ -36,7 +36,7 @@
     { slug: "seo-google-ads", title: "SEO & Google Ads", caption: "Engineered to scale measurable growth.",
       desc: "Organic search and paid media built to put you in front of high-intent buyers and grow qualified pipeline.",
       caps: ["Technical & on-page SEO", "Content & link strategy", "Google Ads (Search, PMax)", "Paid media management", "Conversion tracking", "Reporting & optimisation"],
-      video: V + "seoupsacled_w_1440.mp4" },
+      video: "https://cdn.jsdelivr.net/gh/thebrandle/cyb3r-svc-media@d7601e38fc11347b45e9017e0d8cd5b6a88241b6/svc/seoads_w_1440.mp4" },   /* coded search-results loop (home-services/seo-clip); jsDelivr, so the Supabase head rewrite leaves it alone */
     { slug: "social-media-content", title: "Social Media & Content", caption: "Content that compounds attention into demand.",
       desc: "Social-first content and community that build audience, authority and a steady stream of inbound interest.",
       caps: ["Social strategy", "Content production", "Short-form video", "Community management", "Paid social", "Influencer & partnerships"],

@@ -1,0 +1,181 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=block" rel="stylesheet">
+<style>
+:root{--teal:#39F1E0;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:800px;height:560px;overflow:hidden;background:#0a0e13}
+body{font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased;color:#fff;position:relative}
+#bg{position:absolute;inset:0;background:radial-gradient(120% 95% at 78% 6%,#233142 0%,#141c25 46%,#0a0e13 100%)}
+#glow{position:absolute;left:0;top:0;width:640px;height:640px;border-radius:50%;background:radial-gradient(closest-side,rgba(57,241,224,.17),rgba(57,241,224,.05) 55%,rgba(57,241,224,0))}
+#dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.075) 1px,transparent 1.4px);background-size:24px 24px;-webkit-mask-image:radial-gradient(ellipse 72% 70% at 50% 46%,#000 18%,transparent 78%)}
+#grain{position:absolute;inset:0;opacity:.07;mix-blend-mode:overlay;pointer-events:none}
+#stage{position:absolute;inset:0;perspective:1700px;perspective-origin:46% 36%;transform-origin:50% 50%}
+#win{position:absolute;left:34px;top:46px;width:624px;height:440px;border-radius:16px;background:linear-gradient(180deg,#223040,#161f29);box-shadow:0 60px 90px -30px rgba(0,0,0,.75),0 0 0 1px rgba(255,255,255,.1),inset 0 1px 0 rgba(255,255,255,.1);overflow:hidden}
+.chrome{height:36px;display:flex;align-items:center;gap:7px;padding:0 14px;border-bottom:1px solid rgba(255,255,255,.06)}
+.chrome i{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.16)}
+.addr{position:absolute;left:50%;top:8px;transform:translateX(-50%);width:236px;height:20px;border-radius:10px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center}
+.addr b{width:112px;height:6px;border-radius:3px;background:rgba(255,255,255,.14)}
+.body{padding:20px 24px 0}
+#search{position:relative;height:46px;border-radius:23px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;padding:0 18px 0 46px}
+#search svg{position:absolute;left:17px;top:14px}
+#q{font:500 18px/1 Inter;letter-spacing:-.01em;white-space:pre}
+#caret{display:inline-block;width:2px;height:20px;background:var(--teal);margin-left:1px;border-radius:1px;vertical-align:-4px}
+.tabs{display:flex;gap:22px;margin:15px 0 0 8px;font:500 12px/1 Inter;color:#7d8996}
+.tabs span{position:relative;padding-bottom:10px}
+.tabs .on{color:#fff}
+.tabs .on:after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;border-radius:2px;background:var(--teal)}
+.rule{height:1px;background:rgba(255,255,255,.07);margin:0 -24px}
+#results{position:relative;height:288px;margin-top:12px;-webkit-mask-image:linear-gradient(#000 84%,transparent)}
+.row,.ad{position:absolute;left:0;right:0;padding:9px 14px;border-radius:12px;border:1px solid transparent}
+.row{height:60px}
+.meta{display:flex;align-items:center;gap:7px;height:13px}
+.fav{width:13px;height:13px;border-radius:50%;background:rgba(255,255,255,.14);flex:none}
+.fav.me{background:var(--teal)}
+.bar{display:block;border-radius:4px;background:rgba(255,255,255,.12)}
+.meta .bar{height:6px}
+.t{height:9px;margin-top:8px;background:rgba(255,255,255,.2)}
+.d{height:6px;margin-top:8px;background:rgba(255,255,255,.075)}
+.dom{font:500 11px/1 Inter;color:#8d98a5}
+.title{font:600 16px/1 Inter;letter-spacing:-.01em;color:var(--teal);margin-top:6px}
+#me{background:rgba(57,241,224,.0);z-index:2}
+#pill{position:absolute;right:14px;top:17px;height:24px;min-width:40px;padding:0 9px;border-radius:12px;border:1.5px solid var(--teal);color:var(--teal);font:700 12px/21px Inter;text-align:center;font-variant-numeric:tabular-nums}
+.ad{height:84px;background:rgba(255,255,255,.035);border-color:rgba(255,255,255,.08);overflow:hidden}
+.spon{font:700 11px/1 Inter;color:#e8edf2;margin-right:3px}
+.links{display:flex;gap:7px;margin-top:9px}
+.links span{font:500 11px/1 Inter;color:#c9d1d9;padding:5px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14)}
+.card{position:absolute;border-radius:16px;background:rgba(24,32,42,.74);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.11);box-shadow:0 34px 60px -18px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.08)}
+#cardA{right:20px;bottom:22px;width:272px;height:160px;padding:16px 18px}
+#cardB{right:22px;top:14px;width:196px;height:96px;padding:14px 16px}
+.lbl{font:500 10px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:#8d98a5}
+.num{font:600 36px/1 Inter;letter-spacing:-.03em;margin-top:10px;font-variant-numeric:tabular-nums}
+#cardB .num{font-size:28px;margin-top:9px}
+#delta{position:absolute;right:16px;top:40px;height:22px;padding:0 9px;border-radius:11px;background:rgba(57,241,224,.14);color:var(--teal);font:700 12px/22px Inter}
+#spark{position:absolute;left:16px;bottom:14px}
+#bars{position:absolute;right:16px;bottom:16px;display:flex;align-items:flex-end;gap:5px;height:40px}
+#bars i{display:block;width:8px;border-radius:2px;background:linear-gradient(var(--teal),rgba(57,241,224,.35));transform-origin:bottom}
+</style></head><body>
+<div id="bg"></div><div id="glow"></div><div id="dots"></div>
+<div id="stage">
+  <div id="win">
+    <div class="chrome"><i></i><i></i><i></i><div class="addr"><b></b></div></div>
+    <div class="body">
+      <div id="search">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#BCBEC0" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>
+        <span id="q"></span><span id="caret"></span>
+      </div>
+      <div class="tabs"><span class="on">All</span><span>Images</span><span>News</span><span>Maps</span><span>Shopping</span></div>
+      <div class="rule"></div>
+      <div id="results">
+        <div class="ad" id="ad">
+          <div class="meta"><span class="spon">Sponsored</span><i class="fav me"></i><span class="dom">yourbrand.com</span></div>
+          <div class="title">Your Brand - Get a Free Quote</div>
+          <div class="links"><span>Pricing</span><span>Reviews</span><span>Contact</span></div>
+        </div>
+        <div class="row" id="r0"><div class="meta"><i class="fav"></i><b class="bar" style="width:92px"></b></div><b class="bar t" style="width:236px"></b><b class="bar d" style="width:420px"></b></div>
+        <div class="row" id="r1"><div class="meta"><i class="fav"></i><b class="bar" style="width:74px"></b></div><b class="bar t" style="width:200px"></b><b class="bar d" style="width:392px"></b></div>
+        <div class="row" id="r2"><div class="meta"><i class="fav"></i><b class="bar" style="width:104px"></b></div><b class="bar t" style="width:258px"></b><b class="bar d" style="width:404px"></b></div>
+        <div class="row" id="me"><div class="meta"><i class="fav me"></i><span class="dom">yourbrand.com</span></div><div class="title">Your Brand | Official Site</div><b class="bar d" style="width:360px"></b><span id="pill">#4</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card" id="cardB"><div class="lbl">Ads ROAS</div><div class="num" id="nB">0.0x</div><div id="bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+  <div class="card" id="cardA"><div class="lbl">Organic clicks</div><div class="num" id="nA">0</div><span id="delta">+184%</span>
+    <svg id="spark" width="228" height="58" viewBox="0 0 228 58"><defs><linearGradient id="gf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#39F1E0" stop-opacity=".32"/><stop offset="1" stop-color="#39F1E0" stop-opacity="0"/></linearGradient><clipPath id="cp"><rect id="cpr" x="0" y="0" width="0" height="58"/></clipPath></defs>
+      <path id="area" clip-path="url(#cp)" fill="url(#gf)"/><path id="line" fill="none" stroke="#39F1E0" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle id="dot" r="4" fill="#39F1E0"/></svg>
+  </div>
+</div>
+<svg id="grain" width="800" height="560"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/></filter><rect width="800" height="560" filter="url(#n)"/></svg>
+<script>
+const T = 8.4, START = 6.6, Q = 'boutique hotels london';
+const $ = id => document.getElementById(id);
+const cl = x => x < 0 ? 0 : x > 1 ? 1 : x;
+const seg = (t, a, b) => cl((t - a) / (b - a));
+const eo = x => 1 - Math.pow(1 - x, 3);
+const eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const lerp = (a, b, x) => a + (b - a) * x;
+const TAU = Math.PI * 2;
+// typing rhythm: fixed per-character delays so every render of a frame is identical
+const DELAYS = [...Q].map((c, i) => .72 * (.045 + .04 * Math.abs(Math.sin(i * 12.9898) * 43758.5453 % 1) + (c === ' ' ? .05 : 0)));
+const TYPE0 = .2, TYPE_END = TYPE0 + DELAYS.reduce((a, b) => a + b, 0);
+// sparkline points
+const PTS = [10, 13, 12, 17, 16, 21, 25, 24, 30, 35, 41, 49].map((v, i, a) => [6 + i * (216 / (a.length - 1)), 52 - (v - 10) / 39 * 44]);
+let d = `M${PTS[0][0]},${PTS[0][1]}`;
+for (let i = 0; i < PTS.length - 1; i++) {
+  const p0 = PTS[i - 1] || PTS[i], p1 = PTS[i], p2 = PTS[i + 1], p3 = PTS[i + 2] || p2;
+  d += ` C${p1[0] + (p2[0] - p0[0]) / 6},${p1[1] + (p2[1] - p0[1]) / 6} ${p2[0] - (p3[0] - p1[0]) / 6},${p2[1] - (p3[1] - p1[1]) / 6} ${p2[0]},${p2[1]}`;
+}
+$('line').setAttribute('d', d); $('area').setAttribute('d', d + ' L222,58 L6,58 Z');
+const LEN = $('line').getTotalLength(); $('line').style.strokeDasharray = LEN;
+const BARS = [.34, .5, .44, .62, .7, .84, 1];
+const PITCH = 66, AD = 94;
+function render(clipT) {
+  const t = ((clipT + START) % T + T) % T, w = TAU * t / T;
+  // ambient float (period = loop length, so the loop is seamless)
+  $('win').style.transform = `rotateY(${-12 + 1.6 * Math.sin(w)}deg) rotateX(${6 + Math.sin(w + 1.3)}deg) translateY(${5 * Math.sin(w + .6)}px)`;
+  $('stage').style.transform = `scale(${1.015 + .015 * Math.sin(w + 2.6)})`;
+  $('glow').style.transform = `translate(${70 + 40 * Math.sin(w)}px,${-70 + 28 * Math.cos(w)}px)`;
+  // typing, focus, outro
+  let n = 0, acc = TYPE0; for (const dl of DELAYS) { acc += dl; if (t >= acc) n++; }
+  const qFade = 1 - seg(t, 7.85, 8.1);
+  if (t >= 8.1) n = 0;
+  $('q').textContent = Q.slice(0, n); $('q').style.opacity = qFade;
+  const typing = t >= TYPE0 && t < TYPE_END + .3;
+  $('caret').style.opacity = typing ? 1 : ((t * 2) % 1 < .55 ? 1 : 0);
+  const focus = seg(t, 0, TYPE0) * (1 - seg(t, 7.85, 8.2));
+  const press = Math.sin(Math.PI * seg(t, TYPE_END + .05, TYPE_END + .3));
+  $('search').style.borderColor = `rgba(${lerp(255, 57, focus)},${lerp(255, 241, focus)},${lerp(255, 224, focus)},${lerp(.1, .55, focus)})`;
+  $('search').style.boxShadow = `0 0 0 ${4 * focus}px rgba(57,241,224,${.08 * focus})`;
+  $('search').style.transform = `scale(${1 - .012 * press})`;
+  // results: appear, climb, ad slot, outro
+  const R0 = TYPE_END + .25;
+  const climb = eio(seg(t, 2.45, 3.85)), p = 3 - 3 * climb;    // our row's slot, 3 -> 0
+  const ad = eo(seg(t, 4.25, 4.85)) * (1 - eio(seg(t, 7.65, 8.05)));
+  const off = AD * ad;
+  ['r0', 'r1', 'r2', 'me'].forEach((id, i) => {
+    const a = eo(seg(t, R0 + i * .08, R0 + i * .08 + .4)), o = (1 - eo(seg(t, 7.6 + i * .04, 7.95 + i * .04)));
+    let slot = id === 'me' ? p : i + eio(cl(i + 1 - p));
+    const el = $(id);
+    el.style.opacity = a * o * (id === 'me' ? 1 : 1 - .25 * Math.sin(Math.PI * climb));
+    el.style.transform = `translateY(${slot * PITCH + off + 10 * (1 - a) - 6 * (1 - o)}px)`;
+  });
+  const hl = seg(t, 2.1, 2.4) * (1 - seg(t, 7.6, 7.95));
+  const lift = Math.sin(Math.PI * climb);
+  const me = $('me');
+  me.style.background = `rgba(57,241,224,${.07 * hl})`;
+  me.style.borderColor = `rgba(57,241,224,${.32 * hl})`;
+  const ring = seg(t, 3.85, 4.6);
+  me.style.boxShadow = `0 ${14 * lift}px ${30 * lift}px rgba(0,0,0,${.4 * lift}),0 0 0 ${12 * eo(ring)}px rgba(57,241,224,${ring > 0 && ring < 1 ? .22 * (1 - ring) : 0})`;
+  me.style.transform += ` scale(${1 + .02 * lift})`;
+  const pill = $('pill'), arrive = seg(t, 3.85, 4.2);
+  pill.textContent = '#' + (Math.round(p) + 1);
+  pill.style.opacity = hl;
+  pill.style.background = arrive > 0 ? `rgba(57,241,224,${eo(arrive)})` : 'transparent';
+  pill.style.color = arrive > .4 ? '#0F0E0E' : '#39F1E0';
+  pill.style.transform = `scale(${1 + .16 * Math.sin(Math.PI * arrive) * (1 - .4 * arrive)})`;
+  const adEl = $('ad');
+  adEl.style.height = 84 * ad + 'px';
+  adEl.style.opacity = ad;
+  adEl.style.transform = `translateY(${-8 * (1 - ad)}px)`;
+  // cards
+  const cA = eo(seg(t, 4.85, 5.45)), cB = eo(seg(t, 5.1, 5.7));
+  const oA = 1 - eio(seg(t, 7.6, 8.0)), oB = 1 - eio(seg(t, 7.55, 7.95));
+  const A = $('cardA'), B = $('cardB');
+  A.style.opacity = cA * oA; B.style.opacity = cB * oB;
+  A.style.transform = `translate(${28 * (1 - cA)}px,${4 * Math.sin(w + 2.2) + 12 * (1 - oA)}px) rotateY(${-7 + 1.2 * Math.sin(w + 2.2)}deg)`;
+  B.style.transform = `translate(${24 * (1 - cB)}px,${4 * Math.sin(w + 4) + 12 * (1 - oB)}px) rotateY(${-7 + 1.2 * Math.sin(w + 4)}deg)`;
+  A.style.filter = `blur(${8 * (1 - cA) + 6 * (1 - oA)}px)`; B.style.filter = `blur(${8 * (1 - cB) + 6 * (1 - oB)}px)`;
+  const kA = eo(seg(t, 5.05, 6.45));
+  $('nA').textContent = Math.round(12480 * kA).toLocaleString('en-GB');
+  $('delta').style.opacity = eo(seg(t, 6.05, 6.4)); $('delta').style.transform = `translateY(${6 * (1 - eo(seg(t, 6.05, 6.4)))}px)`;
+  const sp = eio(seg(t, 5.05, 6.35));
+  $('line').style.strokeDashoffset = LEN * (1 - sp);
+  $('cpr').setAttribute('width', 6 + 216 * sp);
+  const pt = $('line').getPointAtLength(LEN * sp);
+  $('dot').setAttribute('cx', pt.x); $('dot').setAttribute('cy', pt.y); $('dot').style.opacity = sp > .02 ? 1 : 0;
+  $('nB').textContent = (6.2 * eo(seg(t, 5.25, 6.35))).toFixed(1) + 'x';
+  [...$('bars').children].forEach((b, i) => { b.style.height = 40 * BARS[i] + 'px'; b.style.transform = `scaleY(${eo(seg(t, 5.3 + i * .07, 5.75 + i * .07))})`; });
+}
+window.render = render;
+render(0);
+</script></body></html>

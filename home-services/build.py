@@ -1,16 +1,16 @@
 # Builds the homepage services section embed (akaru.fr "Expertises" layout) from the six service-pages/<slug>.json files:
 # panel title = the page h1, list = its six card names, media = the service's video (the clips the Work in Motion
-# helix used, posters cut from them), Learn more -> /<slug> (services-xp.js turns it into the site's Learn more button).
+# helix used, posters cut from them; SEO = the coded search-results loop in home-services/seo-clip/), Learn more -> /<slug> (services-xp.js turns it into the site's Learn more button).
 # Usage (repo root): python3 home-services/build.py  ->  home-services/services-xp-embed.html
 import json, os, html
 D = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(D)
 CDN = 'https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/'
-SVC = 'https://cdn.jsdelivr.net/gh/thebrandle/cyb3r-svc-media@cee4bd881fd2f54bf585b89afca9c778f15c43b9/svc/'
+SVC = 'https://cdn.jsdelivr.net/gh/thebrandle/cyb3r-svc-media@d7601e38fc11347b45e9017e0d8cd5b6a88241b6/svc/'
 e = lambda s: html.escape(s, quote=True)
 # slug, clip name (svc/<name>_w_800|480.mp4), poster asset + the second it was cut at, panel colour (site palette), text theme
 PANELS = [('brand-identity', 'brand', '6ae51e096168c53b85abadb6_cyb3r-svc-brand-poster.webp', 0.2, '#39F1E0', 'light'),
           ('web-design-development', 'webui', '6ae51e0938a2019734b45910_cyb3r-svc-webui-poster.webp', 3, '#202A36', 'dark'),
-          ('seo-google-ads', 'seoupsacled', '6ae51e0912957b9d593ec139_cyb3r-svc-seoupsacled-poster.webp', 1.5, '#FFFFFF', 'light'),
+          ('seo-google-ads', 'seoads', '6ae83fc32ca07a25dcf6260f_cyb3r-svc-seoads-poster-v2.webp', 0.2, '#FFFFFF', 'light'),
           ('social-media-content', 'socialmedia', '6ae51e096a03b7a61be06f57_cyb3r-svc-socialmedia-poster.webp', 0.2, '#BCBEC0', 'light'),
           ('commercial-print-production', 'commercialprint', '6ae51e0a58f1e8457be18be6_cyb3r-svc-commercialprint-poster.webp', 1.5, '#0F0E0E', 'dark'),
           ('ai-driven-advertising', 'aidriven', '6ae51e0aeca4ce6d6842ae3a_cyb3r-svc-aidriven-poster.webp', 8, '#F7F7F7', 'light')]
