@@ -1,11 +1,15 @@
 <style>
-/* Homepage logo band (learnwithzero.com wave): the client logos on three curved rows over the brand teal, heading centred
-   above (site section-title classes). logo-band.js builds and moves the logos; it reads them from the CMS ticker below,
+/* Homepage logo band (learnwithzero.com wave): the client logos on three curved rows over the brand teal, the heading centred
+   above on two lines (site section-title classes). logo-band.js builds and moves the logos; it reads them from the CMS ticker below,
    which stays on the page only as the data source (Ticker Logos collection), so a logo added there appears here too. */
 section.ticker-reveal{display:none!important}
-.lb{position:relative;height:100svh;min-height:560px;max-height:1000px;overflow:hidden;background:#39F1E0;color:#0F0E0E}
-.lb .lb-head{position:absolute;left:0;right:0;top:0;z-index:1;box-sizing:border-box;margin:0 auto;max-width:none;padding:0 16px;
-  font-weight:600;color:#0F0E0E;text-align:center;text-wrap:balance;pointer-events:none}
+/* height = padding + the two-line heading + a gap + the three rows + padding (logo-band.js sets it; min-height is its estimate) */
+.lb{position:relative;box-sizing:border-box;min-height:480px;padding:clamp(88px,7vw,104px) 0 clamp(64px,7vw,104px);overflow:hidden;background:#39F1E0;color:#0F0E0E}
+@media (min-width:700px){.lb{min-height:clamp(520px,43vw,680px)}}
+.lb .lb-head{position:relative;z-index:1;box-sizing:border-box;margin:0 auto;max-width:none;padding:0 16px;
+  font-weight:600;color:#0F0E0E;text-align:center;pointer-events:none}
+.lb-l{display:block;white-space:nowrap}
+@media (max-width:359px){.lb .lb-head{font-size:8.4vw}}
 .lb-w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.08em;margin-bottom:-.08em}
 .lb-w>span{display:inline-block}
 .lb.lb-split .lb-w>span{transform:translate3d(0,110%,0);transition:transform .2s cubic-bezier(.4,0,1,1)}
@@ -21,6 +25,6 @@ html.lb-dark .navigation-top .logo-first{filter:brightness(0)}
 html.lb-dark .navigation-top .hamburger-flex:not(.cy-burger-open) .hamburger-line{background-color:#0F0E0E}
 </style>
 <section class="lb" aria-labelledby="lb-h">
-<h2 class="h1 for-h2 lb-head" id="lb-h">Brands we have worked with</h2>
+<h2 class="h1 for-h2 lb-head" id="lb-h"><span class="lb-l">Brands we have</span> <span class="lb-l">worked with</span></h2>
 <div class="lb-rows" role="group" aria-labelledby="lb-h"></div>
 </section>

@@ -106,18 +106,25 @@
   }
 
   function layout() {
-    var W = root.offsetWidth, H = root.offsetHeight;
-    if (!W || !H || !near) return;
+    var W = root.offsetWidth, vh = window.innerHeight || 800;
+    if (!W || !near) return;
     var mob = W < 700, s = mob ? clamp(W * .072, 26, 34) : clamp(Math.min(W, 1440) * .017, 18, 46);
     if (Math.abs(s - lastS) >= .5) { build(s); lastS = s; }
-    var R = W / 2 / Math.sin(HALF), lift = Math.min(H * .105, W * .085, W * W / (4.6 * H)), Rf = (W * W / 4 + lift * lift) / (2 * lift);
-    var yb = H * .79 - s / 2, ym = yb - s * 2.85, yt = ym - s * 2.85, wmax = 0;
+    var R = W / 2 / Math.sin(HALF), lift = Math.min(vh * .105, W * .085, W * W / (4.6 * vh)), Rf = (W * W / 4 + lift * lift) / (2 * lift);
+    /* top down: padding, the two-line heading, a clear gap above the top row where it passes the heading's ends, the rows, padding */
+    var rr = root.getBoundingClientRect(), half = 0, tall = function (r) { return r.reduce(function (m, o) { return Math.max(m, o.h); }, s) / 2; };
+    [].forEach.call(head.querySelectorAll(".lb-l"), function (ln) {
+      var g = document.createRange(); g.selectNodeContents(ln);
+      var q = g.getBoundingClientRect(); if (q.width) half = Math.max(half, Math.abs(q.left - rr.left - W / 2), Math.abs(q.right - rr.left - W / 2));
+    });
+    var hx = Math.min(half + 12, Rf * .9), rise = (Rf - Math.sqrt(Rf * Rf - hx * hx)) * BEND, gap = mob ? 36 : clamp(W * .036, 40, 64);
+    var yt = head.offsetTop + head.offsetHeight + gap + rise + tall(rows[0]), ym = yt + s * 2.85, yb = ym + s * 2.85, wmax = 0;
+    root.style.minHeight = "0px";   // the CSS min-height only holds the space until this exact height lands
+    root.style.height = Math.ceil(yb + tall(rows[2]) + (parseFloat(getComputedStyle(root).paddingBottom) || 0)) + "px";
     var sums = rows.map(function (r) { return r.reduce(function (a, o) { if (o.w > wmax) wmax = o.w; return a + o.w; }, 0); });
     var span = 2 * R * Math.asin(Math.min(1, (W / 2 + wmax * .3) / R)), gap = s * 3.4;
     rows.forEach(function (r, i) { if (r.length) gap = Math.max(gap, (span + wmax + 8 - sums[i]) / r.length); });
     var loop = rows.map(function (r, i) { var a = gap / 2; r.forEach(function (o) { o.x = a + o.w / 2; a += o.w + gap; }); return Math.max(1, sums[i] + r.length * gap); });
-    var hh = head.offsetHeight, hy = Math.max(hh / 2 + 24, (yt - s * .6) * .47);   // the heading sits centred above the top row
-    head.style.transform = "translate3d(0," + (hy - hh / 2).toFixed(1) + "px,0)";
     if (!off) off = [0, loop[1] / Math.max(1, rows[1].length) / 2, loop[2] / Math.max(1, rows[2].length) / 4];
     L = { W: W, s: s, R: R, bow: s * 2.1, Rf: Rf, cap: Rf * .9, y: [yt, ym, yb], loop: loop, v: [-W * .022, W * .019, -W * .016], top: yt - s * 1.6, mob: mob };
     var burger = document.querySelector(".navigation-top .hamburger-flex"), br = burger && burger.getBoundingClientRect();
@@ -172,11 +179,13 @@
     html.classList.toggle("lb-dark", near && r.top <= bandY && r.bottom >= bandY);
   }
 
-  /* heading: words rise into place when the band arrives */
+  /* heading (two .lb-l lines): words rise into place when the band arrives */
   if (!reduce && head) {
-    var words = head.textContent.trim().split(/\s+/);
-    head.setAttribute("aria-label", words.join(" "));
-    head.innerHTML = words.map(function (w, i) { return '<span class="lb-w" aria-hidden="true"><span style="--i:' + i + '">' + esc(w) + "</span></span>"; }).join(" ");
+    var wi = 0;
+    head.setAttribute("aria-label", head.textContent.replace(/\s+/g, " ").trim());
+    [].forEach.call(head.querySelectorAll(".lb-l"), function (ln) {
+      ln.innerHTML = ln.textContent.trim().split(/\s+/).map(function (w) { return '<span class="lb-w" aria-hidden="true"><span style="--i:' + (wi++) + '">' + esc(w) + "</span></span>"; }).join(" ");
+    });
     root.classList.add("lb-split");
   }
 
