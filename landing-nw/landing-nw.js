@@ -527,18 +527,20 @@
   }
 
   /* ---- the journey (after ysuriadesign.co). Between the hero and the footer the page becomes one pinned 3D world.
-     The scroll flies a camera along a teal thread of light from one piece of the page to the next, each set in its own
-     place and at its own angle: the opening ring, a ring of client logos, the four agent steps hanging from the thread,
-     the five examples, the results inside its coils, the platform it circles, the transparency ruler, the three
-     activation models in their rings and the closing ring it runs into. The piece in view sits mid-screen, joined to the
-     thread; its copy sits bottom left. Every word and picture is the page's own, moved into place (not copied); the
-     pieces in space are HTML set in 3D over a three.js canvas (r128, the copy the homepage loads). Off for reduced
-     motion and without WebGL, where the page keeps its normal sections. */
+     Every screen of scroll flies the camera along a teal thread of light to the next piece of the page - one piece per
+     screen, each in its own place and at its own angle: the client logos in a ring, each agent step, each example, each
+     result, the platform, each transparency row, each activation model. The thread plugs into every piece at its edges
+     (bright joints) and runs on to the next; the pieces ahead and behind stay faded until the camera reaches them. The
+     piece in view sits mid-screen, its copy bottom left. It opens on the thread itself sweeping away into the distance
+     and ends with the thread spiralling into a knot of light. Every word and picture is the page's own, moved into place
+     (not copied); the pieces are HTML set in 3D over a three.js canvas (r128, the copy the homepage loads). Off for
+     reduced motion and without WebGL, where the page keeps its normal sections. */
   var jEnd = false, journeyOn = function () {};
   (function journey() {
     if (!JOURNEY) return;
     var jReady = false, failed = false, wake = function () {};
     journeyOn = function () { jReady = true; wake(); };
+    var tall = window.innerWidth < window.innerHeight;   /* portrait screens get narrower pieces */
 
     /* ---- the stage: a track as tall as the trip, a sticky full-screen stage inside it */
     var track = document.createElement('div'), stage = document.createElement('div'), cvs = document.createElement('canvas');
@@ -566,7 +568,7 @@
       if (!el) return null;
       var box = document.createElement('div'); box.className = 'lnw-3d__it ' + cls; box.style.width = w + 'px';
       take(el, box); cam3.appendChild(box);
-      var it = { el: box, op: -1 }; items.push(it); return it;
+      var it = { el: box, w: w, op: -1, stop: -1 }; items.push(it); return it;
     }
     /* copy into chapters (page order), pieces into space */
     var cards = $$('.lnw-work .lnw-card'), CH = {};
@@ -579,14 +581,14 @@
     CH['int'] = chapter([q('.lnw-int .lnw-head'), q('.lnw-int .lnw-side')]);
     CH.cta = chapter([q('.lnw-cta .lnw-head'), q('.lnw-cta .lnw-side')]);
     var IT = {
-      logos: $$('.lnw-logos__list:first-child img').map(function (img) { img.loading = 'eager'; return item(img, 170, 'is-logo'); }),
-      steps: $$('.lnw-agent .lnw-step').map(function (s) { return item(s, 340, 'is-card is-step'); }),
+      logos: $$('.lnw-logos__list:first-child img').map(function (img) { return item(img, tall ? 150 : 170, 'is-logo'); }),
+      steps: $$('.lnw-agent .lnw-step').map(function (s) { return item(s, tall ? 300 : 360, 'is-card is-step'); }),
       names: item(q('.lnw-work .lnw-marq'), 5600, 'is-names'),
-      cards: cards.map(function (c) { return item(c, 300, 'is-film'); }),
-      stats: $$('.lnw-res .lnw-stat').map(function (s) { return item(s, 480, 'is-stat'); }),
-      plat: item(q('.lnw-plat__img'), 1000, 'is-plat'),
-      rows: $$('.lnw-trans .lnw-row').map(function (r) { return item(r, 520, 'is-card is-row'); }),
-      caps: $$('.lnw-int .lnw-cap').map(function (c) { return item(c, 500, 'is-card is-cap'); })
+      cards: cards.map(function (c) { return item(c, tall ? 260 : 300, 'is-film'); }),
+      stats: $$('.lnw-res .lnw-stat').map(function (s) { return item(s, tall ? 340 : 460, 'is-stat'); }),
+      plat: item(q('.lnw-plat__img'), tall ? 760 : 1000, 'is-plat'),
+      rows: $$('.lnw-trans .lnw-row').map(function (r) { return item(r, tall ? 310 : 500, 'is-card is-row'); }),
+      caps: $$('.lnw-int .lnw-cap').map(function (c) { return item(c, tall ? 310 : 480, 'is-card is-cap'); })
     };
     $$('img', stage).forEach(function (img) { img.loading = 'eager'; });
     $$('[data-reveal]', stage).forEach(function (el) { el.classList.add('is-in'); });
@@ -596,13 +598,22 @@
     });
     root.classList.add('is-journey');
 
-    /* ---- the stops: how long the camera holds at each piece and travels to the next, in screens of scroll */
-    var STOPS = [{ k: 'pos', g: 1, ch: CH.pos, hold: 1, travel: 1 }, { k: 'logos', g: 1, ch: null, hold: 0.7, travel: 1 },
-      { k: 'agent', g: 2, ch: CH.agent, hold: 1.8, travel: 1 }];
-    CH.cards.forEach(function (c, i) { STOPS.push({ k: 'work' + i, i: i, g: 3, ch: c, hold: 0.5, travel: i < CH.cards.length - 1 ? 0.55 : 1 }); });
-    STOPS.push({ k: 'res', g: 4, ch: CH.res, hold: 1.6, travel: 1 }, { k: 'plat', g: 5, ch: CH.plat, hold: 1.2, travel: 1 },
-      { k: 'trans', g: 6, ch: CH.trans, hold: 1.4, travel: 1 }, { k: 'int', g: 7, ch: CH['int'], hold: 1.6, travel: 1 },
-      { k: 'cta', g: 8, ch: CH.cta, hold: 1.2, travel: 0 });
+    /* ---- the stops: one piece per screen of scroll (hold + travel = 1 screen) */
+    var STOPS = [];
+    function stop(k, g, ch, its) {
+      STOPS.push({ k: k, g: g, ch: ch, it: (its || []).filter(Boolean), hold: 0.42, travel: 0.58 });
+      (its || []).forEach(function (it) { if (it) it.stop = STOPS.length - 1; });
+    }
+    stop('pos', 1, CH.pos);
+    stop('logos', 1, null, IT.logos);
+    IT.steps.forEach(function (it) { stop('step', 2, CH.agent, [it]); });
+    IT.cards.forEach(function (it, i) { stop('work', 3, CH.cards[i], [it]); STOPS[STOPS.length - 1].i = i; });
+    IT.stats.forEach(function (it) { stop('stat', 4, CH.res, [it]); });
+    if (IT.plat) stop('plat', 5, CH.plat, [IT.plat]);
+    IT.rows.forEach(function (it) { stop('row', 6, CH.trans, [it]); });
+    IT.caps.forEach(function (it) { stop('cap', 7, CH['int'], [it]); });
+    stop('cta', 8, CH.cta);
+    STOPS[0].hold = 0.6; STOPS[STOPS.length - 1].hold = 1; STOPS[STOPS.length - 1].travel = 0;
     var TOTAL = 0, GROUPS = 8;
     STOPS.forEach(function (s) { s.h0 = TOTAL; TOTAL += s.hold; s.h1 = TOTAL; TOTAL += s.travel; });
     track.style.height = ((TOTAL + 1) * 100) + 'vh';
@@ -626,8 +637,8 @@
       document.head.appendChild(tag);
     }
 
-    /* every line of light (thread, rings, ruler ticks) is a camera-facing ribbon: world width, so it thins with distance,
-       never under a pixel; a hot core inside a soft halo, fogged by depth, pulses travelling along it */
+    /* the thread is a camera-facing ribbon: world width, so it thins with distance, never under a pixel; a hot core
+       inside a soft halo, fogged by depth, pulses travelling along it */
     var RIBBON_VS = [
       'attribute vec3 tdir;attribute float side;attribute float arc;',
       'uniform vec2 uRes;uniform float uWidth;uniform float uMinPx;',
@@ -700,184 +711,165 @@
       renderer.setClearColor(BG, 1);
       var scene = new T.Scene(), cam = new T.PerspectiveCamera(40, 1, 10, 26000), world = new T.Group();
       scene.add(world);
-      var res = new T.Vector2(1, 1), pulse = [0, 0, 0, 0], lightP = [], lightI = [0, 0, 0, 0, 0, 0];
+      var res = new T.Vector2(1, 1), pulse = [0, 0, 0, 0], lightP = [], lightI = [0, 0, 0, 0, 0, 0], up = new T.Vector3(0, 1, 0);
       for (var li = 0; li < 6; li++) lightP.push(new T.Vector3(0, -1e5, 0));
-
-      function ribbonMat(width, gain, pulses) {
-        return new T.ShaderMaterial({
-          uniforms: { uRes: { value: res }, uWidth: { value: width }, uMinPx: { value: 1.2 }, uColor: { value: TEAL }, uCore: { value: CORE },
-            uGain: { value: gain }, uFog: { value: FOG }, uPulse: { value: pulses ? pulse : [-1e6, -1e6, -1e6, -1e6] }, uPulseGain: { value: pulses ? 1 : 0 },
-            uFrom: { value: -1e9 }, uTo: { value: 1e9 } },
-          vertexShader: RIBBON_VS, fragmentShader: RIBBON_FS, transparent: true, depthWrite: false, blending: T.AdditiveBlending
-        });
-      }
+      var threadMat = new T.ShaderMaterial({
+        uniforms: { uRes: { value: res }, uWidth: { value: 20 }, uMinPx: { value: 1.2 }, uColor: { value: TEAL }, uCore: { value: CORE },
+          uGain: { value: 1 }, uFog: { value: FOG }, uPulse: { value: pulse }, uPulseGain: { value: 1 }, uFrom: { value: 0 }, uTo: { value: 1e9 } },
+        vertexShader: RIBBON_VS, fragmentShader: RIBBON_FS, transparent: true, depthWrite: false, blending: T.AdditiveBlending
+      });
       function dotMat(color, maxPx) {
         return new T.ShaderMaterial({
           uniforms: { uTime: { value: 0 }, uPx: { value: 1000 }, uFog: { value: FOG }, uMaxPx: { value: maxPx }, uColor: { value: new T.Color(color) } },
           vertexShader: DOT_VS, fragmentShader: DOT_FS, transparent: true, depthWrite: false, blending: T.AdditiveBlending
         });
       }
-      var threadMat = ribbonMat(20, 1, true), ringMat = ribbonMat(9, 0.65, false), tickMat = ribbonMat(5, 0.55, false);
       var dustMat = dotMat('#bdfaf4', 34), flareMat = dotMat('#7ff6ea', 380);
       var shardMat = new T.ShaderMaterial({
         uniforms: { uTime: { value: 0 }, uBase: { value: new T.Color('#223140') }, uTeal: { value: TEAL }, uFogCol: { value: BG }, uFog: { value: FOG },
           uL: { value: lightP }, uLi: { value: lightI } },
         vertexShader: SHARD_VS, fragmentShader: SHARD_FS
       });
-      function ribbonGeo(lines) {   /* two vertices per point (the ribbon's edges), any number of polylines */
-        var n = 0, i, j;
-        lines.forEach(function (l) { n += l.p.length / 3; });
-        var pos = new Float32Array(n * 6), td = new Float32Array(n * 6), side = new Float32Array(n * 2), arc = new Float32Array(n * 2), idx = [], v = 0;
-        lines.forEach(function (l) {
-          var m = l.p.length / 3, p = l.p, base = v;
-          for (i = 0; i < m; i++) {
-            var a = l.closed ? (i + m - 1) % m : Math.max(i - 1, 0), b = l.closed ? (i + 1) % m : Math.min(i + 1, m - 1);
-            var tx = p[b * 3] - p[a * 3], ty = p[b * 3 + 1] - p[a * 3 + 1], tz = p[b * 3 + 2] - p[a * 3 + 2], tl = Math.sqrt(tx * tx + ty * ty + tz * tz) || 1;
-            for (j = 0; j < 2; j++) {
-              var o = v * 3;
-              pos[o] = p[i * 3]; pos[o + 1] = p[i * 3 + 1]; pos[o + 2] = p[i * 3 + 2];
-              td[o] = tx / tl; td[o + 1] = ty / tl; td[o + 2] = tz / tl;
-              side[v] = j ? -1 : 1; arc[v] = l.a ? l.a[i] : 0; v++;
-            }
-            if (i < m - 1 || l.closed) { var qv = base + i * 2, rv = base + ((i + 1) % m) * 2; idx.push(qv, qv + 1, rv, qv + 1, rv + 1, rv); }
+      function add(obj) { obj.frustumCulled = false; world.add(obj); return obj; }
+
+      /* ---- where each stop sits: a step further along a zigzag spine, turning and climbing a little each time */
+      var TURN = [0, -32, 36, -40, 30, -36, 42, -30, 34, -38, 28, -40, 36, -30, 38, -34, 30, -42, 36, -28, 34, -30];
+      var RISE = [0, 5, -7, 9, -5, 7, -9, 5, -6, 8, -6, 7, -8, 5, -7, 6, -5, 8, -7, 5, -4, 4];
+      var yawAcc = 0, spot = new T.Vector3();
+      STOPS.forEach(function (s, n) {
+        if (n) {
+          yawAcc += TURN[n % TURN.length] * Math.PI / 180;
+          var pitch = RISE[n % RISE.length] * Math.PI / 180, gap = s.k === 'logos' || STOPS[n - 1].k === 'logos' ? 3300 : 2700;
+          spot = spot.clone().add(new T.Vector3(Math.sin(yawAcc) * Math.cos(pitch), Math.sin(pitch), -Math.cos(yawAcc) * Math.cos(pitch)).multiplyScalar(gap));
+        }
+        s.pos = spot.clone(); s.side = n % 2 ? 1 : -1;
+        /* a piece turns a little away from the line of travel, so the camera meets it at an angle */
+        s.ry = s.it.length === 1 ? -yawAcc + s.side * 0.42 : -yawAcc;
+        s.N = new T.Vector3(Math.sin(s.ry), 0, Math.cos(s.ry));
+        s.X = new T.Vector3(Math.cos(s.ry), 0, -Math.sin(s.ry));
+      });
+      function L(s, x, y, z) { return s.pos.clone().addScaledVector(s.X, x).addScaledVector(up, y).addScaledVector(s.N, z); }   /* a point in a stop's frame */
+      var dummy = new T.Object3D();
+      function eps(v) { return Math.abs(v) < 1e-10 ? 0 : v; }
+      function place(it, p, ry, rx) {   /* an HTML piece at a point in space (CSS3D, as three's CSS3DRenderer) */
+        if (!it) return;
+        dummy.position.copy(p); dummy.rotation.set(rx || 0, ry, 0, 'YXZ'); dummy.updateMatrixWorld(true);
+        var e = dummy.matrixWorld.elements;
+        it.el.style.transform = 'translate(-50%,-50%) matrix3d(' + [e[0], e[1], e[2], e[3], -e[4], -e[5], -e[6], -e[7], e[8], e[9], e[10], e[11], e[12], e[13], e[14], e[15]].map(eps).join(',') + ')';
+        it.pos = p.clone(); it.h = it.el.offsetHeight || it.w * 0.7;
+      }
+      var sLogo = STOPS.filter(function (s) { return s.k === 'logos'; })[0], LR = tall ? [420, 660] : [800, 480];
+      IT.logos.forEach(function (it, k) {
+        var th = k / IT.logos.length * TAU + 0.2;
+        place(it, L(sLogo, Math.cos(th) * LR[0], Math.sin(th) * LR[1], Math.sin(th * 2) * 120), sLogo.ry - Math.cos(th) * 0.45, Math.sin(th) * 0.3);
+      });
+      STOPS.forEach(function (s) { if (s.it.length === 1) place(s.it[0], s.pos, s.ry, 0); });
+      var works = STOPS.filter(function (s) { return s.k === 'work'; });
+      if (works.length) { var sw = works[Math.floor(works.length / 2)]; place(IT.names, L(sw, 0, -150, -4400), sw.ry, 0); }
+
+      /* ---- the thread: it opens sweeping in from the lower right and away into the distance, then crosses every piece
+         from the edge facing the last one to the far edge (bright joints where it plugs in), and ends in a spiral knot */
+      var TP = [], JOINTS = [], s0 = STOPS[0];
+      TP.push(L(s0, 560, -470, 1350), L(s0, 330, -260, 1150), L(s0, 180, -90, 600), L(s0, 20, 40, -200));
+      STOPS.forEach(function (s, n) {
+        if (!n) return;
+        var nx = STOPS[n + 1];
+        if (s.k === 'logos') {   /* it swoops in from the lower left and through the ring, below the camera's way through */
+          TP.push(L(s, -900, -420, 1500), L(s, -300, -230, 700), L(s, 0, -180, 200), L(s, 0, -180, -400), L(s, 220, -200, -1000));
+          return;
+        }
+        if (s.k === 'cta') {
+          for (var j = 0; j <= 44; j++) { var th = j / 44 * Math.PI * 5, r = 470 * (1 - j / 44) + 10; TP.push(L(s, Math.cos(th) * r, Math.sin(th) * r, 180 * (1 - j / 44))); }
+          return;
+        }
+        var it = s.it[0], hw = it.w / 2 + 10, cy = s.k === 'stat' ? -it.h / 2 - 30 : 0, under = s.k === 'stat';
+        var ein = STOPS[n - 1].pos.clone().sub(s.pos).dot(s.X) < 0 ? -1 : 1, ex = ein * hw, xx = -ein * hw;
+        TP.push(L(s, ex + ein * 340, cy + 60, 160), L(s, ex, cy, 4), L(s, 0, cy, under ? 4 : -50), L(s, xx, cy, 4), L(s, xx - ein * 340, cy - 60, 160));
+        JOINTS.push({ n: n, p: L(s, ex, cy, 8) }, { n: n, p: L(s, xx, cy, 8) });
+        if (nx && nx.k !== 'logos') {   /* a wide sweep on the way to the next piece */
+          var a = L(s, xx - ein * 340, cy - 60, 160), d = nx.pos.clone().sub(a), mid = a.clone().addScaledVector(d, 0.5);
+          var sideV = new T.Vector3().crossVectors(d, up).normalize();
+          TP.push(mid.addScaledVector(up, (n % 2 ? 1 : -1) * 420).addScaledVector(sideV, (n % 2 ? -1 : 1) * 520));
+        }
+      });
+      var curve = new T.CatmullRomCurve3(TP, false, 'centripetal');
+      curve.arcLengthDivisions = TP.length * 40;
+      var LEN = curve.getLength(), NS = Math.round(LEN / 24), sp = curve.getSpacedPoints(NS), tp = [], ta = [], i;
+      for (i = 0; i <= NS; i++) { tp.push(sp[i].x, sp[i].y, sp[i].z); ta.push(i / NS * LEN); }
+      (function () {   /* the ribbon: two vertices per sample (its edges) */
+        var n = NS + 1, pos = new Float32Array(n * 6), td = new Float32Array(n * 6), side = new Float32Array(n * 2), arc = new Float32Array(n * 2), idx = [];
+        for (var k = 0; k < n; k++) {
+          var a = Math.max(k - 1, 0), b = Math.min(k + 1, n - 1), tx = tp[b * 3] - tp[a * 3], ty = tp[b * 3 + 1] - tp[a * 3 + 1], tz = tp[b * 3 + 2] - tp[a * 3 + 2];
+          var tl = Math.sqrt(tx * tx + ty * ty + tz * tz) || 1;
+          for (var j2 = 0; j2 < 2; j2++) {
+            var v2 = k * 2 + j2, o = v2 * 3;
+            pos[o] = tp[k * 3]; pos[o + 1] = tp[k * 3 + 1]; pos[o + 2] = tp[k * 3 + 2];
+            td[o] = tx / tl; td[o + 1] = ty / tl; td[o + 2] = tz / tl; side[v2] = j2 ? -1 : 1; arc[v2] = ta[k];
           }
-        });
+          if (k < n - 1) idx.push(k * 2, k * 2 + 1, k * 2 + 2, k * 2 + 1, k * 2 + 3, k * 2 + 2);
+        }
         var g = new T.BufferGeometry();
         g.setAttribute('position', new T.BufferAttribute(pos, 3)); g.setAttribute('tdir', new T.BufferAttribute(td, 3));
         g.setAttribute('side', new T.BufferAttribute(side, 1)); g.setAttribute('arc', new T.BufferAttribute(arc, 1));
         g.setIndex(idx);
-        return g;
-      }
-      function add(obj) { obj.frustumCulled = false; world.add(obj); return obj; }
-
-      /* ---- the world: each piece of the page in its own frame (origin + turn), so the camera swings between them */
-      var SEC = { pos: [0, 0, 0, 0], logos: [2600, 600, -3800, -35], agent: [7000, -200, -6600, -65], work: [10600, 900, -11000, -20],
-        res: [9800, -300, -18200, 25], plat: [6400, 1200, -22400, 50], trans: [2600, -500, -26200, 20], 'int': [1200, 400, -30600, -15], cta: [2800, 0, -35000, 0] };
-      function yaw(s) { return SEC[s][3] * Math.PI / 180; }
-      function P(s, x, y, z) { var f = SEC[s], a = yaw(s), c = Math.cos(a), si = Math.sin(a); return new T.Vector3(f[0] + x * c + z * si, f[1] + y, f[2] - x * si + z * c); }
-      var dummy = new T.Object3D();
-      function eps(v) { return Math.abs(v) < 1e-10 ? 0 : v; }
-      function place(it, s, x, y, z, ry, rx) {   /* an HTML piece at a point in space (CSS3D, as three's CSS3DRenderer) */
-        if (!it) return;
-        dummy.position.copy(P(s, x, y, z)); dummy.rotation.set(rx || 0, yaw(s) + (ry || 0), 0, 'YXZ'); dummy.updateMatrixWorld(true);
-        var e = dummy.matrixWorld.elements;
-        it.el.style.transform = 'translate(-50%,-50%) matrix3d(' + [e[0], e[1], e[2], e[3], -e[4], -e[5], -e[6], -e[7], e[8], e[9], e[10], e[11], e[12], e[13], e[14], e[15]].map(eps).join(',') + ')';
-        it.pos = dummy.position.clone();
-      }
-      var camCurve, focCurve, idxA = [], idxB = [], portrait = null, up = new T.Vector3(0, 1, 0);
-      var TP = [], RINGS = [], TICKS = [], F = {}, tall = window.innerWidth < window.innerHeight;   /* portrait: taller layouts */
-      function ringAt(s, x, y, z, r, ry) {
-        var a = yaw(s) + (ry || 0), X = new T.Vector3(Math.cos(a), 0, -Math.sin(a)), c = P(s, x, y, z), p = [];
-        for (var j = 0; j < 120; j++) { var t = j / 120 * TAU; p.push(c.x + X.x * Math.cos(t) * r, c.y + Math.sin(t) * r, c.z + X.z * Math.cos(t) * r); }
-        RINGS.push({ p: p, closed: true });
-      }
-      function H(it, d) { return (it && it.el.offsetHeight) || d; }
-      /* opening: the thread starts in a ring of light */
-      ringAt('pos', 260, 60, 0, 430);
-      TP.push(P('pos', 260, 60, 0), P('pos', 320, 80, -700), P('pos', 760, 280, -1800));
-      F.pos = { A: [P('pos', -260, -80, 1600), P('pos', 260, 60, 0)], B: [P('pos', -40, -30, 1180), P('pos', 260, 60, -60)] };
-      /* the client logos stand in a ring the camera flies through */
-      IT.logos.forEach(function (it, k) {
-        var th = k / IT.logos.length * TAU + 0.2;
-        place(it, 'logos', Math.cos(th) * (tall ? 420 : 780), Math.sin(th) * (tall ? 660 : 470), Math.sin(th * 2) * 120, -Math.cos(th) * 0.45, Math.sin(th) * 0.3);
-      });
-      TP.push(P('logos', -100, 60, 1000), P('logos', 0, 0, 0), P('logos', 60, -40, -900), P('logos', 360, -160, -1800));
-      F.logos = { A: [P('logos', 0, 0, 2050), P('logos', 0, 0, 0)], B: [P('logos', 0, 30, 820), P('logos', 0, 0, -400)],
-        via: [P('logos', 0, 10, -1100), P('logos', 0, -40, -2600)], centre: true };
-      /* the four agent steps hang from the thread (on portrait screens they hang in a column, the thread at their left) */
-      var AX = [-930, -310, 310, 930];
-      TP.push(P('agent', tall ? -700 : -1600, tall ? 1000 : 420, 600));
-      IT.steps.forEach(function (it, k) {
-        var hh = H(it, 270) / 2;
-        if (tall) {
-          var y = 620 - k * 420, zc = -k * 120;
-          place(it, 'agent', 0, y, zc, 0, 0);
-          TP.push(P('agent', -430, y + 130, zc + 30), P('agent', -174, y, zc + 4), P('agent', -430, y - 130, zc + 30));
-          return;
-        }
-        var x = AX[k], z = -Math.abs(x) * 0.18;
-        place(it, 'agent', x, 0, z, -x / 2600, 0);
-        TP.push(P('agent', x - 230, hh + 110, z + 30), P('agent', x, hh + 4, z + 4), P('agent', x + 230, hh + 110, z + 30));
-      });
-      TP.push(P('agent', tall ? -600 : 1650, tall ? -1100 : 320, -350));
-      F.agent = tall ? { A: [P('agent', -160, 700, 1350), P('agent', 0, 620, 0)], B: [P('agent', -120, -560, 1250), P('agent', 0, -640, -360)] }
-        : { A: [P('agent', -1260, 80, 1150), P('agent', -930, 0, -170)], B: [P('agent', 880, 60, 1080), P('agent', 930, 0, -170)] };
-      /* the five examples float in a field of shards; the thread runs under each one */
-      var WK = [[-460, 60, 0, 0.32, 0.04], [620, 380, -1500, -0.38, -0.05], [-380, -180, -3000, 0.28, 0.03], [700, 160, -4500, -0.34, -0.04], [-520, 300, -6000, 0.3, 0.05]];
-      place(IT.names, 'work', 0, -150, -8200, 0, 0);
-      TP.push(P('work', -1300, -600, 1300));
-      IT.cards.forEach(function (it, k) {
-        var w = WK[k], hh = H(it, 432) / 2, s = k % 2 ? -1 : 1;
-        place(it, 'work', w[0], w[1], w[2], w[3], w[4]);
-        TP.push(P('work', w[0] - 300 * s, w[1] - hh - 130, w[2] + 120), P('work', w[0], w[1] - hh - 6, w[2] + 8), P('work', w[0] + 300 * s, w[1] - hh - 130, w[2] - 120));
-        var ry = yaw('work') + w[3], nx = Math.sin(ry), nz = Math.cos(ry), rx = Math.cos(ry), rz = -Math.sin(ry), C = P('work', w[0], w[1], w[2]);
-        F['work' + k] = {
-          A: [new T.Vector3(C.x + nx * 1120 - rx * 280 * s, C.y + 40, C.z + nz * 1120 - rz * 280 * s), C.clone()],
-          B: [new T.Vector3(C.x + nx * 960 - rx * 130 * s, C.y + 20, C.z + nz * 960 - rz * 130 * s), C.clone()] };
-      });
-      /* the results sit inside the thread's coils */
-      var RS = [[-760, 120, 0, 0.2], [40, -120, -900, 0], [820, 160, -1800, -0.2]];
-      TP.push(P('res', -1500, -300, 900));
-      IT.stats.forEach(function (it, k) {
-        var r = RS[k];
-        place(it, 'res', r[0], r[1], r[2], r[3], 0);
-        for (var j = 0; j <= 16; j++) { var th = -Math.PI / 2 + j / 16 * Math.PI * 2.5; TP.push(P('res', r[0] + Math.cos(th) * 430, r[1] + Math.sin(th) * 300, r[2] + 240 - j * 30)); }
-      });
-      F.res = { A: [P('res', -1120, 60, 1350), P('res', -760, 120, 0)], B: [P('res', 560, 120, -480), P('res', 820, 160, -1800)] };
-      /* the platform: the thread circles the dashboard and runs in behind it */
-      place(IT.plat, 'plat', 0, 0, 0, 0, -0.06);
-      [[-1000, -260, 700], [-780, 0, 0], [-560, 420, -320], [0, 540, -420], [560, 420, -320], [780, 0, 0], [560, -400, -320], [0, -470, -470],
-        [-160, -100, -300], [0, 0, -130], [420, -260, -700]].forEach(function (p) { TP.push(P('plat', p[0], p[1], p[2])); });
-      F.plat = { A: [P('plat', -1500, 220, 700), P('plat', 0, 0, 0)], B: [P('plat', -260, 90, 1400), P('plat', 0, 0, 0)] };
-      /* transparency: a ruler with the three rows standing on it */
-      var RX = [-960, 0, 960], x;
-      TP.push(P('trans', -2200, -200, 700));
-      for (x = -1700; x <= 1700; x += 425) TP.push(P('trans', x, -270, 0));
-      TP.push(P('trans', 2200, -120, -600));
-      for (x = -1600; x <= 1600; x += 80) TICKS.push({ p: [].concat(P('trans', x, -270, 0).toArray(), P('trans', x, Math.round((x + 1600) / 80) % 5 ? -238 : -198, 0).toArray()) });
-      IT.rows.forEach(function (it, k) { place(it, 'trans', RX[k], -180 + H(it, 150) / 2, 0, -RX[k] / 8000, 0); });
-      F.trans = { A: [P('trans', -1550, -120, 1050), P('trans', -960, -100, 0)], B: [P('trans', 1100, -90, 1080), P('trans', 960, -100, 0)] };
-      /* integration: each activation model inside a ring on the thread */
-      var IX = [[-900, 0, 0, 0.15], [0, 0, -500, 0], [900, 0, -1000, -0.15]];
-      TP.push(P('int', -1800, -320, 760));
-      IT.caps.forEach(function (it, k) {
-        var c = IX[k];
-        place(it, 'int', c[0], c[1], c[2], c[3], 0);
-        ringAt('int', c[0], c[1], c[2] - 70, 330, c[3]);
-        TP.push(P('int', c[0], c[1], c[2] - 90));
-        if (k < 2) TP.push(P('int', c[0] + 450, k ? -330 : 330, c[2] - 330));
-      });
-      TP.push(P('int', 1700, 220, -1500));
-      F['int'] = { A: [P('int', -1420, 60, 1120), P('int', -900, 0, 0)], B: [P('int', 1120, 40, 280), P('int', 900, 0, -1000)] };
-      /* closing: the thread runs into a ring of light */
-      ringAt('cta', 240, 80, 0, 560); ringAt('cta', 240, 80, -40, 650);
-      TP.push(P('cta', -900, -520, 1500), P('cta', -320, -220, 700), P('cta', 110, 30, 220), P('cta', 240, 80, 0));
-      F.cta = { A: [P('cta', -420, -120, 2600), P('cta', 240, 80, 0)], B: [P('cta', -150, -60, 1900), P('cta', 240, 80, 0)] };
-
-      /* the thread itself */
-      var curve = new T.CatmullRomCurve3(TP, false, 'centripetal');
-      curve.arcLengthDivisions = TP.length * 40;
-      var LEN = curve.getLength(), NS = Math.round(LEN / 26), sp = curve.getSpacedPoints(NS), tp = [], ta = [], i;
-      for (i = 0; i <= NS; i++) { tp.push(sp[i].x, sp[i].y, sp[i].z); ta.push(i / NS * LEN); }
-      var threadMesh = add(new T.Mesh(ribbonGeo([{ p: tp, a: ta }]), threadMat));
-      threadMat.uniforms.uFrom.value = 0; threadMat.uniforms.uTo.value = LEN;
-      add(new T.Mesh(ribbonGeo(RINGS), ringMat));
-      add(new T.Mesh(ribbonGeo(TICKS), tickMat));
-      function nearestArc(v) { var best = 0, bd = 1e18; for (var k = 0; k <= NS; k += 2) { var d = sp[k].distanceToSquared(v); if (d < bd) { bd = d; best = k; } } return best; }
-      STOPS.forEach(function (s) { s.f = F[s.k]; s.arcI = nearestArc(s.f.B[1]); s.arc = ta[s.arcI]; });
-      /* flares: the spark where the thread starts, a light where it meets each piece, the light inside the closing ring */
+        add(new T.Mesh(g, threadMat));
+      })();
+      threadMat.uniforms.uTo.value = LEN;
+      function nearestArc(v) { var best = 0, bd = 1e18; for (var k = 0; k <= NS; k++) { var d = sp[k].distanceToSquared(v); if (d < bd) { bd = d; best = k; } } return best; }
+      STOPS.forEach(function (s, n) { s.arcI = nearestArc(n ? s.pos : L(s0, 180, -90, 600)); s.arc = ta[s.arcI]; });
+      /* joints where the thread plugs into each piece, and the knot of light it ends in */
       var fp = [], fr = [];
-      function flare(v, size, gain) { fp.push(v.x, v.y, v.z); fr.push(size, 0.5, gain, 0); }
-      flare(sp[0], 70, 1); flare(sp[0], 260, 0.35);
-      STOPS.forEach(function (s) { flare(sp[s.arcI], 46, 0.3); });
-      flare(sp[NS], 90, 1); flare(sp[NS], 520, 0.4);
+      JOINTS.forEach(function (j) { fp.push(j.p.x, j.p.y, j.p.z); fr.push(44, 0.5, 0.3, 0); fp.push(j.p.x, j.p.y, j.p.z); fr.push(150, 0.5, 0.1, 0); });
+      fp.push(sp[NS].x, sp[NS].y, sp[NS].z, sp[NS].x, sp[NS].y, sp[NS].z); fr.push(110, 0.5, 1, 0, 620, 0.5, 0.45, 0);
       var fg = new T.BufferGeometry(), fAttr = new T.BufferAttribute(new Float32Array(fr), 4);
       fg.setAttribute('position', new T.BufferAttribute(new Float32Array(fp), 3)); fg.setAttribute('aRnd', fAttr);
       add(new T.Points(fg, flareMat));
-      portrait = tall; route();
+
+      /* ---- the camera: per stop an arrival (A) and a departure (B) view - off to one side of the piece, swinging round
+         toward the front while easing in - and a wide swing between stops; the camera follows one curve, its point of
+         interest another */
+      var camCurve, focCurve, idxA = [], idxB = [], portrait = null, W = 1, Hh = 1;
+      function rotY(v, a) { var c = Math.cos(a), si = Math.sin(a); return new T.Vector3(v.x * c + v.z * si, v.y, -v.x * si + v.z * c); }
+      function viewDist(it) {   /* far enough to frame the piece, never so close its type is enlarged much */
+        var vt = Math.tan(cam.fov * Math.PI / 360), ht = vt * cam.aspect, fovPx = Hh / (2 * vt);
+        return Math.max(it.w / (2 * ht * (portrait ? 0.8 : 0.4)), it.h / (2 * vt * (portrait ? 0.44 : 0.6)), fovPx * 0.88);
+      }
+      function route() {
+        STOPS.forEach(function (s) {
+          if (s.k === 'pos') { s.f = { A: [L(s, -60, 120, 1750), L(s, 60, -20, -400)], B: [L(s, 40, 100, 1380), L(s, 40, 0, -600)] }; return; }
+          if (s.k === 'logos') {
+            var back = portrait ? 2500 : 2100;
+            s.f = { A: [L(s, 0, 40, back), s.pos.clone()], B: [L(s, 0, 20, back * 0.45), L(s, 0, 0, -300)], via: [L(s, 0, 0, -1300), L(s, 0, -40, -2600)], centre: true };
+            return;
+          }
+          if (s.k === 'cta') { var dc = portrait ? 2300 : 1900; s.f = { A: [L(s, -240, 90, dc), s.pos.clone()], B: [L(s, -120, 50, dc * 0.8), s.pos.clone()] }; return; }
+          var it = s.it[0], d = viewDist(it), c = s.pos.clone();
+          s.f = { A: [c.clone().addScaledVector(rotY(s.N, s.side * 0.3), d * 1.08).addScaledVector(up, d * 0.08), c.clone()],
+                  B: [c.clone().addScaledVector(rotY(s.N, s.side * 0.16), d * 0.95).addScaledVector(up, d * 0.03), c.clone()] };
+        });
+        var CP = [], AP = [];
+        STOPS.forEach(function (s, n) {
+          idxA[n] = CP.length; CP.push(s.f.A[0]); AP.push(s.f.A[1]);
+          idxB[n] = CP.length; CP.push(s.f.B[0]); AP.push(s.f.B[1]);
+          var nx = STOPS[n + 1];
+          if (!nx) return;
+          if (s.f.via) { CP.push(s.f.via[0]); AP.push(s.f.via[1]); return; }
+          var b = s.f.B[0], a2 = nx.f.A[0], mid = b.clone().add(a2).multiplyScalar(0.5), dd = a2.clone().sub(b), L2 = dd.length();
+          var sideV = new T.Vector3().crossVectors(dd, up).normalize();
+          mid.addScaledVector(up, L2 * 0.12).addScaledVector(sideV, L2 * 0.14 * (n % 2 ? 1 : -1));
+          CP.push(mid); AP.push(s.f.B[1].clone().add(nx.f.A[1]).multiplyScalar(0.5));
+        });
+        camCurve = new T.CatmullRomCurve3(CP, false, 'centripetal');
+        focCurve = new T.CatmullRomCurve3(AP, false, 'centripetal');
+        camCurve.np = CP.length;
+      }
+
+      /* ---- dust and shards along the whole route, kept clear of the pieces and of the camera's path */
+      W = stage.clientWidth || window.innerWidth; Hh = stage.clientHeight || window.innerHeight;
+      cam.aspect = W / Hh; cam.fov = cam.aspect < 1 ? 52 : 40; cam.updateProjectionMatrix();
+      portrait = cam.aspect < 1; route();
       var camPts = camCurve.getPoints(Math.max(300, camCurve.np * 6));
-      /* dust and shards along the whole route, kept clear of the pieces and of the camera's path */
-      var pieces = items.filter(function (it) { return it.pos; }).map(function (it) { return it.pos; }), v = new T.Vector3(), dir = new T.Vector3();
+      var pieces = items.filter(function (it) { return it.pos && it !== IT.names; }).map(function (it) { return it.pos; }), v = new T.Vector3(), dir = new T.Vector3();
       function clear(p, r) {
         for (var k = 0; k < pieces.length; k++) if (pieces[k].distanceToSquared(p) < r * r) return false;
         for (k = 0; k < camPts.length; k++) if (camPts[k].distanceToSquared(p) < 640 * 640) return false;
@@ -899,11 +891,11 @@
         bp.setXYZ(i, bp.getX(i) * jit[key], bp.getY(i) * jit[key], bp.getZ(i) * jit[key]);
       }
       base.computeVertexNormals();
-      var nsh = phone ? 170 : 340, spin = new Float32Array(nsh * 4), shards = new T.InstancedMesh(base, shardMat, nsh), m4 = new T.Matrix4(), qt = new T.Quaternion(), sc = new T.Vector3(), ax = new T.Vector3();
+      var nsh = phone ? 150 : 300, spin = new Float32Array(nsh * 4), shards = new T.InstancedMesh(base, shardMat, nsh), m4 = new T.Matrix4(), qt = new T.Quaternion(), sc = new T.Vector3(), ax = new T.Vector3();
       for (i = 0; i < nsh; i++) {
         var tries = 0;
         do { v.copy(sp[Math.floor(Math.random() * NS)]).add(dir.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize().multiplyScalar(420 + Math.pow(Math.random(), 1.2) * 2600)); }
-        while (!clear(v, 620) && ++tries < 14);
+        while (!clear(v, 700) && ++tries < 14);
         var k = 26 + Math.pow(Math.random(), 2.4) * 190;
         sc.set(k * (0.8 + Math.random() * 0.5), k * (0.7 + Math.random() * 0.6), k * (0.8 + Math.random() * 0.5));
         qt.setFromAxisAngle(ax.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize(), Math.random() * TAU);
@@ -914,64 +906,43 @@
       base.setAttribute('aSpin', new T.InstancedBufferAttribute(spin, 4));
       shards.instanceMatrix.needsUpdate = true; add(shards);
 
-      /* ---- the camera route: for each stop an arrival (A) and a departure (B) view, a swing (via) between stops;
-         the camera follows one curve, its point of interest another */
-      function route() {
-        var CP = [], AP = [], pull = portrait ? 1.14 : 1;
-        function push(c, a) { CP.push(a.clone().add(c.clone().sub(a).multiplyScalar(pull))); AP.push(a.clone()); }
-        STOPS.forEach(function (s, n) {
-          idxA[n] = CP.length; push(s.f.A[0], s.f.A[1]);
-          idxB[n] = CP.length; push(s.f.B[0], s.f.B[1]);
-          var nx = STOPS[n + 1];
-          if (!nx) return;
-          if (s.f.via) { push(s.f.via[0], s.f.via[1]); return; }
-          var b = s.f.B[0], a2 = nx.f.A[0], mid = b.clone().add(a2).multiplyScalar(0.5), d = a2.clone().sub(b), L2 = d.length();
-          var sideV = new T.Vector3().crossVectors(d, up).normalize();
-          mid.addScaledVector(up, L2 * 0.12).addScaledVector(sideV, L2 * 0.16 * (n % 2 ? 1 : -1));
-          push(mid, s.f.B[1].clone().add(nx.f.A[1]).multiplyScalar(0.5));
-        });
-        camCurve = new T.CatmullRomCurve3(CP, false, 'centripetal');
-        focCurve = new T.CatmullRomCurve3(AP, false, 'centripetal');
-        camCurve.np = CP.length;
-      }
       function ease(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
-      function where(pr) {   /* curve parameter, the stop in reach, how far along */
+      function sstep(a, b, x) { var t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
+      function where(pr) {   /* curve parameter, the stop in reach, the hold or travel we are in */
         for (var n = 0; n < STOPS.length; n++) {
           var s = STOPS[n];
           if (pr <= s.h1 || n === STOPS.length - 1) {
             var f = clamp((pr - s.h0) / s.hold, 0, 1);
-            return { t: idxA[n] + f * (idxB[n] - idxA[n]), n: n, arc: s.arc, roll: 0 };
+            return { t: idxA[n] + f * (idxB[n] - idxA[n]), n: n, a: n, g: -1, arc: s.arc, roll: 0 };
           }
           if (pr < s.h1 + s.travel) {
             var g0 = (pr - s.h1) / s.travel, e = ease(g0);
             /* the camera banks into each flight and levels out to arrive */
-            return { t: idxB[n] + e * (idxA[n + 1] - idxB[n]), n: e < 0.5 ? n : n + 1, arc: s.arc + (STOPS[n + 1].arc - s.arc) * e, roll: Math.sin(Math.PI * g0) * (n % 2 ? 0.2 : -0.2) };
+            return { t: idxB[n] + e * (idxA[n + 1] - idxB[n]), n: e < 0.5 ? n : n + 1, a: n, g: g0, arc: s.arc + (STOPS[n + 1].arc - s.arc) * e,
+              roll: Math.sin(Math.PI * g0) * (n % 2 ? 0.2 : -0.2) };
           }
         }
       }
-      function chapterAt(pr) {
-        for (var n = 0; n < STOPS.length; n++) {
-          var s = STOPS[n], before = n ? STOPS[n - 1].travel * 0.3 : 1e9, after = n === STOPS.length - 1 ? 1e9 : s.travel * 0.3;
-          if (pr >= s.h0 - before && pr <= s.h1 + after) return n;
-        }
-        return -1;
+      function chapterOf(w) {   /* copy shared by neighbouring stops stays up; otherwise it hands over mid-flight */
+        if (w.g < 0) return STOPS[w.a].ch;
+        var c0 = STOPS[w.a].ch, c1 = STOPS[w.a + 1].ch;
+        return c0 === c1 ? c0 : w.g < 0.3 ? c0 : w.g > 0.7 ? c1 : null;
       }
 
       /* ---- size, pointer, the frame */
-      var W = 1, Hh = 1, dpr = 1, lastFov = 0;
+      var dpr = 1, lastFov = 0;
       function size() {
         W = stage.clientWidth || window.innerWidth; Hh = stage.clientHeight || window.innerHeight;
         dpr = Math.min(window.devicePixelRatio || 1, phone ? 1.5 : 1.75);
         renderer.setPixelRatio(dpr); renderer.setSize(W, Hh, false);
         res.set(Math.round(W * dpr), Math.round(Hh * dpr));
         cam.aspect = W / Hh; cam.fov = cam.aspect < 1 ? 52 : 40; cam.updateProjectionMatrix();
-        threadMat.uniforms.uMinPx.value = 1.3 * dpr; ringMat.uniforms.uMinPx.value = 1.1 * dpr; tickMat.uniforms.uMinPx.value = 0.9 * dpr;
-        var pt = cam.aspect < 1;
-        if (pt !== portrait) { portrait = pt; route(); }
+        threadMat.uniforms.uMinPx.value = 1.3 * dpr;
+        portrait = cam.aspect < 1; route();
       }
-      var mx = 0, my = 0, cmx = 0, cmy = 0, prog = null, raf = 0, last = performance.now(), time = 0;
+      var mx = 0, my = 0, cmx = 0, cmy = 0, prog = null, raf = 0, last = performance.now(), time = 0, act = new Float32Array(STOPS.length);
       var cpos = new T.Vector3(), fpos = new T.Vector3(), tgt = new T.Vector3(), fwd = new T.Vector3(), rgt = new T.Vector3(), upv = new T.Vector3();
-      var curCh = null, curN = -1, curG = 0, counted = {};
+      var curCh = null, curN = -1, curG = 0;
       if (fine) window.addEventListener('mousemove', function (e) { mx = e.clientX / window.innerWidth * 2 - 1; my = e.clientY / window.innerHeight * 2 - 1; }, { passive: true });
       function cardFilm(n, on) {
         var c = IT.cards[n] && IT.cards[n].el.firstChild, vd = c && c.querySelector('video');
@@ -979,11 +950,13 @@
         if (on) { c.classList.add('is-in'); if (!vd.getAttribute('src')) vd.src = vd.getAttribute('data-src'); var pp = vd.play(); if (pp && pp.catch) pp.catch(function () {}); }
         else if (!vd.paused) vd.pause();
       }
-      function enter(n) {   /* a stop comes into reach: its film plays, its figures count */
-        STOPS.forEach(function (s, k) { if (s.i != null) cardFilm(s.i, k === n); });
-        var g = STOPS[n].g;
-        if (g === 2 && !counted[2]) { counted[2] = 1; $$('[data-count-from]', stage).forEach(function (c) { count(c, +c.getAttribute('data-count-from')); }); }
-        if (g === 4 && !counted[4]) { counted[4] = 1; $$('[data-count]', stage).forEach(function (c) { count(c); }); }
+      function enter(n) {   /* a stop comes into reach: its film plays, its figure counts */
+        var s = STOPS[n], el = s.it.length === 1 && s.it[0].el;
+        STOPS.forEach(function (x, k) { if (x.i != null) cardFilm(x.i, k === n); });
+        if (el) {
+          $$('[data-count-from]', el).forEach(function (c) { count(c, +c.getAttribute('data-count-from')); });
+          $$('[data-count]', el).forEach(function (c) { count(c); });
+        }
         var nx = STOPS[n + 1];
         if (nx && nx.i != null) { var nv = IT.cards[nx.i].el.querySelector('video'); if (nv && !nv.getAttribute('src')) nv.src = nv.getAttribute('data-src'); }
       }
@@ -998,14 +971,14 @@
         if (prog === null) prog = target;
         prog += (target - prog) * (1 - Math.exp(-dt * 7));
         if (Math.abs(target - prog) < 1e-4) prog = target;
-        var w = where(prog), u = w.t / (camCurve.np - 1);
+        var w = where(prog), u = w.t / (camCurve.np - 1), k;
         camCurve.getPoint(u, cpos); focCurve.getPoint(u, fpos);
         cmx += (mx - cmx) * 0.05; cmy += (my - cmy) * 0.05;
         /* aim so the piece sits right of centre above the copy (centred on portrait screens and in the logo ring) */
         fwd.subVectors(fpos, cpos); var dist = fwd.length(); fwd.divideScalar(dist || 1);
         rgt.crossVectors(fwd, up).normalize(); upv.crossVectors(rgt, fwd);
         var hh = dist * Math.tan(cam.fov * Math.PI / 360), hw = hh * cam.aspect, st = STOPS[w.n];
-        var sx = portrait || st.f.centre ? 0.5 : 0.6, sy = st.f.centre ? 0.5 : portrait ? 0.36 : 0.44;
+        var sx = portrait || st.f.centre ? 0.5 : 0.62, sy = st.f.centre ? 0.5 : portrait ? 0.36 : 0.44;
         tgt.copy(fpos).addScaledVector(rgt, -(sx - 0.5) * 2 * hw).addScaledVector(upv, -(0.5 - sy) * 2 * hh);
         cam.position.copy(cpos).addScaledVector(rgt, cmx * 60).addScaledVector(upv, -cmy * 40);
         cam.up.copy(up).multiplyScalar(Math.cos(w.roll)).addScaledVector(rgt, Math.sin(w.roll));
@@ -1015,18 +988,24 @@
         if (fovPx !== lastFov) { view.style.perspective = fovPx + 'px'; lastFov = fovPx; }
         cam3.style.transform = 'translateZ(' + fovPx + 'px) matrix3d(' + [e[0], -e[1], e[2], e[3], e[4], -e[5], e[6], e[7], e[8], -e[9], e[10], e[11], e[12], -e[13], e[14], e[15]].map(eps).join(',') +
           ') translate(' + W / 2 + 'px,' + Hh / 2 + 'px)';
+        /* only the piece in reach is lit; the rest wait faded until the camera gets to them */
+        for (k = 0; k < act.length; k++) act[k] = 0;
+        if (w.g < 0) act[w.a] = 1; else { act[w.a] = 1 - sstep(0.05, 0.55, w.g); act[w.a + 1] = sstep(0.4, 0.92, w.g); }
+        var workW = 0;
+        STOPS.forEach(function (s, n) { if (s.k === 'work') workW = Math.max(workW, act[n]); });
         cam.getWorldDirection(fwd);
-        for (var k = 0; k < items.length; k++) {
+        for (k = 0; k < items.length; k++) {
           var it = items[k];
           if (!it.pos) continue;
           v.subVectors(it.pos, cam.position);
-          var d = v.length(), front = v.dot(fwd), op = front < 120 ? 0 : clamp((6200 - d) / 1900, 0, 1) * clamp((d - 260) / 420, 0, 1);
+          var d = v.length(), lit = it.stop >= 0 ? act[it.stop] : it === IT.names ? workW * 0.8 : 0;
+          var op = v.dot(fwd) < 120 ? 0 : Math.max(lit, d < 4600 ? 0.07 : 0) * clamp((d - 260) / 420, 0, 1) * clamp((7200 - d) / 1600, 0, 1);
           op = Math.round(op * 50) / 50;
           if (op !== it.op) { it.op = op; it.el.style.opacity = op; it.el.style.visibility = op ? 'visible' : 'hidden'; }
         }
         /* the stop in reach, its copy, the counter */
         if (w.n !== curN) { curN = w.n; enter(curN); }
-        var ci = jReady ? chapterAt(prog) : -1, chEl = ci >= 0 ? STOPS[ci].ch : null;
+        var chEl = jReady ? chapterOf(w) : null;
         if (chEl !== curCh) {
           if (curCh) { curCh.classList.remove('is-on'); var so = curCh.querySelector('.lnw-stmt'); if (so) so.classList.remove('is-in'); }
           if (chEl) {
@@ -1050,8 +1029,8 @@
         }
         lightP[4].copy(fpos); lightI[4] = 0.6;
         lightP[5].copy(sp[clamp(Math.round(w.arc / LEN * NS), 0, NS)]); lightI[5] = 0.5;
-        /* the light where the thread meets the piece in reach burns brighter */
-        for (k = 0; k < STOPS.length; k++) fAttr.setZ(2 + k, k === w.n ? 1 : 0.3);
+        /* the joints of the piece in reach burn bright */
+        for (k = 0; k < JOINTS.length; k++) { var jl = act[JOINTS[k].n]; fAttr.setZ(k * 2, 0.3 + 0.85 * jl); fAttr.setZ(k * 2 + 1, 0.08 + 0.3 * jl); }
         fAttr.needsUpdate = true;
         var px = res.y * cam.projectionMatrix.elements[5] * 0.5;
         dustMat.uniforms.uTime.value = flareMat.uniforms.uTime.value = shardMat.uniforms.uTime.value = time;
