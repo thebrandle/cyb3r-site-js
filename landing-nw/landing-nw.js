@@ -745,14 +745,14 @@
         var D = b.clone().sub(a), L = D.length(), h = D.clone().setY(0).normalize(), side = new T.Vector3().crossVectors(h, up).normalize();
         function at(f, sd, u) { return a.clone().lerp(b, f).addScaledVector(side, sd * L).addScaledVector(up, u * L); }
         switch (kind) {
-          case 'climb': return [at(0.5, 0.1, 0.45)];
-          case 'dive': return [at(0.5, -0.12, -0.42)];
-          case 'swingL': return [at(0.5, 0.55, 0.08)];
-          case 'swingR': return [at(0.5, -0.55, -0.05)];
-          case 'cork': return [at(0.3, 0.38, 0.3), at(0.64, -0.34, 0.42)];
-          case 'dip': return [at(0.36, 0.05, -0.4), at(0.7, -0.08, 0.22)];
-          case 'climbR': return [at(0.5, -0.36, 0.38)];
-          default: return [at(0.5, 0.38, -0.36)];
+          case 'climb': return [at(0.5, 0.1, 0.4)];
+          case 'dive': return [at(0.5, -0.12, -0.38)];
+          case 'swingL': return [at(0.5, 0.5, 0.08)];
+          case 'swingR': return [at(0.5, -0.5, -0.05)];
+          case 'cork': return [at(0.3, 0.34, 0.28), at(0.64, -0.3, 0.36)];
+          case 'dip': return [at(0.36, 0.05, -0.34), at(0.7, -0.08, 0.2)];
+          case 'climbR': return [at(0.5, -0.32, 0.34)];
+          default: return [at(0.5, 0.34, -0.32)];
         }
       }
       var prevOut = TP[TP.length - 1];
@@ -910,14 +910,40 @@
           var p0 = STOPS[n - 1];
           if (STOPS[n].c0 < p0.c1 + 300) { STOPS[n].c0 = p0.c1 + 300; STOPS[n].c1 = Math.max(STOPS[n].c1, STOPS[n].c0 + 120); }
         }
+        /* scroll -> place on the thread: a monotone cubic (Fritsch-Carlson) through every hold, so the speed changes
+           smoothly - slow by each piece, quicker between them, never a dead stop or a jolt */
+        KX = []; KY = [];
+        STOPS.forEach(function (s) { KX.push(s.h0, s.h1); KY.push(s.c0, s.c1); });
+        var m = KX.length, dd = [], i2;
+        KM = [];
+        for (i2 = 0; i2 < m - 1; i2++) dd[i2] = (KY[i2 + 1] - KY[i2]) / Math.max(1e-6, KX[i2 + 1] - KX[i2]);
+        KM[0] = dd[0]; KM[m - 1] = dd[m - 2];
+        for (i2 = 1; i2 < m - 1; i2++) KM[i2] = dd[i2 - 1] * dd[i2] <= 0 ? 0 : (dd[i2 - 1] + dd[i2]) / 2;
+        for (i2 = 0; i2 < m - 1; i2++) {
+          if (!dd[i2]) { KM[i2] = KM[i2 + 1] = 0; continue; }
+          var ka = KM[i2] / dd[i2], kb = KM[i2 + 1] / dd[i2], hh2 = ka * ka + kb * kb;
+          if (hh2 > 9) { var tt = 3 / Math.sqrt(hh2); KM[i2] = tt * ka * dd[i2]; KM[i2 + 1] = tt * kb * dd[i2]; }
+        }
       }
-      function ease(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
-      function sstep(a, b, x) { var t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
+      var KX = [], KY = [], KM = [];
+      function mapS(x) {
+        var m = KX.length, j = 0;
+        if (x <= KX[0]) return KY[0];
+        if (x >= KX[m - 1]) return KY[m - 1];
+        while (j < m - 2 && x > KX[j + 1]) j++;
+        var h = KX[j + 1] - KX[j], t = (x - KX[j]) / h, t2 = t * t, t3 = t2 * t;
+        return (2 * t3 - 3 * t2 + 1) * KY[j] + (t3 - 2 * t2 + t) * h * KM[j] + (-2 * t3 + 3 * t2) * KY[j + 1] + (t3 - t2) * h * KM[j + 1];
+      }
+      function bell(n, pr) {   /* how much stop n is "the one in view": 1 at its hold, easing to 0 half a screen either side */
+        var s = STOPS[n], x = pr - (s.h0 + s.h1) / 2;
+        if ((n === 0 && x < 0) || (n === STOPS.length - 1 && x > 0)) return 1;
+        return Math.abs(x) >= 0.62 ? 0 : 0.5 + 0.5 * Math.cos(Math.PI * x / 0.62);
+      }
       function where(pr) {   /* where on the thread the camera is, the stop in reach, the hold or travel we are in */
         for (var n = 0; n < STOPS.length; n++) {
           var s = STOPS[n];
-          if (pr <= s.h1 || n === STOPS.length - 1) { var f = clamp((pr - s.h0) / s.hold, 0, 1); return { s: s.c0 + f * (s.c1 - s.c0), n: n, a: n, g: -1 }; }
-          if (pr < s.h1 + s.travel) { var g0 = (pr - s.h1) / s.travel, e = ease(g0); return { s: s.c1 + e * (STOPS[n + 1].c0 - s.c1), n: e < 0.5 ? n : n + 1, a: n, g: g0 }; }
+          if (pr <= s.h1 || n === STOPS.length - 1) return { s: mapS(pr), n: n, a: n, g: -1 };
+          if (pr < s.h1 + s.travel) { var g0 = (pr - s.h1) / s.travel; return { s: mapS(pr), n: g0 < 0.5 ? n : n + 1, a: n, g: g0 }; }
         }
       }
       function chapterOf(w) {   /* copy shared by neighbouring stops stays up; otherwise it hands over mid-flight */
@@ -939,7 +965,7 @@
       }
       var mx = 0, my = 0, cmx = 0, cmy = 0, prog = null, raf = 0, last = performance.now(), time = 0, act = new Float32Array(STOPS.length);
       var cpos = new T.Vector3(), ahead = new T.Vector3(), tgt = new T.Vector3(), fwd = new T.Vector3(), rgt = new T.Vector3(), upv = new T.Vector3();
-      var t1 = new T.Vector3(), t2 = new T.Vector3(), tr = new T.Vector3(), aim = new T.Vector3(), sideNow = 0, lift = 0;
+      var t1 = new T.Vector3(), t2 = new T.Vector3(), tr = new T.Vector3(), aim = new T.Vector3(), tgtS = new T.Vector3(), snap = true, sideNow = 0, lift = 0;
       var curCh = null, curN = -1, curG = 0;
       if (fine) window.addEventListener('mousemove', function (e) { mx = e.clientX / window.innerWidth * 2 - 1; my = e.clientY / window.innerHeight * 2 - 1; }, { passive: true });
       function cardFilm(n, on) {
@@ -969,21 +995,21 @@
         raf = 0;
         var dt = Math.min(0.05, Math.max(0.001, (now - last) / 1000)); last = now;
         var r = track.getBoundingClientRect(), vh = window.innerHeight;
-        if (document.hidden || r.top > vh || r.bottom < 0) { prog = null; return; }
+        if (document.hidden || r.top > vh || r.bottom < 0) { prog = null; snap = true; return; }
         time += dt;
         var pinned = Math.max(1, r.height - Hh), target = clamp(-r.top / pinned, 0, 1) * TOTAL;
         if (prog === null) prog = target;
-        prog += (target - prog) * (1 - Math.exp(-dt * 7));
+        prog += (target - prog) * (1 - Math.exp(-dt * 4.5));   /* a little glide on every scroll */
         if (Math.abs(target - prog) < 1e-4) prog = target;
         var w = where(prog), k;
-        /* which pieces are lit: the one held, crossfading to the next as the camera nears it */
-        for (k = 0; k < act.length; k++) act[k] = 0;
-        if (w.g < 0) act[w.a] = 1; else { act[w.a] = 1 - sstep(0.05, 0.55, w.g); act[w.a + 1] = sstep(0.4, 0.92, w.g); }
+        /* which piece is in view: a smooth weight per stop, peaking at its hold */
+        var inView = 0;
+        for (k = 0; k < act.length; k++) { act[k] = bell(k, prog); inView += act[k]; }
         /* on the thread: just above it, off to the side away from the piece in reach, a little higher in flight */
         var sideT = 0;
         for (k = 0; k < act.length; k++) sideT += act[k] * (STOPS[k].side || 0);
         sideNow += (sideT - sideNow) * (1 - Math.exp(-dt * 4));
-        var liftT = w.g < 0 ? 0 : Math.sin(Math.PI * w.g);
+        var liftT = clamp(1 - inView, 0, 1);
         lift += (liftT - lift) * (1 - Math.exp(-dt * 4));
         ptAt(w.s, cpos); tanAt(w.s, t1);
         tr.crossVectors(t1, up).normalize();
@@ -991,7 +1017,7 @@
         cam.position.copy(cpos).addScaledVector(up, 200 + lift * 80 - cmy * 30).addScaledVector(tr, -sideNow * 190 + cmx * 50);
         /* look along the thread ahead, turning to frame the piece in reach (it sits right of centre over the copy,
            centred on portrait screens) */
-        ptAt(w.s + 1100, ahead); ahead.addScaledVector(up, -30);
+        ptAt(w.s + 2000, ahead); ahead.addScaledVector(up, -30);
         tgt.copy(ahead);
         for (k = 0; k < act.length; k++) {
           if (!act[k] || !STOPS[k].P) continue;
@@ -1003,7 +1029,11 @@
         tanAt(w.s + 500, t2);
         var roll = clamp(-((t2.x - t1.x) * tr.x + (t2.z - t1.z) * tr.z) * 1.1, -0.16, 0.16) * lift;   /* level while a piece is held */
         cam.up.copy(up).multiplyScalar(Math.cos(roll)).addScaledVector(tr, Math.sin(roll));
-        cam.lookAt(tgt); cam.updateMatrixWorld();
+        /* the gaze eases round, never snaps: the direction is smoothed (a smoothed point would trail behind a fast camera) */
+        aim.subVectors(tgt, cam.position).normalize();
+        if (snap || !tgtS.lengthSq()) tgtS.copy(aim); else tgtS.lerp(aim, 1 - Math.exp(-dt * 4)).normalize();
+        snap = false;
+        cam.lookAt(aim.copy(cam.position).addScaledVector(tgtS, 1000)); cam.updateMatrixWorld();
         /* HTML pieces: the camera moves them all in one transform (three's CSS3DRenderer maths) */
         var fovPx = cam.projectionMatrix.elements[5] * Hh / 2, e = cam.matrixWorldInverse.elements;
         if (fovPx !== lastFov) { view.style.perspective = fovPx + 'px'; lastFov = fovPx; }
@@ -1017,7 +1047,7 @@
           var it = items[k];
           if (!it.pos) continue;
           v.subVectors(it.pos, cam.position);
-          var d = v.length(), lit = it.stop >= 0 ? act[it.stop] : it === IT.names ? workW * 0.5 : 0;
+          var d = v.length(), lit = it.stop >= 0 ? Math.min(1, act[it.stop] * 1.6) : it === IT.names ? workW * 0.5 : 0;
           var ghost = d < 4600 && !it.solo ? 0.07 : 0;   /* a result waits unseen: its figure has not counted yet */
           var op = v.dot(fwd) < 120 ? 0 : Math.max(lit, ghost) * clamp((d - 300) / 450, 0, 1) * clamp((7200 - d) / 1600, 0, 1);
           op = Math.round(op * 50) / 50;
