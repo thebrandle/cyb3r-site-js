@@ -4,9 +4,9 @@
  * labels and side copy lagging the scroll, magnetic links, a scroll-scrubbed logo strip, a brand-name strip that
  * drifts with scroll speed, a scroll-linked example rail whose cards open from the bottom, fixed-layer image bands,
  * floating statements, a one-open accordion, the floating Discovery Call badge, a pop-up that opens as a circle
- * from the click, a veil that rises before leaving for another page, and a teal light thread that winds through
- * the page after the hero (WebGL, after ysuriadesign.co). The hero film is a muted loop; "Watch the
- * video" or a click on the film restarts it with sound and controls. The Discovery Call modal (second block) moves
+ * from the click, a veil that rises before leaving for another page, and after the hero a 3D world the scroll
+ * flies through along a teal thread of light (three.js, after ysuriadesign.co). The hero film is a muted loop;
+ * "Watch the video" or a click on the film restarts it with sound and controls. The Discovery Call modal (second block) moves
  * the page's NATIVE Webflow form (#cybDiscoveryNative) into it, so submissions still land in Webflow. */
 (function () {
   if (window.__lnw) return; window.__lnw = 1;
@@ -380,6 +380,7 @@
     bands.forEach(function (b) { bandIO.observe(b); });
   } else bands.forEach(function (b) { b.classList.add('is-live'); });
   if (!reduce) onTick(function () {
+    if (root.classList.contains('is-3d')) return false;   /* the 3D world shows through the bands instead */
     bands.forEach(function (b, k) {
       if (!b.classList.contains('is-live')) return;
       var p = progress(b) - 0.5, orbs = b.querySelectorAll('i');
@@ -518,201 +519,410 @@
     });
   }
 
-  /* ---- the light thread (after ysuriadesign.co): one teal line of light winding through the page in 3D after the
-     hero. Its point runs 72% down the screen, so it leads on as you scroll; depth gives it parallax and thickness,
-     pulses of light travel along it, dust floats around it, and it ends plugged into the closing Discovery Call
-     button. WebGL1 in a transparent fixed canvas behind the copy (the sections sit above it at z-index 1). */
+  /* ---- the light thread, in 3D (after ysuriadesign.co). After the hero the page floats over a three.js world - a
+     navy space of drifting dust and slow-turning dark shards - and the scroll flies a camera along a rail through it.
+     A teal thread of light runs beside the camera into the distance and ties the sections together: it weaves under
+     the opening statement, threads a gate of light at each image band, runs through four rings for the four agent
+     steps, loops round the shard field at the work, coils round the camera at the results, swings wide at the
+     platform, lays a ruler under the transparency rows and ends in a ring of light at the closing call to action.
+     Pulses run ahead along it and light the shards they pass. three.js r128 (the copy the homepage loads) arrives
+     after the intro; off for reduced motion, and without WebGL the page keeps its image bands. */
   var threadOn = function () {};
-  (function lightThread() {
-    if (reduce) return;
-    var cvs = document.createElement('canvas'), gl = null;
-    cvs.className = 'lnw-thread'; cvs.setAttribute('aria-hidden', 'true');
-    try { gl = cvs.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: true }); } catch (e) {}
-    if (!gl) return;
-    root.insertBefore(cvs, root.firstChild);
-    var D = 1.6, HEAD = 0.72, COL = [0.224, 0.945, 0.878], small = window.innerWidth < 768;
+  (function thread3d() {
+    var hero = document.getElementById('lnwHero');
+    if (reduce || !hero) return;
+    var started = false;
+    threadOn = function () {
+      if (started) return; started = true;
+      if (window.THREE && window.THREE.WebGLRenderer) { init(window.THREE); return; }
+      var s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+      s.integrity = 'sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==';
+      s.crossOrigin = 'anonymous';
+      s.onload = function () { if (window.THREE) init(window.THREE); };
+      document.head.appendChild(s);
+    };
 
-    function program(vs, fs) {
-      var p = gl.createProgram();
-      [[gl.VERTEX_SHADER, vs], [gl.FRAGMENT_SHADER, fs]].forEach(function (s) {
-        var sh = gl.createShader(s[0]); gl.shaderSource(sh, s[1]); gl.compileShader(sh); gl.attachShader(p, sh);
+    /* every line of light (thread, gates, ruler) is a camera-facing ribbon: world width, so it thins with distance,
+       never under a pixel; a hot core inside a soft halo, fogged by depth, pulses travelling along it */
+    var RIBBON_VS = [
+      'attribute vec3 tdir;attribute float side;attribute float arc;',
+      'uniform vec2 uRes;uniform float uWidth;uniform float uMinPx;',
+      'varying float vSide;varying float vArc;varying float vDepth;varying float vPx;',
+      'void main(){',
+      ' vec4 mv=modelViewMatrix*vec4(position,1.0);vec4 mt=modelViewMatrix*vec4(position+tdir,1.0);',
+      ' float z=min(mv.z,-0.08);',
+      ' vec4 c=projectionMatrix*vec4(mv.xy,z,1.0);vec4 c2=projectionMatrix*vec4(mt.xy,min(mt.z,-0.08),1.0);',
+      ' vec2 d=(c2.xy/c2.w-c.xy/c.w)*uRes;float dl=length(d);',
+      ' vec2 n=dl>0.0001?vec2(-d.y,d.x)/dl:vec2(0.0,1.0);',
+      ' float ppu=projectionMatrix[1][1]*uRes.y*0.5/-z,px=clamp(uWidth*ppu,uMinPx,220.0);',
+      /* where the line turns toward the camera it narrows, instead of fanning into a starburst */
+      ' px=max(uMinPx,px*mix(0.22,1.0,smoothstep(0.04,0.4,dl*0.5/ppu)));',
+      ' c.xy+=n*side*px*2.0/uRes*c.w;gl_Position=c;',
+      ' vSide=side;vArc=arc;vDepth=-mv.z;vPx=px;}'
+    ].join('\n');
+    var RIBBON_FS = [
+      'uniform vec3 uColor;uniform vec3 uCore;uniform float uGain;uniform float uFog;',
+      'uniform float uPulse[4];uniform float uPulseGain;uniform float uFrom;uniform float uTo;',
+      'varying float vSide;varying float vArc;varying float vDepth;varying float vPx;',
+      'void main(){',
+      ' float a=abs(vSide),dpx=a*vPx,cw=max(vPx*0.1,1.2),q=dpx/cw;',
+      ' float core=exp(-q*q);float halo=exp(-dpx/max(vPx*0.3,1.6))*(1.0-smoothstep(0.7,1.0,a));',
+      ' float p=0.0;for(int k=0;k<4;k++){float e=(vArc-uPulse[k])*0.55;p+=exp(-e*e);}p*=uPulseGain;',
+      ' float f=exp(-vDepth*vDepth*uFog*uFog)*smoothstep(0.5,4.5,vDepth);',
+      ' float ends=smoothstep(uFrom,uFrom+1.5,vArc)*(1.0-smoothstep(uTo-0.6,uTo,vArc));',
+      ' vec3 col=(uColor*halo*0.55*(1.0+p*2.2)+uCore*core*(0.85+p*1.6))*f*ends*uGain;',
+      ' gl_FragColor=vec4(col,1.0);}'
+    ].join('\n');
+    /* dust and flares: round soft points sized in world units */
+    var DOT_VS = [
+      'attribute vec4 aRnd;uniform float uTime;uniform float uPx;uniform float uFog;uniform float uMaxPx;varying float vA;',
+      'void main(){vec3 p=position;',
+      ' p.x+=sin(uTime*0.27+aRnd.y*6.28)*0.35*aRnd.w;p.y+=cos(uTime*0.21+aRnd.y*4.1)*0.35*aRnd.w;',
+      ' vec4 mv=modelViewMatrix*vec4(p,1.0);float d=max(-mv.z,0.05);',
+      ' gl_PointSize=clamp(aRnd.x*uPx/d,1.0,uMaxPx);',
+      ' float tw=0.6+0.4*sin(uTime*1.5+aRnd.y*23.0);',
+      ' vA=aRnd.z*tw*exp(-d*d*uFog*uFog)*smoothstep(0.4,2.5,d)*step(0.0,-mv.z);',
+      ' gl_Position=projectionMatrix*mv;}'
+    ].join('\n');
+    var DOT_FS = 'uniform vec3 uColor;varying float vA;void main(){vec2 q=gl_PointCoord*2.0-1.0;float r=dot(q,q);if(r>1.0)discard;' +
+      'gl_FragColor=vec4(uColor*exp(-r*4.0)*vA,1.0);}';
+    /* shards: dark faceted solids turning slowly, a teal rim, lit by the pulses and the thread near the camera */
+    var SHARD_VS = [
+      'attribute vec4 aSpin;uniform float uTime;varying vec3 vN;varying vec3 vW;',
+      'vec3 rot(vec3 v,vec3 ax,float a){float c=cos(a),s=sin(a);return v*c+cross(ax,v)*s+ax*dot(ax,v)*(1.0-c);}',
+      'void main(){float a=uTime*aSpin.w;vec3 p=rot(position,aSpin.xyz,a),n=rot(normal,aSpin.xyz,a);',
+      ' mat4 m=modelMatrix;',
+      ' #ifdef USE_INSTANCING',
+      ' m=m*instanceMatrix;',
+      ' #endif',
+      ' vec4 w=m*vec4(p,1.0);vN=normalize(mat3(m)*n);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}'
+    ].join('\n');
+    var SHARD_FS = [
+      'uniform vec3 uBase;uniform vec3 uTeal;uniform vec3 uFogCol;uniform float uFog;uniform vec3 uL[6];uniform float uLi[6];',
+      'varying vec3 vN;varying vec3 vW;',
+      'void main(){vec3 N=normalize(vN),V=normalize(cameraPosition-vW);',
+      ' float fr=1.0-max(dot(N,V),0.0);float key=max(dot(N,normalize(vec3(0.35,1.0,0.25))),0.0);',
+      ' vec3 c=uBase*(0.28+0.72*key)+uTeal*fr*fr*fr*0.42;',
+      ' for(int i=0;i<6;i++){vec3 L=uL[i]-vW;float d2=dot(L,L);c+=uTeal*uLi[i]*max(dot(N,L*inversesqrt(d2+0.0001)),0.0)/(1.0+d2*0.16);}',
+      ' float d=length(cameraPosition-vW);gl_FragColor=vec4(mix(uFogCol,c,exp(-d*d*uFog*uFog)),1.0);}'
+    ].join('\n');
+
+    function init(T) {
+      var cvs = document.createElement('canvas'), renderer, phone = window.innerWidth < 768;
+      cvs.className = 'lnw-thread'; cvs.setAttribute('aria-hidden', 'true');
+      try { renderer = new T.WebGLRenderer({ canvas: cvs, antialias: !phone, alpha: false, powerPreference: 'high-performance' }); }
+      catch (e) { return; }
+      root.insertBefore(cvs, root.firstChild);
+      root.classList.add('is-3d');
+      var BG = new T.Color('#131c25'), TEAL = new T.Color('#39F1E0'), CORE = new T.Color('#e6fffc'), FOG = 0.02, UNIT = 45;   /* UNIT: world units per screen of scroll */
+      renderer.setClearColor(BG, 1);
+      var scene = new T.Scene(), cam = new T.PerspectiveCamera(58, 1, 0.05, 170), world = new T.Group();
+      scene.add(world);
+      var res = new T.Vector2(1, 1), time = 0, last = performance.now(), dpr = 1;
+      var pulse = [0, 0, 0, 0], lightP = [], lightI = [0, 0, 0, 0, 0, 0];
+      for (var li = 0; li < 6; li++) lightP.push(new T.Vector3(0, -999, 0));
+
+      function ribbonMat(width, minPx, gain, pulses) {
+        return new T.ShaderMaterial({
+          uniforms: { uRes: { value: res }, uWidth: { value: width }, uMinPx: { value: minPx }, uColor: { value: TEAL }, uCore: { value: CORE },
+            uGain: { value: gain }, uFog: { value: FOG }, uPulse: { value: pulses ? pulse : [-999, -999, -999, -999] }, uPulseGain: { value: pulses ? 1 : 0 },
+            uFrom: { value: -1e5 }, uTo: { value: 1e5 } },
+          vertexShader: RIBBON_VS, fragmentShader: RIBBON_FS, transparent: true, depthWrite: false, blending: T.AdditiveBlending
+        });
+      }
+      function dotMat(color, maxPx) {
+        return new T.ShaderMaterial({
+          uniforms: { uTime: { value: 0 }, uPx: { value: 500 }, uFog: { value: FOG }, uMaxPx: { value: maxPx }, uColor: { value: new T.Color(color) } },
+          vertexShader: DOT_VS, fragmentShader: DOT_FS, transparent: true, depthWrite: false, blending: T.AdditiveBlending
+        });
+      }
+      var threadMat = ribbonMat(0.5, 1.3, 1, true), ringMat = ribbonMat(0.3, 1.1, 0.75, false), tickMat = ribbonMat(0.16, 0.9, 0.5, false);
+      var dustMat = dotMat('#bdfaf4', 40), flareMat = dotMat('#7ff6ea', 420);
+      var shardMat = new T.ShaderMaterial({
+        uniforms: { uTime: { value: 0 }, uBase: { value: new T.Color('#223140') }, uTeal: { value: TEAL }, uFogCol: { value: BG }, uFog: { value: FOG },
+          uL: { value: lightP }, uLi: { value: lightI } },
+        vertexShader: SHARD_VS, fragmentShader: SHARD_FS
       });
-      gl.linkProgram(p);
-      return p;
-    }
-    /* a ribbon around the line: hot core + soft halo, pulses travelling from the start to the point, a brighter tip */
-    var line = program(
-      'attribute vec4 a;attribute float t;uniform vec2 res;varying float vs,vl,vt;' +
-      'void main(){vs=a.z;vl=a.w;vt=t;gl_Position=vec4(a.x/res.x*2.-1.,1.-a.y/res.y*2.,0.,1.);}',
-      'precision mediump float;varying float vs,vl,vt;uniform float time,head;uniform vec3 col;' +
-      'void main(){float d=vs*vs,core=exp(-d*150.),halo=exp(-d*6.5),p=0.;' +
-      'for(int k=0;k<3;k++){float e=(vt-fract(time*.06+float(k)/3.)*head)*170.;p+=exp(-e*e);}' +
-      'float q=(vt-head)*120.,tip=exp(-q*q),fade=smoothstep(0.,.012,vt);' +
-      'float i=(halo*.38+core)*(1.+p*1.5+tip*2.4)*vl*fade;' +
-      'vec3 c=col*i+vec3(.8,1.,.97)*core*vl*fade*(.55+p+tip*1.6);' +
-      'gl_FragColor=vec4(c,clamp(max(c.r,max(c.g,c.b)),0.,1.));}');
-    /* round soft points: floating dust, the spark at the point, the light where it plugs in */
-    var dots = program(
-      'attribute vec4 a;uniform vec2 res;uniform float dpr;varying float va;' +
-      'void main(){va=a.w;gl_Position=vec4(a.x/res.x*2.-1.,1.-a.y/res.y*2.,0.,1.);gl_PointSize=a.z*dpr;}',
-      'precision mediump float;varying float va;uniform vec3 col;' +
-      'void main(){vec2 q=gl_PointCoord*2.-1.;float r=dot(q,q);if(r>1.)discard;' +
-      'vec3 c=(col*exp(-r*3.2)+vec3(1.)*exp(-r*16.)*.7)*va;gl_FragColor=vec4(c,clamp(max(c.r,max(c.g,c.b)),0.,1.));}');
-    var L = { a: gl.getAttribLocation(line, 'a'), t: gl.getAttribLocation(line, 't'), res: gl.getUniformLocation(line, 'res'),
-      time: gl.getUniformLocation(line, 'time'), head: gl.getUniformLocation(line, 'head'), col: gl.getUniformLocation(line, 'col') };
-    var P = { a: gl.getAttribLocation(dots, 'a'), res: gl.getUniformLocation(dots, 'res'), dpr: gl.getUniformLocation(dots, 'dpr'), col: gl.getUniformLocation(dots, 'col') };
-    var lineBuf = gl.createBuffer(), dotBuf = gl.createBuffer();
-    var maxPt = (gl.getParameter(gl.ALIASED_POINT_SIZE_RANGE) || [1, 64])[1];
 
-    /* the path: through the side margins of each section, swooping across (toward the viewer) in the gap above it,
-       diving deep into each image band, ending on the closing button. x = px from the centre, y = page px, z = depth */
-    var SX, SY, SZ, ST, N = 0, startY = 0, endY = 0, plug = null, dust = [];
-    function crc(p0, p1, p2, p3, u) {   /* centripetal Catmull-Rom: no loops or cusps between uneven stops */
-      function knot(ti, a, b) { return ti + Math.max(Math.pow(Math.pow(b[0] - a[0], 2) + Math.pow(b[1] - a[1], 2) + Math.pow(b[2] - a[2], 2), 0.25), 1e-4); }
-      var t0 = 0, t1 = knot(t0, p0, p1), t2 = knot(t1, p1, p2), t3 = knot(t2, p2, p3), t = t1 + (t2 - t1) * u, o = [];
-      for (var j = 0; j < 3; j++) {
-        var a1 = ((t1 - t) * p0[j] + (t - t0) * p1[j]) / (t1 - t0), a2 = ((t2 - t) * p1[j] + (t - t1) * p2[j]) / (t2 - t1);
-        var a3 = ((t3 - t) * p2[j] + (t - t2) * p3[j]) / (t3 - t2);
-        var b1 = ((t2 - t) * a1 + (t - t0) * a2) / (t2 - t0), b2 = ((t3 - t) * a2 + (t - t1) * a3) / (t3 - t1);
-        o[j] = ((t2 - t) * b1 + (t - t1) * b2) / (t2 - t1);
+      /* geometry for any number of polylines: two vertices per point (the ribbon's two edges) */
+      function ribbonGeo(lines) {
+        var n = 0, i, j;
+        lines.forEach(function (l) { n += l.p.length / 3; });
+        var pos = new Float32Array(n * 6), td = new Float32Array(n * 6), side = new Float32Array(n * 2), arc = new Float32Array(n * 2), idx = [], v = 0;
+        lines.forEach(function (l) {
+          var m = l.p.length / 3, p = l.p, base = v;
+          for (i = 0; i < m; i++) {
+            var a = l.closed ? (i + m - 1) % m : Math.max(i - 1, 0), b = l.closed ? (i + 1) % m : Math.min(i + 1, m - 1);
+            var tx = p[b * 3] - p[a * 3], ty = p[b * 3 + 1] - p[a * 3 + 1], tz = p[b * 3 + 2] - p[a * 3 + 2], tl = Math.sqrt(tx * tx + ty * ty + tz * tz) || 1;
+            for (j = 0; j < 2; j++) {
+              var o = v * 3;
+              pos[o] = p[i * 3]; pos[o + 1] = p[i * 3 + 1]; pos[o + 2] = p[i * 3 + 2];
+              td[o] = tx / tl; td[o + 1] = ty / tl; td[o + 2] = tz / tl;
+              side[v] = j ? -1 : 1; arc[v] = l.a ? l.a[i] : 0; v++;
+            }
+            if (i < m - 1 || l.closed) {
+              var q = base + i * 2, r = base + ((i + 1) % m) * 2;
+              idx.push(q, q + 1, r, q + 1, r + 1, r);
+            }
+          }
+        });
+        var g = new T.BufferGeometry();
+        g.setAttribute('position', new T.BufferAttribute(pos, 3));
+        g.setAttribute('tdir', new T.BufferAttribute(td, 3));
+        g.setAttribute('side', new T.BufferAttribute(side, 1));
+        g.setAttribute('arc', new T.BufferAttribute(arc, 1));
+        g.setIndex(idx);
+        return g;
       }
-      return o;
-    }
-    function build() {
-      var W = window.innerWidth, sy = window.pageYOffset, E = W * (small ? 0.46 : 0.44), Z = W * 0.5, pts = [], side = 1;
-      var hero = document.getElementById('lnwHero'), cta = root.querySelector('.lnw-cta'), btn = cta && cta.querySelector('.lnw-btn');
-      if (!hero || !btn || !hero.offsetHeight) return;
-      function box(el) { var r = el.getBoundingClientRect(); return { t: r.top + sy, b: r.bottom + sy, h: r.height }; }
-      var h = box(hero);
-      startY = h.b;
-      pts.push([W * 0.28, h.b - 90, -1.3]);   /* rises from under the bottom edge of the film */
-      Array.prototype.forEach.call(root.children, function (el) {
-        if (el === hero || el === cvs || el === cta || !el.offsetHeight || el.classList.contains('lnw-badge')) return;
-        var r = box(el);
-        if (el.classList.contains('lnw-band')) { pts.push([side * W * 0.12, r.t + r.h / 2, -1.7]); side = -side; return; }
-        if (el.classList.contains('lnw-logos')) { pts.push([-side * W * 0.12, r.t + r.h * 0.42, -0.3], [side * E, r.t + r.h * 0.62, -0.12]); return; }
-        var pad = Math.min(parseFloat(getComputedStyle(el).paddingTop) || 120, r.h * 0.2);
-        pts.push([0, r.t + pad * 0.45, 0.4],
-          [side * E, r.t + pad + (r.h - 2 * pad) * 0.12, 0.05],
-          [side * E * 0.97, r.b - pad - (r.h - 2 * pad) * 0.12, -0.08]);
-        side = -side;
+
+      /* ---- the layout: where each section sits along the rail (s = world units; the camera is at s while the page
+         is scrolled s/UNIT screens past the end of the hero) */
+      var L = null, rail = null, thread = null, threadMesh = null, segs = [];
+      function measure() {
+        var sy = window.pageYOffset, vh = window.innerHeight, hb = hero.getBoundingClientRect().bottom + sy;
+        var k = UNIT / vh, secs = [];
+        Array.prototype.forEach.call(root.children, function (el) {
+          if (el === hero || el === cvs || !el.offsetHeight || el.classList.contains('lnw-badge')) return;
+          var r = el.getBoundingClientRect(), c = el.classList;
+          secs.push({ kind: c.contains('lnw-band') ? 'band' : c.contains('lnw-logos') ? 'logos' : c.contains('lnw-agent') ? 'agent' : c.contains('lnw-work') ? 'work'
+            : c.contains('lnw-res') ? 'res' : c.contains('lnw-plat') ? 'plat' : c.contains('lnw-trans') ? 'trans' : c.contains('lnw-int') ? 'int'
+            : c.contains('lnw-cta') ? 'cta' : 'pos',
+            s: (r.top + sy - hb - vh * 0.55) * k, e: (r.bottom + sy - hb - vh * 0.55) * k });
+        });
+        var end = Math.max(20, (root.getBoundingClientRect().bottom + sy - vh - hb) * k);
+        return { hb: hb, k: k, vh: vh, w: window.innerWidth, end: end, secs: secs,
+          sig: [Math.round(hb), window.innerWidth, Math.round(end)].concat(secs.map(function (x) { return Math.round(x.s); })).join(',') };
+      }
+
+      /* ---- the rail: a long gentle curve forward (-z), sampled every DS with a frame (tangent, right, up) */
+      var DS = 0.2, S0 = -60;
+      function makeRail(len) {
+        var pts = [], s;
+        for (s = S0 - 12; s <= len + 200; s += 12)
+          pts.push(new T.Vector3(10 * Math.sin(s / 41) + 4 * Math.sin(s / 15.3 + 1), 3.2 * Math.sin(s / 33 + 2) + 1.2 * Math.sin(s / 11.7), -s));
+        var curve = new T.CatmullRomCurve3(pts, false, 'centripetal');
+        curve.arcLengthDivisions = pts.length * 40;   /* even spacing along a long curve */
+        var total = curve.getLength(), n = Math.floor(total / DS);
+        var sp = curve.getSpacedPoints(n), P = new Float32Array((n + 1) * 3), Tg = new Float32Array((n + 1) * 3), R = new Float32Array((n + 1) * 3), U = new Float32Array((n + 1) * 3);
+        var t = new T.Vector3(), r = new T.Vector3(), u = new T.Vector3(), up = new T.Vector3(0, 1, 0);
+        for (var i = 0; i <= n; i++) {
+          P[i * 3] = sp[i].x; P[i * 3 + 1] = sp[i].y; P[i * 3 + 2] = sp[i].z;
+          t.subVectors(sp[Math.min(i + 1, n)], sp[Math.max(i - 1, 0)]).normalize();
+          r.crossVectors(t, up).normalize(); u.crossVectors(r, t).normalize();
+          Tg[i * 3] = t.x; Tg[i * 3 + 1] = t.y; Tg[i * 3 + 2] = t.z;
+          R[i * 3] = r.x; R[i * 3 + 1] = r.y; R[i * 3 + 2] = r.z;
+          U[i * 3] = u.x; U[i * 3 + 1] = u.y; U[i * 3 + 2] = u.z;
+        }
+        return { n: n + 1, ds: total / n, s0: S0 - 12, P: P, T: Tg, R: R, U: U };   /* s counts arc length from the first control point */
+      }
+      function lerp3(A, a, f, v) { v.set(A[a] + (A[a + 3] - A[a]) * f, A[a + 1] + (A[a + 4] - A[a + 1]) * f, A[a + 2] + (A[a + 5] - A[a + 2]) * f); }
+      function at(s, o) {   /* rail point + frame at s, interpolated: o = {p, t, r, u} */
+        var f = (s - rail.s0) / rail.ds, i = Math.floor(f);
+        if (i < 0) { i = 0; f = 0; } else if (i > rail.n - 2) { i = rail.n - 2; f = 1; } else f -= i;
+        lerp3(rail.P, i * 3, f, o.p); lerp3(rail.T, i * 3, f, o.t); lerp3(rail.R, i * 3, f, o.r); lerp3(rail.U, i * 3, f, o.u);
+        return o;
+      }
+      function frameObj() { return { p: new T.Vector3(), t: new T.Vector3(), r: new T.Vector3(), u: new T.Vector3() }; }
+
+      /* ---- where the thread sits beside the rail, section by section (dx right, dy up, in the rail's frame) */
+      var TAU = Math.PI * 2;
+      function pattern(kind, u, s) {
+        switch (kind) {
+          case 'logos': return [2.2 * Math.sin(0.15 * u + 2), -2.4];
+          case 'band': return [0.5 * Math.sin(0.2 * u), -2.5];
+          case 'agent': return [0.35 * Math.sin(0.3 * u), -1.85];
+          case 'work': { var a = u * TAU / 24 - Math.PI / 2; return [4.4 * Math.cos(a), 3.5 * Math.sin(a) - 0.4]; }
+          case 'res': { var b = u * TAU / 10 - Math.PI / 2; return [2.5 * Math.cos(b), 2.5 * Math.sin(b)]; }
+          case 'plat': return [6.5 * Math.sin(u * TAU / 46), -0.8 + 2.6 * Math.cos(u * TAU / 46)];
+          case 'trans': return [-3.4, -1.7];
+          case 'int': return [3.6 * Math.sin(0.13 * u + 1), -1.4 + 0.9 * Math.sin(0.09 * u)];
+          case 'cta': {
+            var w = clamp((s - (L.end - 8)) / 30, 0, 1); w = w * w * (3 - 2 * w);
+            return [2.6 * Math.sin(0.12 * u + 0.5) * (1 - w), (-1.6 + 0.5 * Math.sin(0.1 * u)) * (1 - w) + 0.2 * w];
+          }
+          default: return [3.4 * Math.sin(0.1 * u + 0.6), -1.5 + 0.7 * Math.sin(0.07 * u)];
+        }
+      }
+      function disp(s) {
+        var i = 0, BL = 7;
+        while (i < segs.length - 1 && s >= segs[i + 1].b) i++;
+        var d = pattern(segs[i].kind, s - segs[i].o, s), j = -1;
+        if (i > 0 && s < segs[i].b + BL) j = i - 1;
+        else if (i < segs.length - 1 && s > segs[i + 1].b - BL) j = i + 1;
+        if (j < 0) return d;
+        var bd = j < i ? segs[i].b : segs[i + 1].b, w = clamp((s - bd + BL) / (2 * BL), 0, 1), e = pattern(segs[j].kind, s - segs[j].o, s);
+        w = w * w * (3 - 2 * w);   /* weight of the later section across the boundary */
+        if (j < i) w = 1 - w;
+        return [d[0] + (e[0] - d[0]) * w, d[1] + (e[1] - d[1]) * w];
+      }
+      var F1 = null;
+      function threadPoint(s, v) { at(s, F1); var d = disp(s); return v.copy(F1.p).addScaledVector(F1.r, d[0]).addScaledVector(F1.u, d[1]); }
+
+      function dispose() {
+        while (world.children.length) { var c = world.children.pop(); if (c.geometry) c.geometry.dispose(); if (c.dispose) c.dispose(); }
+      }
+      function build() {
+        var M = measure();
+        if (L && M.sig === L.sig) return;
+        L = M; F1 = frameObj();
+        dispose();
+        rail = makeRail(L.end + 60);
+        /* the stretch of thread seen while each section is on screen starts a little ahead of its anchor */
+        segs = L.secs.map(function (x) { return { kind: x.kind, b: x.s + 8, o: x.s + 8, s: x.s, e: x.e }; });
+        segs[0].b = -1e5;
+        var sStart = 4, sEnd = L.end + 22, A = frameObj(), v = new T.Vector3(), lines = [], i, j, s;
+        /* the thread */
+        var tp = [], ta = [];
+        for (s = sStart; s <= sEnd + 0.001; s += DS) { threadPoint(s, v); tp.push(v.x, v.y, v.z); ta.push(s); }
+        thread = { from: sStart, to: sEnd, step: DS, count: ta.length };
+        threadMesh = new T.Mesh(ribbonGeo([{ p: tp, a: ta }]), threadMat);
+        threadMat.uniforms.uFrom.value = sStart; threadMat.uniforms.uTo.value = sEnd;
+        threadMesh.frustumCulled = false; world.add(threadMesh);
+        /* gates: one at each image band, four rings over the agent steps, the closing ring the thread runs into */
+        function ring(sc, rad, lift) {
+          at(sc, A); var p = [];
+          for (j = 0; j < 96; j++) {
+            var a = j / 96 * TAU;
+            p.push(A.p.x + A.r.x * Math.cos(a) * rad + A.u.x * (Math.sin(a) * rad + lift), A.p.y + A.r.y * Math.cos(a) * rad + A.u.y * (Math.sin(a) * rad + lift),
+              A.p.z + A.r.z * Math.cos(a) * rad + A.u.z * (Math.sin(a) * rad + lift));
+          }
+          lines.push({ p: p, closed: true });
+        }
+        segs.forEach(function (g) {
+          if (g.kind === 'band') ring(g.s + 24, 4.6, 0.2);
+          if (g.kind === 'agent') { var span = Math.max(28, g.e - g.s - 18); for (j = 0; j < 4; j++) ring(g.s + 16 + j * span / 3.4, 3.2, 0.1); }
+        });
+        ring(sEnd, 3.0, 0.2); ring(sEnd, 3.7, 0.2);
+        var rings = new T.Mesh(ribbonGeo(lines), ringMat); rings.frustumCulled = false; world.add(rings);
+        /* a ruler of ticks under the transparency rows */
+        var ticks = [];
+        segs.forEach(function (g) {
+          if (g.kind !== 'trans') return;
+          for (s = g.b + 6, j = 0; s < g.b + Math.max(30, g.e - g.s); s += 2.2, j++) {
+            at(s, A); threadPoint(s, v);
+            var h = j % 5 ? 0.42 : 0.95;
+            ticks.push({ p: [v.x, v.y, v.z, v.x + A.u.x * h, v.y + A.u.y * h, v.z + A.u.z * h] });
+          }
+        });
+        if (ticks.length) { var tk = new T.Mesh(ribbonGeo(ticks), tickMat); tk.frustumCulled = false; world.add(tk); }
+        /* dust through the whole volume */
+        var len = sEnd - S0 + 40, nd = Math.min(5200, Math.round(len * (phone ? 2.6 : 4.4))), dp = new Float32Array(nd * 3), dr = new Float32Array(nd * 4);
+        for (i = 0; i < nd; i++) {
+          s = S0 + Math.random() * len; at(s, A);
+          var ang = Math.random() * TAU, rad = 0.8 + Math.pow(Math.random(), 0.8) * 18;
+          v.copy(A.p).addScaledVector(A.r, Math.cos(ang) * rad).addScaledVector(A.u, Math.sin(ang) * rad * 0.8);
+          dp[i * 3] = v.x; dp[i * 3 + 1] = v.y; dp[i * 3 + 2] = v.z;
+          dr[i * 4] = 0.03 + Math.random() * 0.06; dr[i * 4 + 1] = Math.random(); dr[i * 4 + 2] = 0.25 + Math.random() * 0.75; dr[i * 4 + 3] = Math.random();
+        }
+        var dg = new T.BufferGeometry();
+        dg.setAttribute('position', new T.BufferAttribute(dp, 3)); dg.setAttribute('aRnd', new T.BufferAttribute(dr, 4));
+        var dust = new T.Points(dg, dustMat); dust.frustumCulled = false; world.add(dust);
+        /* flares: the spark where the thread starts, the light inside the closing ring */
+        var fp = [], fr = [];
+        function flare(p, size, gain) { fp.push(p.x, p.y, p.z); fr.push(size, 0.5, gain, 0); }
+        threadPoint(sStart, v); flare(v, 0.9, 1); flare(v, 3.2, 0.35);
+        threadPoint(sEnd, v); flare(v, 1.2, 1); flare(v, 6.5, 0.4);
+        var fg = new T.BufferGeometry();
+        fg.setAttribute('position', new T.BufferAttribute(new Float32Array(fp), 3)); fg.setAttribute('aRnd', new T.BufferAttribute(new Float32Array(fr), 4));
+        var flares = new T.Points(fg, flareMat); flares.frustumCulled = false; world.add(flares);
+        /* shards: scattered round the rail, thicker round the work */
+        var base = new T.IcosahedronGeometry(1, 0), bp = base.attributes.position, jit = {};
+        for (i = 0; i < bp.count; i++) {
+          var key = bp.getX(i).toFixed(3) + ',' + bp.getY(i).toFixed(3) + ',' + bp.getZ(i).toFixed(3);
+          if (!jit[key]) jit[key] = 0.72 + Math.random() * 0.5;
+          bp.setXYZ(i, bp.getX(i) * jit[key], bp.getY(i) * jit[key], bp.getZ(i) * jit[key]);
+        }
+        base.computeVertexNormals();
+        var work = segs.filter(function (g) { return g.kind === 'work'; })[0], extra = work ? (phone ? 30 : 60) : 0;
+        var ns = Math.round(clamp(len * (phone ? 0.16 : 0.28), 60, 320)) + extra, spin = new Float32Array(ns * 4);
+        var shards = new T.InstancedMesh(base, shardMat, ns), m = new T.Matrix4(), qt = new T.Quaternion(), sc = new T.Vector3(), ax = new T.Vector3();
+        for (i = 0; i < ns; i++) {
+          var near = i >= ns - extra;
+          s = near ? work.o + Math.random() * Math.max(40, work.e - work.s + 20) : S0 + 20 + Math.random() * (len - 20);
+          at(s, A);
+          var an = Math.random() * TAU, rr = near ? 5.5 + Math.random() * 9 : 6 + Math.pow(Math.random(), 1.3) * 22;
+          v.copy(A.p).addScaledVector(A.r, Math.cos(an) * rr).addScaledVector(A.u, Math.sin(an) * rr * 0.72);
+          var k = (0.18 + Math.pow(Math.random(), 2.2) * (near ? 1.3 : 1.9)) * clamp(rr / 11, 0.45, 1);   /* the close ones stay small */
+          sc.set(k * (0.8 + Math.random() * 0.5), k * (0.7 + Math.random() * 0.6), k * (0.8 + Math.random() * 0.5));
+          qt.setFromAxisAngle(ax.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize(), Math.random() * TAU);
+          m.compose(v, qt, sc); shards.setMatrixAt(i, m);
+          ax.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize();
+          spin[i * 4] = ax.x; spin[i * 4 + 1] = ax.y; spin[i * 4 + 2] = ax.z; spin[i * 4 + 3] = (0.05 + Math.random() * 0.3) * (Math.random() < 0.5 ? -1 : 1);
+        }
+        base.setAttribute('aSpin', new T.InstancedBufferAttribute(spin, 4));
+        shards.instanceMatrix.needsUpdate = true; shards.frustumCulled = false; world.add(shards);
+        wake();
+      }
+
+      /* ---- size, pointer, the frame */
+      function size() {
+        var w = cvs.clientWidth || window.innerWidth, h = cvs.clientHeight || window.innerHeight;
+        dpr = Math.min(window.devicePixelRatio || 1, phone ? 1.5 : 1.75);
+        renderer.setPixelRatio(dpr); renderer.setSize(w, h, false);
+        res.set(Math.round(w * dpr), Math.round(h * dpr));
+        cam.aspect = w / h;
+        threadMat.uniforms.uMinPx.value = 1.3 * dpr; ringMat.uniforms.uMinPx.value = 1.1 * dpr; tickMat.uniforms.uMinPx.value = 0.9 * dpr;
+      }
+      var mx = 0, my = 0, cmx = 0, cmy = 0, sCam = null, vel = 0, fov = 58, raf = 0, CA = frameObj(), CB = frameObj(), tgt = new T.Vector3(), upv = new T.Vector3();
+      if (fine) window.addEventListener('mousemove', function (e) { mx = e.clientX / window.innerWidth * 2 - 1; my = e.clientY / window.innerHeight * 2 - 1; }, { passive: true });
+
+      function frame(now) {
+        raf = 0;
+        var dt = Math.min(0.05, Math.max(0.001, (now - last) / 1000)); last = now;
+        if (!rail || document.hidden) return;
+        var ch = cvs.clientHeight || window.innerHeight, hbv = hero.getBoundingClientRect().bottom, rbv = root.getBoundingClientRect().bottom;
+        var on = hbv < ch - 1 && rbv > 1;
+        cvs.classList.toggle('is-on', on);
+        if (!on) { sCam = null; return; }
+        cvs.style.clipPath = 'inset(' + Math.max(0, Math.round(hbv)) + 'px 0 ' + Math.max(0, Math.round(ch - rbv)) + 'px 0)';
+        time += dt;
+        var target = clamp((window.pageYOffset - L.hb) * L.k, S0 + 4, L.end);
+        if (sCam === null) sCam = target;
+        var prev = sCam;
+        sCam += (target - sCam) * (1 - Math.exp(-dt * 6));
+        vel += ((sCam - prev) / dt - vel) * 0.08;
+        cmx += (mx - cmx) * 0.05; cmy += (my - cmy) * 0.05;
+        /* camera: just above the rail, looking ahead and a touch down, leaning into the bends */
+        at(sCam, CA); at(sCam + 14, CB);
+        cam.position.copy(CA.p).addScaledVector(CA.u, 0.45 - cmy * 0.35).addScaledVector(CA.r, cmx * 0.7);
+        tgt.copy(CB.p).addScaledVector(CB.u, -0.75).addScaledVector(CB.r, cmx * 0.25);
+        var turn = (CB.t.x - CA.t.x) * CA.r.x + (CB.t.y - CA.t.y) * CA.r.y + (CB.t.z - CA.t.z) * CA.r.z, roll = clamp(-turn * 1.4, -0.22, 0.22);
+        upv.copy(CA.u).multiplyScalar(Math.cos(roll)).addScaledVector(CA.r, Math.sin(roll));
+        cam.up.copy(upv); cam.lookAt(tgt);
+        var wantFov = (cam.aspect < 1 ? 70 : 56) + Math.min(9, Math.abs(vel) * 0.12);
+        fov += (wantFov - fov) * 0.08;
+        if (Math.abs(cam.fov - fov) > 0.01) { cam.fov = fov; cam.updateProjectionMatrix(); }
+        /* pulses run ahead of the camera along the thread and light the shards they pass */
+        var i;
+        for (i = 0; i < 4; i++) {
+          var ps = sCam - 6 + ((time * 12 + i * 19) % 76);
+          pulse[i] = ps;
+          if (ps > thread.from && ps < thread.to) { threadPoint(ps, lightP[i]); lightI[i] = 1.1; } else lightI[i] = 0;
+        }
+        threadPoint(clamp(sCam + 5, thread.from, thread.to), lightP[4]); lightI[4] = 0.55;
+        threadPoint(clamp(sCam + 15, thread.from, thread.to), lightP[5]); lightI[5] = 0.45;
+        /* only the stretch of thread near the camera is drawn */
+        var i0 = clamp(Math.floor((sCam - 4 - thread.from) / thread.step), 0, thread.count - 1), i1 = clamp(Math.ceil((sCam + 95 - thread.from) / thread.step), 0, thread.count - 1);
+        threadMesh.geometry.setDrawRange(i0 * 6, Math.max(0, i1 - i0) * 6);
+        var px = res.y * cam.projectionMatrix.elements[5] * 0.5;
+        dustMat.uniforms.uTime.value = flareMat.uniforms.uTime.value = shardMat.uniforms.uTime.value = time;
+        dustMat.uniforms.uPx.value = flareMat.uniforms.uPx.value = px;
+        renderer.render(scene, cam);
+        raf = requestAnimationFrame(frame);   /* keeps running while the world is on screen */
+      }
+      function wake() { if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } }
+      var bt = 0, lastW = window.innerWidth;
+      function relayout() { clearTimeout(bt); bt = setTimeout(function () { size(); build(); }, 220); }
+      window.addEventListener('scroll', wake, { passive: true });
+      window.addEventListener('resize', function () {
+        size(); wake();
+        if (window.innerWidth !== lastW) { lastW = window.innerWidth; phone = lastW < 768; relayout(); }   /* phones: the address bar alone never rebuilds */
       });
-      var c = box(cta), b = btn.getBoundingClientRect(), bx = b.left - W / 2 - 4, by = b.top + sy + b.height / 2;
-      pts.push([0, c.t + 70, 0.35], [-E, c.t + (by - c.t) * 0.55, 0.12], [bx - 70, by, 0.03], [bx, by, 0]);
-      plug = [bx, by];
-      endY = by;
-      /* sample the curve every ~7 px of path, depth scaled into px only for the spacing */
-      var Q = pts.map(function (p) { return [p[0], p[1], p[2] * Z]; }), n = Q.length, out = [];
-      Q.unshift([2 * Q[0][0] - Q[1][0], 2 * Q[0][1] - Q[1][1], 2 * Q[0][2] - Q[1][2]]);
-      Q.push([2 * Q[n][0] - Q[n - 1][0], 2 * Q[n][1] - Q[n - 1][1], 2 * Q[n][2] - Q[n - 1][2]]);
-      for (var i = 1; i < Q.length - 2; i++) {
-        var seg = Math.sqrt(Math.pow(Q[i + 1][0] - Q[i][0], 2) + Math.pow(Q[i + 1][1] - Q[i][1], 2) + Math.pow(Q[i + 1][2] - Q[i][2], 2));
-        for (var k = 0, m = Math.max(2, Math.ceil(seg / 7)); k < m; k++) out.push(crc(Q[i - 1], Q[i], Q[i + 1], Q[i + 2], k / m));
-      }
-      out.push(Q[Q.length - 2]);
-      N = out.length; SX = new Float32Array(N); SY = new Float32Array(N); SZ = new Float32Array(N); ST = new Float32Array(N);
-      var len = 0;
-      for (i = 0; i < N; i++) {
-        SX[i] = out[i][0]; SY[i] = out[i][1]; SZ[i] = out[i][2] / Z;
-        if (i) len += Math.sqrt(Math.pow(SX[i] - SX[i - 1], 2) + Math.pow(SY[i] - SY[i - 1], 2) + Math.pow(out[i][2] - out[i - 1][2], 2));
-        ST[i] = len;
-      }
-      for (i = 0; i < N; i++) ST[i] /= len || 1;
-      /* dust in the volume around the path */
-      dust = [];
-      for (i = 0, n = small ? 60 : 150; i < n; i++) dust.push([(Math.random() - 0.5) * W * 1.2, startY + Math.random() * (endY - startY), Math.random() * 2.3 - 1.6, 1.1 + Math.random() * 2, Math.random() * 6.28, 0.3 + Math.random() * 0.6]);
-      wake();
+      document.addEventListener('visibilitychange', wake);
+      if ('ResizeObserver' in window) new ResizeObserver(relayout).observe(root);
+      size(); build();
     }
-    var buildT = 0;
-    function rebuild() { clearTimeout(buildT); buildT = setTimeout(build, 120); }
-
-    var dpr = 1, cw = 0, ch = 0, mx = 0, my = 0, cx = 0, cy = 0, raf = 0, ready = false;
-    var vbuf = new Float32Array(0), pbuf = new Float32Array(0);
-    function size() {
-      dpr = Math.min(window.devicePixelRatio || 1, small ? 1.5 : 2);
-      var w = Math.round(window.innerWidth * dpr), hh = Math.round(window.innerHeight * dpr);
-      if (w !== cw || hh !== ch) { cw = cvs.width = w; ch = cvs.height = hh; }
-    }
-    if (!touch) window.addEventListener('mousemove', function (e) { mx = (e.clientX / window.innerWidth - 0.5) * 60; my = (e.clientY / window.innerHeight - 0.5) * 40; }, { passive: true });
-
-    function frame(now) {
-      raf = 0;
-      var sy = window.pageYOffset, vh = window.innerHeight, W = window.innerWidth;
-      var on = ready && N > 1 && !document.hidden && sy + vh > startY + 10 && sy < endY + vh * 0.25;
-      cvs.classList.toggle('is-on', on);
-      if (!on) return;
-      size();
-      gl.viewport(0, 0, cw, ch);
-      gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);
-      cx += (mx - cx) * 0.06; cy += (my - cy) * 0.06;
-      var camY = sy + vh / 2, headY = sy + vh * HEAD, time = now / 1000, span = vh * 1.2 + 300;
-      /* screen position of a page point: the content plane (z 0) stays put, nearer/further layers drift with depth */
-      function proj(x, y, z, o) { var f = D / (D - z); o[0] = W / 2 + x * f - cx * (f - 1); o[1] = vh / 2 + (y - camY) * f - cy * (f - 1); o[2] = f; return o; }
-      var lo = 0, hi = N - 1;
-      while (lo < hi) { var mid = (lo + hi) >> 1; if (SY[mid] < headY) lo = mid + 1; else hi = mid; }
-      var hIdx = lo, head = headY >= SY[N - 1] ? 1 : ST[hIdx];
-      var i0 = 0;
-      while (i0 < hIdx && SY[i0] < camY - span) i0++;
-      var cnt = hIdx - i0 + 1, A = [0, 0, 0], B = [0, 0, 0], C = [0, 0, 0], tip = null;
-      if (vbuf.length < cnt * 10) vbuf = new Float32Array(cnt * 10 + 200);
-      var v = 0, hwBase = small ? 22 : 32;
-      for (var i = i0; i <= hIdx; i++) {
-        proj(SX[i], SY[i], SZ[i], B);
-        var ia = Math.max(i - 1, 0), ib = Math.min(i + 1, N - 1);
-        proj(SX[ia], SY[ia], SZ[ia], A); proj(SX[ib], SY[ib], SZ[ib], C);
-        var tx = C[0] - A[0], ty = C[1] - A[1], tl = Math.sqrt(tx * tx + ty * ty) || 1, nx = -ty / tl, ny = tx / tl;
-        var hw = hwBase * B[2], light = Math.min(1.25, Math.max(0.22, 0.22 + 0.78 * (SZ[i] + 1.7) / 2.1));
-        vbuf[v++] = B[0] + nx * hw; vbuf[v++] = B[1] + ny * hw; vbuf[v++] = 1; vbuf[v++] = light; vbuf[v++] = ST[i];
-        vbuf[v++] = B[0] - nx * hw; vbuf[v++] = B[1] - ny * hw; vbuf[v++] = -1; vbuf[v++] = light; vbuf[v++] = ST[i];
-        if (i === hIdx) tip = [B[0], B[1], B[2]];
-      }
-      if (v >= 20) {
-        gl.useProgram(line);
-        gl.uniform2f(L.res, W, vh); gl.uniform1f(L.time, time); gl.uniform1f(L.head, head); gl.uniform3fv(L.col, COL);
-        gl.bindBuffer(gl.ARRAY_BUFFER, lineBuf); gl.bufferData(gl.ARRAY_BUFFER, vbuf.subarray(0, v), gl.DYNAMIC_DRAW);
-        gl.enableVertexAttribArray(L.a); gl.vertexAttribPointer(L.a, 4, gl.FLOAT, false, 20, 0);
-        gl.enableVertexAttribArray(L.t); gl.vertexAttribPointer(L.t, 1, gl.FLOAT, false, 20, 16);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, v / 5);
-        gl.disableVertexAttribArray(L.t);
-      }
-      /* dust, the spark at the point, and the light on the button once the thread arrives */
-      if (pbuf.length < dust.length * 4 + 16) pbuf = new Float32Array(dust.length * 4 + 16);
-      var p = 0;
-      for (i = 0; i < dust.length; i++) {
-        var d = dust[i], y = d[1] + Math.cos(time * 0.17 + d[4] * 1.3) * 10;
-        if (Math.abs(y - camY) > span || y > endY) continue;
-        proj(d[0] + Math.sin(time * 0.21 + d[4]) * 14, y, d[2], A);
-        if (A[0] < -20 || A[0] > W + 20 || A[1] < -20 || A[1] > vh + 20) continue;
-        var tw = 0.6 + 0.4 * Math.sin(time * 1.7 + d[4] * 3);
-        pbuf[p++] = A[0]; pbuf[p++] = A[1]; pbuf[p++] = Math.min(maxPt / dpr, d[3] * A[2]); pbuf[p++] = d[5] * tw * Math.min(1, Math.max(0.2, (d[2] + 1.7) / 2.2));
-      }
-      if (tip && head < 1) {
-        pbuf[p++] = tip[0]; pbuf[p++] = tip[1]; pbuf[p++] = Math.min(maxPt / dpr, 30 * tip[2]); pbuf[p++] = 1;
-        pbuf[p++] = tip[0]; pbuf[p++] = tip[1]; pbuf[p++] = Math.min(maxPt / dpr, 110 * tip[2]); pbuf[p++] = 0.2;
-      }
-      if (head >= 1 && plug) {
-        proj(plug[0], plug[1], 0, A);
-        var beat = 0.75 + 0.25 * Math.sin(time * 3);
-        pbuf[p++] = A[0]; pbuf[p++] = A[1]; pbuf[p++] = Math.min(maxPt / dpr, 34); pbuf[p++] = beat;
-        pbuf[p++] = A[0]; pbuf[p++] = A[1]; pbuf[p++] = Math.min(maxPt / dpr, 120); pbuf[p++] = 0.22 * beat;
-      }
-      if (p) {
-        gl.useProgram(dots);
-        gl.uniform2f(P.res, W, vh); gl.uniform1f(P.dpr, dpr); gl.uniform3fv(P.col, COL);
-        gl.bindBuffer(gl.ARRAY_BUFFER, dotBuf); gl.bufferData(gl.ARRAY_BUFFER, pbuf.subarray(0, p), gl.DYNAMIC_DRAW);
-        gl.enableVertexAttribArray(P.a); gl.vertexAttribPointer(P.a, 4, gl.FLOAT, false, 16, 0);
-        gl.drawArrays(gl.POINTS, 0, p / 4);
-      }
-      raf = requestAnimationFrame(frame);   /* keeps running while on screen: the pulses never stop */
-    }
-    function wake() { if (!raf && ready) raf = requestAnimationFrame(frame); }
-    window.addEventListener('scroll', wake, { passive: true });
-    window.addEventListener('resize', function () { small = window.innerWidth < 768; rebuild(); wake(); });
-    document.addEventListener('visibilitychange', wake);
-    if ('ResizeObserver' in window) new ResizeObserver(rebuild).observe(root);
-    cvs.addEventListener('webglcontextlost', function (e) { e.preventDefault(); ready = false; cvs.classList.remove('is-on'); });
-    threadOn = function () { ready = true; build(); };
   })();
 
   /* ---- intro: a navy field (already covering the first frame) pulls up off the film, then the page comes alive */
