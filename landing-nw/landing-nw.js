@@ -4,9 +4,9 @@
  * labels and side copy lagging the scroll, magnetic links, a scroll-scrubbed logo strip, a brand-name strip that
  * drifts with scroll speed, a scroll-linked example rail whose cards open from the bottom, fixed-layer image bands,
  * floating statements, a one-open accordion, the floating Discovery Call badge, a pop-up that opens as a circle
- * from the click, a veil that rises before leaving for another page, and after the hero a 3D world the scroll
- * flies through along a teal thread of light (three.js, after ysuriadesign.co). The hero film is a muted loop;
- * "Watch the video" or a click on the film restarts it with sound and controls. The Discovery Call modal (second block) moves
+ * from the click, and a veil that rises before leaving for another page. After the hero the page becomes a 3D journey:
+ * the scroll flies along a teal thread of light from one piece of content to the next (three.js, after ysuriadesign.co).
+ * The hero film is a muted loop; "Watch the video" or a click on the film restarts it with sound and controls. The Discovery Call modal (second block) moves
  * the page's NATIVE Webflow form (#cybDiscoveryNative) into it, so submissions still land in Webflow. */
 (function () {
   if (window.__lnw) return; window.__lnw = 1;
@@ -16,6 +16,12 @@
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var touch = window.matchMedia('(hover: none)').matches || 'ontouchstart' in window;
   var fine = !touch && window.matchMedia('(pointer: fine)').matches;
+  /* the 3D journey replaces the stacked sections wherever the browser can draw it (journey() below) */
+  var JOURNEY = !reduce && !!document.getElementById('lnwHero') && (function () {
+    try { var c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')) && !!(window.CSS && CSS.supports && CSS.supports('transform-style', 'preserve-3d')); }
+    catch (e) { return false; }
+  })();
+  function inJourney(el) { return JOURNEY && !!el.closest('.lnw-stage'); }
   function $$(s, el) { return Array.prototype.slice.call((el || root).querySelectorAll(s)); }
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
   function maxScroll() { return Math.max(0, html.scrollHeight - window.innerHeight); }
@@ -158,7 +164,7 @@
     lastW = window.innerWidth;
     clearTimeout(resizeT);
     resizeT = setTimeout(function () {
-      stmts.forEach(function (el) { if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add('is-in'); });
+      stmts.forEach(function (el) { if (el.getBoundingClientRect().top < window.innerHeight && !inJourney(el)) el.classList.add('is-in'); });
       splitAll();
     }, 260);
   });
@@ -206,7 +212,8 @@
   }
   var IO = 'IntersectionObserver' in window;
   function startReveals() {
-    var targets = $$('[data-reveal], .lnw-stmt[data-split]'), term = $$('.lnw-lab, .lnw-tag, .lnw-step__tags span, .lnw-cap__n, .lnw-pills li');
+    var off = function (el) { return !inJourney(el); };   /* the journey reveals its own copy, stop by stop */
+    var targets = $$('[data-reveal], .lnw-stmt[data-split]').filter(off), term = $$('.lnw-lab, .lnw-tag, .lnw-step__tags span, .lnw-cap__n, .lnw-pills li').filter(off);
     if (reduce || !IO) { targets.forEach(show); return; }
     var io = new IntersectionObserver(function (es) {
       es.forEach(function (en) { if (en.isIntersecting) { io.unobserve(en.target); show(en.target); } });
@@ -219,7 +226,7 @@
   }
 
   /* ---- labels and side copy trail the scroll; statements float a few px against it */
-  var lag = reduce ? [] : $$('.lnw-lab, .lnw-side').map(function (el, i) {
+  var lag = (reduce || JOURNEY) ? [] : $$('.lnw-lab, .lnw-side').map(function (el, i) {
     el.classList.add('lnw-lag');
     return { el: el, cur: 28 + (i % 3) * 6, tgt: 28 };
   });
@@ -233,7 +240,7 @@
       if (Math.abs(it.tgt - it.cur) > 0.12) moving = true; else it.cur = it.tgt;
       it.el.style.transform = 'translate3d(0,' + it.cur.toFixed(2) + 'px,0)';
     });
-    if (!reduce) stmts.forEach(function (el) {
+    if (!reduce && !JOURNEY) stmts.forEach(function (el) {
       var r = el.getBoundingClientRect();
       if (r.bottom < -200 || r.top > vh + 200) return;
       el.style.transform = 'translate3d(0,' + ((((r.top + r.height / 2) - vh / 2) / vh) * 14).toFixed(2) + 'px,0)';
@@ -380,7 +387,7 @@
     bands.forEach(function (b) { bandIO.observe(b); });
   } else bands.forEach(function (b) { b.classList.add('is-live'); });
   if (!reduce) onTick(function () {
-    if (root.classList.contains('is-3d')) return false;   /* the 3D world shows through the bands instead */
+    if (JOURNEY) return false;
     bands.forEach(function (b, k) {
       if (!b.classList.contains('is-live')) return;
       var p = progress(b) - 0.5, orbs = b.querySelectorAll('i');
@@ -394,7 +401,7 @@
 
   /* ---- logo strip: scrubbed by the scroll position, never moving on its own */
   var logos = root.querySelector('.lnw-logos'), logoTrack = logos && logos.querySelector('.lnw-logos__track');
-  if (logoTrack && !reduce) onTick(function () {
+  if (logoTrack && !reduce && !JOURNEY) onTick(function () {
     logoTrack.style.transform = 'translate3d(-' + (6 + progress(logos) * 28).toFixed(2) + 'vw,0,0)';
     return false;
   });
@@ -422,7 +429,7 @@
   var rail = work && work.querySelector('.lnw-rail'), railTrack = rail && rail.querySelector('.lnw-rail__track');
   function linkRail() {
     if (!rail) return;
-    var on = fine && !reduce && window.innerWidth > 767;
+    var on = fine && !reduce && !JOURNEY && window.innerWidth > 767;
     rail.classList.toggle('is-linked', on);
     if (!on) railTrack.style.transform = '';
   }
@@ -435,14 +442,14 @@
   });
   var cards = $$('.lnw-card');
   if (reduce || !IO) cards.forEach(function (c) { c.classList.add('is-in'); });
-  else {
+  else if (!JOURNEY) {   /* in the journey each card opens when the camera reaches it */
     var cardIO = new IntersectionObserver(function (es) {
       es.forEach(function (en) { if (en.isIntersecting) { cardIO.unobserve(en.target); en.target.classList.add('is-in'); } });
     }, { threshold: 0, rootMargin: '0px 0px -12% 0px' });
     cards.forEach(function (c) { cardIO.observe(c); });
   }
   /* card films load a screen early and only play while visible */
-  if (IO) {
+  if (IO && !JOURNEY) {
     var filmIO = new IntersectionObserver(function (es) {
       es.forEach(function (en) {
         var v = en.target;
@@ -472,9 +479,9 @@
   var badge = root.querySelector('.lnw-badge'), ready = false, ending = 0;
   function badgeState() {
     if (!badge) return;
-    badge.classList.toggle('is-on', ready && !watching && !ending && !modalOpen());
+    badge.classList.toggle('is-on', ready && !watching && !ending && !jEnd && !modalOpen());
   }
-  var endEls = [root.querySelector('.lnw-cta')].concat(Array.prototype.slice.call(document.querySelectorAll('section.for-services, .foot2, footer')))
+  var endEls = [JOURNEY ? null : root.querySelector('.lnw-cta')].concat(Array.prototype.slice.call(document.querySelectorAll('section.for-services, .foot2, footer')))
     .filter(function (el, i, a) { return el && a.indexOf(el) === i; });
   if (IO) {
     var endIO = new IntersectionObserver(function (es) {
@@ -519,45 +526,121 @@
     });
   }
 
-  /* ---- the light thread, in 3D (after ysuriadesign.co). After the hero the page floats over a three.js world - a
-     navy space of drifting dust and slow-turning dark shards - and the scroll flies a camera along a rail through it.
-     A teal thread of light runs beside the camera into the distance and ties the sections together: it weaves under
-     the opening statement, threads a gate of light at each image band, runs through four rings for the four agent
-     steps, loops round the shard field at the work, coils round the camera at the results, swings wide at the
-     platform, lays a ruler under the transparency rows and ends in a ring of light at the closing call to action.
-     Pulses run ahead along it and light the shards they pass. three.js r128 (the copy the homepage loads) arrives
-     after the intro; off for reduced motion, and without WebGL the page keeps its image bands. */
-  var threadOn = function () {};
-  (function thread3d() {
-    var hero = document.getElementById('lnwHero');
-    if (reduce || !hero) return;
-    var started = false;
-    threadOn = function () {
-      if (started) return; started = true;
-      if (window.THREE && window.THREE.WebGLRenderer) { init(window.THREE); return; }
-      var s = document.createElement('script');
-      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
-      s.integrity = 'sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==';
-      s.crossOrigin = 'anonymous';
-      s.onload = function () { if (window.THREE) init(window.THREE); };
-      document.head.appendChild(s);
-    };
+  /* ---- the journey (after ysuriadesign.co). Between the hero and the footer the page becomes one pinned 3D world.
+     The scroll flies a camera along a teal thread of light from one piece of the page to the next, each set in its own
+     place and at its own angle: the opening ring, a ring of client logos, the four agent steps hanging from the thread,
+     the five examples, the results inside its coils, the platform it circles, the transparency ruler, the three
+     activation models in their rings and the closing ring it runs into. The piece in view sits mid-screen, joined to the
+     thread; its copy sits bottom left. Every word and picture is the page's own, moved into place (not copied); the
+     pieces in space are HTML set in 3D over a three.js canvas (r128, the copy the homepage loads). Off for reduced
+     motion and without WebGL, where the page keeps its normal sections. */
+  var jEnd = false, journeyOn = function () {};
+  (function journey() {
+    if (!JOURNEY) return;
+    var jReady = false, failed = false, wake = function () {};
+    journeyOn = function () { jReady = true; wake(); };
 
-    /* every line of light (thread, gates, ruler) is a camera-facing ribbon: world width, so it thins with distance,
+    /* ---- the stage: a track as tall as the trip, a sticky full-screen stage inside it */
+    var track = document.createElement('div'), stage = document.createElement('div'), cvs = document.createElement('canvas');
+    var view = document.createElement('div'), cam3 = document.createElement('div'), ov = document.createElement('div'), hud = document.createElement('div');
+    track.className = 'lnw-track'; stage.className = 'lnw-stage'; cvs.className = 'lnw-gl'; view.className = 'lnw-3d'; cam3.className = 'lnw-3d__cam';
+    ov.className = 'lnw-ov'; hud.className = 'lnw-hud';
+    cvs.setAttribute('aria-hidden', 'true'); hud.setAttribute('aria-hidden', 'true');
+    hud.innerHTML = '<span class="lnw-hud__n"></span><span class="lnw-hud__bar"><i></i></span>';
+    view.appendChild(cam3);
+    [cvs, view, ov, hud].forEach(function (el) { stage.appendChild(el); });
+    track.appendChild(stage);
+    hero.parentNode.insertBefore(track, hero.nextSibling);
+    var hudN = hud.firstChild, hudBar = hud.lastChild.firstChild;
+
+    var moved = [];
+    function take(el, into) { if (!el) return null; moved.push([el, el.parentNode, el.nextSibling]); into.appendChild(el); return el; }
+    function q(s) { return root.querySelector(s); }
+    function chapter(parts) {
+      var c = document.createElement('div'); c.className = 'lnw-ch';
+      parts.forEach(function (p) { take(p, c); });
+      ov.appendChild(c); return c;
+    }
+    var items = [];
+    function item(el, w, cls) {
+      if (!el) return null;
+      var box = document.createElement('div'); box.className = 'lnw-3d__it ' + cls; box.style.width = w + 'px';
+      take(el, box); cam3.appendChild(box);
+      var it = { el: box, op: -1 }; items.push(it); return it;
+    }
+    /* copy into chapters (page order), pieces into space */
+    var cards = $$('.lnw-work .lnw-card'), CH = {};
+    CH.pos = chapter([q('.lnw-pos .lnw-head'), q('.lnw-pos .lnw-side')]);
+    CH.agent = chapter([q('.lnw-agent .lnw-lab'), q('.lnw-agent .lnw-stmt')]);
+    CH.cards = cards.map(function (c) { return chapter([c.querySelector('.lnw-card__meta')]); });
+    CH.res = chapter([q('.lnw-res .lnw-lab'), q('.lnw-res .lnw-stmt')]);
+    CH.plat = chapter([q('.lnw-plat .lnw-head'), q('.lnw-plat .lnw-side')]);
+    CH.trans = chapter([q('.lnw-trans .lnw-head'), q('.lnw-trans .lnw-side')]);
+    CH['int'] = chapter([q('.lnw-int .lnw-head'), q('.lnw-int .lnw-side')]);
+    CH.cta = chapter([q('.lnw-cta .lnw-head'), q('.lnw-cta .lnw-side')]);
+    var IT = {
+      logos: $$('.lnw-logos__list:first-child img').map(function (img) { img.loading = 'eager'; return item(img, 170, 'is-logo'); }),
+      steps: $$('.lnw-agent .lnw-step').map(function (s) { return item(s, 340, 'is-card is-step'); }),
+      names: item(q('.lnw-work .lnw-marq'), 5600, 'is-names'),
+      cards: cards.map(function (c) { return item(c, 300, 'is-film'); }),
+      stats: $$('.lnw-res .lnw-stat').map(function (s) { return item(s, 480, 'is-stat'); }),
+      plat: item(q('.lnw-plat__img'), 1000, 'is-plat'),
+      rows: $$('.lnw-trans .lnw-row').map(function (r) { return item(r, 520, 'is-card is-row'); }),
+      caps: $$('.lnw-int .lnw-cap').map(function (c) { return item(c, 500, 'is-card is-cap'); })
+    };
+    $$('img', stage).forEach(function (img) { img.loading = 'eager'; });
+    $$('[data-reveal]', stage).forEach(function (el) { el.classList.add('is-in'); });
+    $$('.lnw-cap', stage).forEach(function (c) {
+      c.classList.add('is-open');
+      var b = c.querySelector('.lnw-cap__s'); b.setAttribute('aria-expanded', 'true'); b.setAttribute('tabindex', '-1');
+    });
+    root.classList.add('is-journey');
+
+    /* ---- the stops: how long the camera holds at each piece and travels to the next, in screens of scroll */
+    var STOPS = [{ k: 'pos', g: 1, ch: CH.pos, hold: 1, travel: 1 }, { k: 'logos', g: 1, ch: null, hold: 0.7, travel: 1 },
+      { k: 'agent', g: 2, ch: CH.agent, hold: 1.8, travel: 1 }];
+    CH.cards.forEach(function (c, i) { STOPS.push({ k: 'work' + i, i: i, g: 3, ch: c, hold: 0.5, travel: i < CH.cards.length - 1 ? 0.55 : 1 }); });
+    STOPS.push({ k: 'res', g: 4, ch: CH.res, hold: 1.6, travel: 1 }, { k: 'plat', g: 5, ch: CH.plat, hold: 1.2, travel: 1 },
+      { k: 'trans', g: 6, ch: CH.trans, hold: 1.4, travel: 1 }, { k: 'int', g: 7, ch: CH['int'], hold: 1.6, travel: 1 },
+      { k: 'cta', g: 8, ch: CH.cta, hold: 1.2, travel: 0 });
+    var TOTAL = 0, GROUPS = 8;
+    STOPS.forEach(function (s) { s.h0 = TOTAL; TOTAL += s.hold; s.h1 = TOTAL; TOTAL += s.travel; });
+    track.style.height = ((TOTAL + 1) * 100) + 'vh';
+
+    /* three.js failed to arrive: put everything back where it came from */
+    function revert() {
+      if (failed) return; failed = true;
+      for (var i = moved.length - 1; i >= 0; i--) moved[i][1].insertBefore(moved[i][0], moved[i][2]);
+      if (track.parentNode) track.parentNode.removeChild(track);
+      root.classList.remove('is-journey');
+      $$('.lnw-stmt, [data-reveal], .lnw-card').forEach(function (el) { el.classList.add('is-in'); });
+    }
+    if (window.THREE && window.THREE.WebGLRenderer) setTimeout(function () { init(window.THREE); }, 0);
+    else {
+      var tag = document.createElement('script');
+      tag.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+      tag.integrity = 'sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==';
+      tag.crossOrigin = 'anonymous';
+      tag.onload = function () { if (window.THREE && window.THREE.WebGLRenderer) init(window.THREE); else revert(); };
+      tag.onerror = revert;
+      document.head.appendChild(tag);
+    }
+
+    /* every line of light (thread, rings, ruler ticks) is a camera-facing ribbon: world width, so it thins with distance,
        never under a pixel; a hot core inside a soft halo, fogged by depth, pulses travelling along it */
     var RIBBON_VS = [
       'attribute vec3 tdir;attribute float side;attribute float arc;',
       'uniform vec2 uRes;uniform float uWidth;uniform float uMinPx;',
       'varying float vSide;varying float vArc;varying float vDepth;varying float vPx;',
       'void main(){',
-      ' vec4 mv=modelViewMatrix*vec4(position,1.0);vec4 mt=modelViewMatrix*vec4(position+tdir,1.0);',
-      ' float z=min(mv.z,-0.08);',
-      ' vec4 c=projectionMatrix*vec4(mv.xy,z,1.0);vec4 c2=projectionMatrix*vec4(mt.xy,min(mt.z,-0.08),1.0);',
+      ' vec4 mv=modelViewMatrix*vec4(position,1.0);vec4 mt=modelViewMatrix*vec4(position+tdir*20.0,1.0);',
+      ' float z=min(mv.z,-12.0);',
+      ' vec4 c=projectionMatrix*vec4(mv.xy,z,1.0);vec4 c2=projectionMatrix*vec4(mt.xy,min(mt.z,-12.0),1.0);',
       ' vec2 d=(c2.xy/c2.w-c.xy/c.w)*uRes;float dl=length(d);',
       ' vec2 n=dl>0.0001?vec2(-d.y,d.x)/dl:vec2(0.0,1.0);',
-      ' float ppu=projectionMatrix[1][1]*uRes.y*0.5/-z,px=clamp(uWidth*ppu,uMinPx,220.0);',
+      ' float ppu=projectionMatrix[1][1]*uRes.y*0.5/-z,px=clamp(uWidth*ppu,uMinPx,200.0);',
       /* where the line turns toward the camera it narrows, instead of fanning into a starburst */
-      ' px=max(uMinPx,px*mix(0.22,1.0,smoothstep(0.04,0.4,dl*0.5/ppu)));',
+      ' px=max(uMinPx,px*mix(0.22,1.0,smoothstep(0.04,0.4,dl*0.5/(ppu*20.0))));',
       ' c.xy+=n*side*px*2.0/uRes*c.w;gl_Position=c;',
       ' vSide=side;vArc=arc;vDepth=-mv.z;vPx=px;}'
     ].join('\n');
@@ -568,9 +651,9 @@
       'void main(){',
       ' float a=abs(vSide),dpx=a*vPx,cw=max(vPx*0.1,1.2),q=dpx/cw;',
       ' float core=exp(-q*q);float halo=exp(-dpx/max(vPx*0.3,1.6))*(1.0-smoothstep(0.7,1.0,a));',
-      ' float p=0.0;for(int k=0;k<4;k++){float e=(vArc-uPulse[k])*0.55;p+=exp(-e*e);}p*=uPulseGain;',
-      ' float f=exp(-vDepth*vDepth*uFog*uFog)*smoothstep(0.5,4.5,vDepth);',
-      ' float ends=smoothstep(uFrom,uFrom+1.5,vArc)*(1.0-smoothstep(uTo-0.6,uTo,vArc));',
+      ' float p=0.0;for(int k=0;k<4;k++){float e=(vArc-uPulse[k])/90.0;p+=exp(-e*e);}p*=uPulseGain;',
+      ' float f=exp(-vDepth*vDepth*uFog*uFog)*smoothstep(60.0,320.0,vDepth);',
+      ' float ends=smoothstep(uFrom,uFrom+60.0,vArc)*(1.0-smoothstep(uTo-20.0,uTo,vArc));',
       ' vec3 col=(uColor*halo*0.55*(1.0+p*2.2)+uCore*core*(0.85+p*1.6))*f*ends*uGain;',
       ' gl_FragColor=vec4(col,1.0);}'
     ].join('\n');
@@ -578,16 +661,16 @@
     var DOT_VS = [
       'attribute vec4 aRnd;uniform float uTime;uniform float uPx;uniform float uFog;uniform float uMaxPx;varying float vA;',
       'void main(){vec3 p=position;',
-      ' p.x+=sin(uTime*0.27+aRnd.y*6.28)*0.35*aRnd.w;p.y+=cos(uTime*0.21+aRnd.y*4.1)*0.35*aRnd.w;',
-      ' vec4 mv=modelViewMatrix*vec4(p,1.0);float d=max(-mv.z,0.05);',
+      ' p.x+=sin(uTime*0.27+aRnd.y*6.28)*30.0*aRnd.w;p.y+=cos(uTime*0.21+aRnd.y*4.1)*30.0*aRnd.w;',
+      ' vec4 mv=modelViewMatrix*vec4(p,1.0);float d=max(-mv.z,1.0);',
       ' gl_PointSize=clamp(aRnd.x*uPx/d,1.0,uMaxPx);',
       ' float tw=0.6+0.4*sin(uTime*1.5+aRnd.y*23.0);',
-      ' vA=aRnd.z*tw*exp(-d*d*uFog*uFog)*smoothstep(0.4,2.5,d)*step(0.0,-mv.z);',
+      ' vA=aRnd.z*tw*exp(-d*d*uFog*uFog)*smoothstep(40.0,260.0,d)*step(0.0,-mv.z);',
       ' gl_Position=projectionMatrix*mv;}'
     ].join('\n');
     var DOT_FS = 'uniform vec3 uColor;varying float vA;void main(){vec2 q=gl_PointCoord*2.0-1.0;float r=dot(q,q);if(r>1.0)discard;' +
       'gl_FragColor=vec4(uColor*exp(-r*4.0)*vA,1.0);}';
-    /* shards: dark faceted solids turning slowly, a teal rim, lit by the pulses and the thread near the camera */
+    /* shards: dark faceted solids turning slowly, a teal rim, lit by the pulses and the piece in view */
     var SHARD_VS = [
       'attribute vec4 aSpin;uniform float uTime;varying vec3 vN;varying vec3 vW;',
       'vec3 rot(vec3 v,vec3 ax,float a){float c=cos(a),s=sin(a);return v*c+cross(ax,v)*s+ax*dot(ax,v)*(1.0-c);}',
@@ -604,49 +687,44 @@
       'void main(){vec3 N=normalize(vN),V=normalize(cameraPosition-vW);',
       ' float fr=1.0-max(dot(N,V),0.0);float key=max(dot(N,normalize(vec3(0.35,1.0,0.25))),0.0);',
       ' vec3 c=uBase*(0.28+0.72*key)+uTeal*fr*fr*fr*0.42;',
-      ' for(int i=0;i<6;i++){vec3 L=uL[i]-vW;float d2=dot(L,L);c+=uTeal*uLi[i]*max(dot(N,L*inversesqrt(d2+0.0001)),0.0)/(1.0+d2*0.16);}',
+      ' for(int i=0;i<6;i++){vec3 L=uL[i]-vW;float d2=dot(L,L);c+=uTeal*uLi[i]*max(dot(N,L*inversesqrt(d2+1.0)),0.0)/(1.0+d2*0.000012);}',
       ' float d=length(cameraPosition-vW);gl_FragColor=vec4(mix(uFogCol,c,exp(-d*d*uFog*uFog)),1.0);}'
     ].join('\n');
 
     function init(T) {
-      var cvs = document.createElement('canvas'), renderer, phone = window.innerWidth < 768;
-      cvs.className = 'lnw-thread'; cvs.setAttribute('aria-hidden', 'true');
+      if (failed) return;
+      var renderer, phone = window.innerWidth < 768;
       try { renderer = new T.WebGLRenderer({ canvas: cvs, antialias: !phone, alpha: false, powerPreference: 'high-performance' }); }
-      catch (e) { return; }
-      root.insertBefore(cvs, root.firstChild);
-      root.classList.add('is-3d');
-      var BG = new T.Color('#131c25'), TEAL = new T.Color('#39F1E0'), CORE = new T.Color('#e6fffc'), FOG = 0.02, UNIT = 45;   /* UNIT: world units per screen of scroll */
+      catch (e) { revert(); return; }
+      var BG = new T.Color('#131c25'), TEAL = new T.Color('#39F1E0'), CORE = new T.Color('#e6fffc'), FOG = 1 / 5200, TAU = Math.PI * 2;
       renderer.setClearColor(BG, 1);
-      var scene = new T.Scene(), cam = new T.PerspectiveCamera(58, 1, 0.05, 170), world = new T.Group();
+      var scene = new T.Scene(), cam = new T.PerspectiveCamera(40, 1, 10, 26000), world = new T.Group();
       scene.add(world);
-      var res = new T.Vector2(1, 1), time = 0, last = performance.now(), dpr = 1;
-      var pulse = [0, 0, 0, 0], lightP = [], lightI = [0, 0, 0, 0, 0, 0];
-      for (var li = 0; li < 6; li++) lightP.push(new T.Vector3(0, -999, 0));
+      var res = new T.Vector2(1, 1), pulse = [0, 0, 0, 0], lightP = [], lightI = [0, 0, 0, 0, 0, 0];
+      for (var li = 0; li < 6; li++) lightP.push(new T.Vector3(0, -1e5, 0));
 
-      function ribbonMat(width, minPx, gain, pulses) {
+      function ribbonMat(width, gain, pulses) {
         return new T.ShaderMaterial({
-          uniforms: { uRes: { value: res }, uWidth: { value: width }, uMinPx: { value: minPx }, uColor: { value: TEAL }, uCore: { value: CORE },
-            uGain: { value: gain }, uFog: { value: FOG }, uPulse: { value: pulses ? pulse : [-999, -999, -999, -999] }, uPulseGain: { value: pulses ? 1 : 0 },
-            uFrom: { value: -1e5 }, uTo: { value: 1e5 } },
+          uniforms: { uRes: { value: res }, uWidth: { value: width }, uMinPx: { value: 1.2 }, uColor: { value: TEAL }, uCore: { value: CORE },
+            uGain: { value: gain }, uFog: { value: FOG }, uPulse: { value: pulses ? pulse : [-1e6, -1e6, -1e6, -1e6] }, uPulseGain: { value: pulses ? 1 : 0 },
+            uFrom: { value: -1e9 }, uTo: { value: 1e9 } },
           vertexShader: RIBBON_VS, fragmentShader: RIBBON_FS, transparent: true, depthWrite: false, blending: T.AdditiveBlending
         });
       }
       function dotMat(color, maxPx) {
         return new T.ShaderMaterial({
-          uniforms: { uTime: { value: 0 }, uPx: { value: 500 }, uFog: { value: FOG }, uMaxPx: { value: maxPx }, uColor: { value: new T.Color(color) } },
+          uniforms: { uTime: { value: 0 }, uPx: { value: 1000 }, uFog: { value: FOG }, uMaxPx: { value: maxPx }, uColor: { value: new T.Color(color) } },
           vertexShader: DOT_VS, fragmentShader: DOT_FS, transparent: true, depthWrite: false, blending: T.AdditiveBlending
         });
       }
-      var threadMat = ribbonMat(0.5, 1.3, 1, true), ringMat = ribbonMat(0.3, 1.1, 0.75, false), tickMat = ribbonMat(0.16, 0.9, 0.5, false);
-      var dustMat = dotMat('#bdfaf4', 40), flareMat = dotMat('#7ff6ea', 420);
+      var threadMat = ribbonMat(20, 1, true), ringMat = ribbonMat(9, 0.65, false), tickMat = ribbonMat(5, 0.55, false);
+      var dustMat = dotMat('#bdfaf4', 34), flareMat = dotMat('#7ff6ea', 380);
       var shardMat = new T.ShaderMaterial({
         uniforms: { uTime: { value: 0 }, uBase: { value: new T.Color('#223140') }, uTeal: { value: TEAL }, uFogCol: { value: BG }, uFog: { value: FOG },
           uL: { value: lightP }, uLi: { value: lightI } },
         vertexShader: SHARD_VS, fragmentShader: SHARD_FS
       });
-
-      /* geometry for any number of polylines: two vertices per point (the ribbon's two edges) */
-      function ribbonGeo(lines) {
+      function ribbonGeo(lines) {   /* two vertices per point (the ribbon's edges), any number of polylines */
         var n = 0, i, j;
         lines.forEach(function (l) { n += l.p.length / 3; });
         var pos = new Float32Array(n * 6), td = new Float32Array(n * 6), side = new Float32Array(n * 2), arc = new Float32Array(n * 2), idx = [], v = 0;
@@ -661,267 +739,332 @@
               td[o] = tx / tl; td[o + 1] = ty / tl; td[o + 2] = tz / tl;
               side[v] = j ? -1 : 1; arc[v] = l.a ? l.a[i] : 0; v++;
             }
-            if (i < m - 1 || l.closed) {
-              var q = base + i * 2, r = base + ((i + 1) % m) * 2;
-              idx.push(q, q + 1, r, q + 1, r + 1, r);
-            }
+            if (i < m - 1 || l.closed) { var qv = base + i * 2, rv = base + ((i + 1) % m) * 2; idx.push(qv, qv + 1, rv, qv + 1, rv + 1, rv); }
           }
         });
         var g = new T.BufferGeometry();
-        g.setAttribute('position', new T.BufferAttribute(pos, 3));
-        g.setAttribute('tdir', new T.BufferAttribute(td, 3));
-        g.setAttribute('side', new T.BufferAttribute(side, 1));
-        g.setAttribute('arc', new T.BufferAttribute(arc, 1));
+        g.setAttribute('position', new T.BufferAttribute(pos, 3)); g.setAttribute('tdir', new T.BufferAttribute(td, 3));
+        g.setAttribute('side', new T.BufferAttribute(side, 1)); g.setAttribute('arc', new T.BufferAttribute(arc, 1));
         g.setIndex(idx);
         return g;
       }
+      function add(obj) { obj.frustumCulled = false; world.add(obj); return obj; }
 
-      /* ---- the layout: where each section sits along the rail (s = world units; the camera is at s while the page
-         is scrolled s/UNIT screens past the end of the hero) */
-      var L = null, rail = null, thread = null, threadMesh = null, segs = [];
-      function measure() {
-        var sy = window.pageYOffset, vh = window.innerHeight, hb = hero.getBoundingClientRect().bottom + sy;
-        var k = UNIT / vh, secs = [];
-        Array.prototype.forEach.call(root.children, function (el) {
-          if (el === hero || el === cvs || !el.offsetHeight || el.classList.contains('lnw-badge')) return;
-          var r = el.getBoundingClientRect(), c = el.classList;
-          secs.push({ kind: c.contains('lnw-band') ? 'band' : c.contains('lnw-logos') ? 'logos' : c.contains('lnw-agent') ? 'agent' : c.contains('lnw-work') ? 'work'
-            : c.contains('lnw-res') ? 'res' : c.contains('lnw-plat') ? 'plat' : c.contains('lnw-trans') ? 'trans' : c.contains('lnw-int') ? 'int'
-            : c.contains('lnw-cta') ? 'cta' : 'pos',
-            s: (r.top + sy - hb - vh * 0.55) * k, e: (r.bottom + sy - hb - vh * 0.55) * k });
+      /* ---- the world: each piece of the page in its own frame (origin + turn), so the camera swings between them */
+      var SEC = { pos: [0, 0, 0, 0], logos: [2600, 600, -3800, -35], agent: [7000, -200, -6600, -65], work: [10600, 900, -11000, -20],
+        res: [9800, -300, -18200, 25], plat: [6400, 1200, -22400, 50], trans: [2600, -500, -26200, 20], 'int': [1200, 400, -30600, -15], cta: [2800, 0, -35000, 0] };
+      function yaw(s) { return SEC[s][3] * Math.PI / 180; }
+      function P(s, x, y, z) { var f = SEC[s], a = yaw(s), c = Math.cos(a), si = Math.sin(a); return new T.Vector3(f[0] + x * c + z * si, f[1] + y, f[2] - x * si + z * c); }
+      var dummy = new T.Object3D();
+      function eps(v) { return Math.abs(v) < 1e-10 ? 0 : v; }
+      function place(it, s, x, y, z, ry, rx) {   /* an HTML piece at a point in space (CSS3D, as three's CSS3DRenderer) */
+        if (!it) return;
+        dummy.position.copy(P(s, x, y, z)); dummy.rotation.set(rx || 0, yaw(s) + (ry || 0), 0, 'YXZ'); dummy.updateMatrixWorld(true);
+        var e = dummy.matrixWorld.elements;
+        it.el.style.transform = 'translate(-50%,-50%) matrix3d(' + [e[0], e[1], e[2], e[3], -e[4], -e[5], -e[6], -e[7], e[8], e[9], e[10], e[11], e[12], e[13], e[14], e[15]].map(eps).join(',') + ')';
+        it.pos = dummy.position.clone();
+      }
+      var camCurve, focCurve, idxA = [], idxB = [], portrait = null, up = new T.Vector3(0, 1, 0);
+      var TP = [], RINGS = [], TICKS = [], F = {}, tall = window.innerWidth < window.innerHeight;   /* portrait: taller layouts */
+      function ringAt(s, x, y, z, r, ry) {
+        var a = yaw(s) + (ry || 0), X = new T.Vector3(Math.cos(a), 0, -Math.sin(a)), c = P(s, x, y, z), p = [];
+        for (var j = 0; j < 120; j++) { var t = j / 120 * TAU; p.push(c.x + X.x * Math.cos(t) * r, c.y + Math.sin(t) * r, c.z + X.z * Math.cos(t) * r); }
+        RINGS.push({ p: p, closed: true });
+      }
+      function H(it, d) { return (it && it.el.offsetHeight) || d; }
+      /* opening: the thread starts in a ring of light */
+      ringAt('pos', 260, 60, 0, 430);
+      TP.push(P('pos', 260, 60, 0), P('pos', 320, 80, -700), P('pos', 760, 280, -1800));
+      F.pos = { A: [P('pos', -260, -80, 1600), P('pos', 260, 60, 0)], B: [P('pos', -40, -30, 1180), P('pos', 260, 60, -60)] };
+      /* the client logos stand in a ring the camera flies through */
+      IT.logos.forEach(function (it, k) {
+        var th = k / IT.logos.length * TAU + 0.2;
+        place(it, 'logos', Math.cos(th) * (tall ? 420 : 780), Math.sin(th) * (tall ? 660 : 470), Math.sin(th * 2) * 120, -Math.cos(th) * 0.45, Math.sin(th) * 0.3);
+      });
+      TP.push(P('logos', -100, 60, 1000), P('logos', 0, 0, 0), P('logos', 60, -40, -900), P('logos', 360, -160, -1800));
+      F.logos = { A: [P('logos', 0, 0, 2050), P('logos', 0, 0, 0)], B: [P('logos', 0, 30, 820), P('logos', 0, 0, -400)],
+        via: [P('logos', 0, 10, -1100), P('logos', 0, -40, -2600)], centre: true };
+      /* the four agent steps hang from the thread (on portrait screens they hang in a column, the thread at their left) */
+      var AX = [-930, -310, 310, 930];
+      TP.push(P('agent', tall ? -700 : -1600, tall ? 1000 : 420, 600));
+      IT.steps.forEach(function (it, k) {
+        var hh = H(it, 270) / 2;
+        if (tall) {
+          var y = 620 - k * 420, zc = -k * 120;
+          place(it, 'agent', 0, y, zc, 0, 0);
+          TP.push(P('agent', -430, y + 130, zc + 30), P('agent', -174, y, zc + 4), P('agent', -430, y - 130, zc + 30));
+          return;
+        }
+        var x = AX[k], z = -Math.abs(x) * 0.18;
+        place(it, 'agent', x, 0, z, -x / 2600, 0);
+        TP.push(P('agent', x - 230, hh + 110, z + 30), P('agent', x, hh + 4, z + 4), P('agent', x + 230, hh + 110, z + 30));
+      });
+      TP.push(P('agent', tall ? -600 : 1650, tall ? -1100 : 320, -350));
+      F.agent = tall ? { A: [P('agent', -160, 700, 1350), P('agent', 0, 620, 0)], B: [P('agent', -120, -560, 1250), P('agent', 0, -640, -360)] }
+        : { A: [P('agent', -1260, 80, 1150), P('agent', -930, 0, -170)], B: [P('agent', 880, 60, 1080), P('agent', 930, 0, -170)] };
+      /* the five examples float in a field of shards; the thread runs under each one */
+      var WK = [[-460, 60, 0, 0.32, 0.04], [620, 380, -1500, -0.38, -0.05], [-380, -180, -3000, 0.28, 0.03], [700, 160, -4500, -0.34, -0.04], [-520, 300, -6000, 0.3, 0.05]];
+      place(IT.names, 'work', 0, -150, -8200, 0, 0);
+      TP.push(P('work', -1300, -600, 1300));
+      IT.cards.forEach(function (it, k) {
+        var w = WK[k], hh = H(it, 432) / 2, s = k % 2 ? -1 : 1;
+        place(it, 'work', w[0], w[1], w[2], w[3], w[4]);
+        TP.push(P('work', w[0] - 300 * s, w[1] - hh - 130, w[2] + 120), P('work', w[0], w[1] - hh - 6, w[2] + 8), P('work', w[0] + 300 * s, w[1] - hh - 130, w[2] - 120));
+        var ry = yaw('work') + w[3], nx = Math.sin(ry), nz = Math.cos(ry), rx = Math.cos(ry), rz = -Math.sin(ry), C = P('work', w[0], w[1], w[2]);
+        F['work' + k] = {
+          A: [new T.Vector3(C.x + nx * 1120 - rx * 280 * s, C.y + 40, C.z + nz * 1120 - rz * 280 * s), C.clone()],
+          B: [new T.Vector3(C.x + nx * 960 - rx * 130 * s, C.y + 20, C.z + nz * 960 - rz * 130 * s), C.clone()] };
+      });
+      /* the results sit inside the thread's coils */
+      var RS = [[-760, 120, 0, 0.2], [40, -120, -900, 0], [820, 160, -1800, -0.2]];
+      TP.push(P('res', -1500, -300, 900));
+      IT.stats.forEach(function (it, k) {
+        var r = RS[k];
+        place(it, 'res', r[0], r[1], r[2], r[3], 0);
+        for (var j = 0; j <= 16; j++) { var th = -Math.PI / 2 + j / 16 * Math.PI * 2.5; TP.push(P('res', r[0] + Math.cos(th) * 430, r[1] + Math.sin(th) * 300, r[2] + 240 - j * 30)); }
+      });
+      F.res = { A: [P('res', -1120, 60, 1350), P('res', -760, 120, 0)], B: [P('res', 560, 120, -480), P('res', 820, 160, -1800)] };
+      /* the platform: the thread circles the dashboard and runs in behind it */
+      place(IT.plat, 'plat', 0, 0, 0, 0, -0.06);
+      [[-1000, -260, 700], [-780, 0, 0], [-560, 420, -320], [0, 540, -420], [560, 420, -320], [780, 0, 0], [560, -400, -320], [0, -470, -470],
+        [-160, -100, -300], [0, 0, -130], [420, -260, -700]].forEach(function (p) { TP.push(P('plat', p[0], p[1], p[2])); });
+      F.plat = { A: [P('plat', -1500, 220, 700), P('plat', 0, 0, 0)], B: [P('plat', -260, 90, 1400), P('plat', 0, 0, 0)] };
+      /* transparency: a ruler with the three rows standing on it */
+      var RX = [-960, 0, 960], x;
+      TP.push(P('trans', -2200, -200, 700));
+      for (x = -1700; x <= 1700; x += 425) TP.push(P('trans', x, -270, 0));
+      TP.push(P('trans', 2200, -120, -600));
+      for (x = -1600; x <= 1600; x += 80) TICKS.push({ p: [].concat(P('trans', x, -270, 0).toArray(), P('trans', x, Math.round((x + 1600) / 80) % 5 ? -238 : -198, 0).toArray()) });
+      IT.rows.forEach(function (it, k) { place(it, 'trans', RX[k], -180 + H(it, 150) / 2, 0, -RX[k] / 8000, 0); });
+      F.trans = { A: [P('trans', -1550, -120, 1050), P('trans', -960, -100, 0)], B: [P('trans', 1100, -90, 1080), P('trans', 960, -100, 0)] };
+      /* integration: each activation model inside a ring on the thread */
+      var IX = [[-900, 0, 0, 0.15], [0, 0, -500, 0], [900, 0, -1000, -0.15]];
+      TP.push(P('int', -1800, -320, 760));
+      IT.caps.forEach(function (it, k) {
+        var c = IX[k];
+        place(it, 'int', c[0], c[1], c[2], c[3], 0);
+        ringAt('int', c[0], c[1], c[2] - 70, 330, c[3]);
+        TP.push(P('int', c[0], c[1], c[2] - 90));
+        if (k < 2) TP.push(P('int', c[0] + 450, k ? -330 : 330, c[2] - 330));
+      });
+      TP.push(P('int', 1700, 220, -1500));
+      F['int'] = { A: [P('int', -1420, 60, 1120), P('int', -900, 0, 0)], B: [P('int', 1120, 40, 280), P('int', 900, 0, -1000)] };
+      /* closing: the thread runs into a ring of light */
+      ringAt('cta', 240, 80, 0, 560); ringAt('cta', 240, 80, -40, 650);
+      TP.push(P('cta', -900, -520, 1500), P('cta', -320, -220, 700), P('cta', 110, 30, 220), P('cta', 240, 80, 0));
+      F.cta = { A: [P('cta', -420, -120, 2600), P('cta', 240, 80, 0)], B: [P('cta', -150, -60, 1900), P('cta', 240, 80, 0)] };
+
+      /* the thread itself */
+      var curve = new T.CatmullRomCurve3(TP, false, 'centripetal');
+      curve.arcLengthDivisions = TP.length * 40;
+      var LEN = curve.getLength(), NS = Math.round(LEN / 26), sp = curve.getSpacedPoints(NS), tp = [], ta = [], i;
+      for (i = 0; i <= NS; i++) { tp.push(sp[i].x, sp[i].y, sp[i].z); ta.push(i / NS * LEN); }
+      var threadMesh = add(new T.Mesh(ribbonGeo([{ p: tp, a: ta }]), threadMat));
+      threadMat.uniforms.uFrom.value = 0; threadMat.uniforms.uTo.value = LEN;
+      add(new T.Mesh(ribbonGeo(RINGS), ringMat));
+      add(new T.Mesh(ribbonGeo(TICKS), tickMat));
+      function nearestArc(v) { var best = 0, bd = 1e18; for (var k = 0; k <= NS; k += 2) { var d = sp[k].distanceToSquared(v); if (d < bd) { bd = d; best = k; } } return best; }
+      STOPS.forEach(function (s) { s.f = F[s.k]; s.arcI = nearestArc(s.f.B[1]); s.arc = ta[s.arcI]; });
+      /* flares: the spark where the thread starts, a light where it meets each piece, the light inside the closing ring */
+      var fp = [], fr = [];
+      function flare(v, size, gain) { fp.push(v.x, v.y, v.z); fr.push(size, 0.5, gain, 0); }
+      flare(sp[0], 70, 1); flare(sp[0], 260, 0.35);
+      STOPS.forEach(function (s) { flare(sp[s.arcI], 46, 0.3); });
+      flare(sp[NS], 90, 1); flare(sp[NS], 520, 0.4);
+      var fg = new T.BufferGeometry(), fAttr = new T.BufferAttribute(new Float32Array(fr), 4);
+      fg.setAttribute('position', new T.BufferAttribute(new Float32Array(fp), 3)); fg.setAttribute('aRnd', fAttr);
+      add(new T.Points(fg, flareMat));
+      portrait = tall; route();
+      var camPts = camCurve.getPoints(Math.max(300, camCurve.np * 6));
+      /* dust and shards along the whole route, kept clear of the pieces and of the camera's path */
+      var pieces = items.filter(function (it) { return it.pos; }).map(function (it) { return it.pos; }), v = new T.Vector3(), dir = new T.Vector3();
+      function clear(p, r) {
+        for (var k = 0; k < pieces.length; k++) if (pieces[k].distanceToSquared(p) < r * r) return false;
+        for (k = 0; k < camPts.length; k++) if (camPts[k].distanceToSquared(p) < 640 * 640) return false;
+        return true;
+      }
+      var nd = phone ? 2200 : 4600, dp = new Float32Array(nd * 3), dr = new Float32Array(nd * 4);
+      for (i = 0; i < nd; i++) {
+        v.copy(sp[Math.floor(Math.random() * NS)]).add(dir.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize().multiplyScalar(160 + Math.pow(Math.random(), 0.7) * 2800));
+        dp[i * 3] = v.x; dp[i * 3 + 1] = v.y; dp[i * 3 + 2] = v.z;
+        dr[i * 4] = 3 + Math.random() * 6; dr[i * 4 + 1] = Math.random(); dr[i * 4 + 2] = 0.25 + Math.random() * 0.75; dr[i * 4 + 3] = Math.random();
+      }
+      var dg = new T.BufferGeometry();
+      dg.setAttribute('position', new T.BufferAttribute(dp, 3)); dg.setAttribute('aRnd', new T.BufferAttribute(dr, 4));
+      add(new T.Points(dg, dustMat));
+      var base = new T.IcosahedronGeometry(1, 0), bp = base.attributes.position, jit = {};
+      for (i = 0; i < bp.count; i++) {
+        var key = bp.getX(i).toFixed(3) + ',' + bp.getY(i).toFixed(3) + ',' + bp.getZ(i).toFixed(3);
+        if (!jit[key]) jit[key] = 0.72 + Math.random() * 0.5;
+        bp.setXYZ(i, bp.getX(i) * jit[key], bp.getY(i) * jit[key], bp.getZ(i) * jit[key]);
+      }
+      base.computeVertexNormals();
+      var nsh = phone ? 170 : 340, spin = new Float32Array(nsh * 4), shards = new T.InstancedMesh(base, shardMat, nsh), m4 = new T.Matrix4(), qt = new T.Quaternion(), sc = new T.Vector3(), ax = new T.Vector3();
+      for (i = 0; i < nsh; i++) {
+        var tries = 0;
+        do { v.copy(sp[Math.floor(Math.random() * NS)]).add(dir.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize().multiplyScalar(420 + Math.pow(Math.random(), 1.2) * 2600)); }
+        while (!clear(v, 620) && ++tries < 14);
+        var k = 26 + Math.pow(Math.random(), 2.4) * 190;
+        sc.set(k * (0.8 + Math.random() * 0.5), k * (0.7 + Math.random() * 0.6), k * (0.8 + Math.random() * 0.5));
+        qt.setFromAxisAngle(ax.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize(), Math.random() * TAU);
+        m4.compose(v, qt, sc); shards.setMatrixAt(i, m4);
+        ax.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize();
+        spin[i * 4] = ax.x; spin[i * 4 + 1] = ax.y; spin[i * 4 + 2] = ax.z; spin[i * 4 + 3] = (0.05 + Math.random() * 0.3) * (Math.random() < 0.5 ? -1 : 1);
+      }
+      base.setAttribute('aSpin', new T.InstancedBufferAttribute(spin, 4));
+      shards.instanceMatrix.needsUpdate = true; add(shards);
+
+      /* ---- the camera route: for each stop an arrival (A) and a departure (B) view, a swing (via) between stops;
+         the camera follows one curve, its point of interest another */
+      function route() {
+        var CP = [], AP = [], pull = portrait ? 1.14 : 1;
+        function push(c, a) { CP.push(a.clone().add(c.clone().sub(a).multiplyScalar(pull))); AP.push(a.clone()); }
+        STOPS.forEach(function (s, n) {
+          idxA[n] = CP.length; push(s.f.A[0], s.f.A[1]);
+          idxB[n] = CP.length; push(s.f.B[0], s.f.B[1]);
+          var nx = STOPS[n + 1];
+          if (!nx) return;
+          if (s.f.via) { push(s.f.via[0], s.f.via[1]); return; }
+          var b = s.f.B[0], a2 = nx.f.A[0], mid = b.clone().add(a2).multiplyScalar(0.5), d = a2.clone().sub(b), L2 = d.length();
+          var sideV = new T.Vector3().crossVectors(d, up).normalize();
+          mid.addScaledVector(up, L2 * 0.12).addScaledVector(sideV, L2 * 0.16 * (n % 2 ? 1 : -1));
+          push(mid, s.f.B[1].clone().add(nx.f.A[1]).multiplyScalar(0.5));
         });
-        var end = Math.max(20, (root.getBoundingClientRect().bottom + sy - vh - hb) * k);
-        return { hb: hb, k: k, vh: vh, w: window.innerWidth, end: end, secs: secs,
-          sig: [Math.round(hb), window.innerWidth, Math.round(end)].concat(secs.map(function (x) { return Math.round(x.s); })).join(',') };
+        camCurve = new T.CatmullRomCurve3(CP, false, 'centripetal');
+        focCurve = new T.CatmullRomCurve3(AP, false, 'centripetal');
+        camCurve.np = CP.length;
       }
-
-      /* ---- the rail: a long gentle curve forward (-z), sampled every DS with a frame (tangent, right, up) */
-      var DS = 0.2, S0 = -60;
-      function makeRail(len) {
-        var pts = [], s;
-        for (s = S0 - 12; s <= len + 200; s += 12)
-          pts.push(new T.Vector3(10 * Math.sin(s / 41) + 4 * Math.sin(s / 15.3 + 1), 3.2 * Math.sin(s / 33 + 2) + 1.2 * Math.sin(s / 11.7), -s));
-        var curve = new T.CatmullRomCurve3(pts, false, 'centripetal');
-        curve.arcLengthDivisions = pts.length * 40;   /* even spacing along a long curve */
-        var total = curve.getLength(), n = Math.floor(total / DS);
-        var sp = curve.getSpacedPoints(n), P = new Float32Array((n + 1) * 3), Tg = new Float32Array((n + 1) * 3), R = new Float32Array((n + 1) * 3), U = new Float32Array((n + 1) * 3);
-        var t = new T.Vector3(), r = new T.Vector3(), u = new T.Vector3(), up = new T.Vector3(0, 1, 0);
-        for (var i = 0; i <= n; i++) {
-          P[i * 3] = sp[i].x; P[i * 3 + 1] = sp[i].y; P[i * 3 + 2] = sp[i].z;
-          t.subVectors(sp[Math.min(i + 1, n)], sp[Math.max(i - 1, 0)]).normalize();
-          r.crossVectors(t, up).normalize(); u.crossVectors(r, t).normalize();
-          Tg[i * 3] = t.x; Tg[i * 3 + 1] = t.y; Tg[i * 3 + 2] = t.z;
-          R[i * 3] = r.x; R[i * 3 + 1] = r.y; R[i * 3 + 2] = r.z;
-          U[i * 3] = u.x; U[i * 3 + 1] = u.y; U[i * 3 + 2] = u.z;
-        }
-        return { n: n + 1, ds: total / n, s0: S0 - 12, P: P, T: Tg, R: R, U: U };   /* s counts arc length from the first control point */
-      }
-      function lerp3(A, a, f, v) { v.set(A[a] + (A[a + 3] - A[a]) * f, A[a + 1] + (A[a + 4] - A[a + 1]) * f, A[a + 2] + (A[a + 5] - A[a + 2]) * f); }
-      function at(s, o) {   /* rail point + frame at s, interpolated: o = {p, t, r, u} */
-        var f = (s - rail.s0) / rail.ds, i = Math.floor(f);
-        if (i < 0) { i = 0; f = 0; } else if (i > rail.n - 2) { i = rail.n - 2; f = 1; } else f -= i;
-        lerp3(rail.P, i * 3, f, o.p); lerp3(rail.T, i * 3, f, o.t); lerp3(rail.R, i * 3, f, o.r); lerp3(rail.U, i * 3, f, o.u);
-        return o;
-      }
-      function frameObj() { return { p: new T.Vector3(), t: new T.Vector3(), r: new T.Vector3(), u: new T.Vector3() }; }
-
-      /* ---- where the thread sits beside the rail, section by section (dx right, dy up, in the rail's frame) */
-      var TAU = Math.PI * 2;
-      function pattern(kind, u, s) {
-        switch (kind) {
-          case 'logos': return [2.2 * Math.sin(0.15 * u + 2), -2.4];
-          case 'band': return [0.5 * Math.sin(0.2 * u), -2.5];
-          case 'agent': return [0.35 * Math.sin(0.3 * u), -1.85];
-          case 'work': { var a = u * TAU / 24 - Math.PI / 2; return [4.4 * Math.cos(a), 3.5 * Math.sin(a) - 0.4]; }
-          case 'res': { var b = u * TAU / 10 - Math.PI / 2; return [2.5 * Math.cos(b), 2.5 * Math.sin(b)]; }
-          case 'plat': return [6.5 * Math.sin(u * TAU / 46), -0.8 + 2.6 * Math.cos(u * TAU / 46)];
-          case 'trans': return [-3.4, -1.7];
-          case 'int': return [3.6 * Math.sin(0.13 * u + 1), -1.4 + 0.9 * Math.sin(0.09 * u)];
-          case 'cta': {
-            var w = clamp((s - (L.end - 8)) / 30, 0, 1); w = w * w * (3 - 2 * w);
-            return [2.6 * Math.sin(0.12 * u + 0.5) * (1 - w), (-1.6 + 0.5 * Math.sin(0.1 * u)) * (1 - w) + 0.2 * w];
+      function ease(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+      function where(pr) {   /* curve parameter, the stop in reach, how far along */
+        for (var n = 0; n < STOPS.length; n++) {
+          var s = STOPS[n];
+          if (pr <= s.h1 || n === STOPS.length - 1) {
+            var f = clamp((pr - s.h0) / s.hold, 0, 1);
+            return { t: idxA[n] + f * (idxB[n] - idxA[n]), n: n, arc: s.arc, roll: 0 };
           }
-          default: return [3.4 * Math.sin(0.1 * u + 0.6), -1.5 + 0.7 * Math.sin(0.07 * u)];
-        }
-      }
-      function disp(s) {
-        var i = 0, BL = 7;
-        while (i < segs.length - 1 && s >= segs[i + 1].b) i++;
-        var d = pattern(segs[i].kind, s - segs[i].o, s), j = -1;
-        if (i > 0 && s < segs[i].b + BL) j = i - 1;
-        else if (i < segs.length - 1 && s > segs[i + 1].b - BL) j = i + 1;
-        if (j < 0) return d;
-        var bd = j < i ? segs[i].b : segs[i + 1].b, w = clamp((s - bd + BL) / (2 * BL), 0, 1), e = pattern(segs[j].kind, s - segs[j].o, s);
-        w = w * w * (3 - 2 * w);   /* weight of the later section across the boundary */
-        if (j < i) w = 1 - w;
-        return [d[0] + (e[0] - d[0]) * w, d[1] + (e[1] - d[1]) * w];
-      }
-      var F1 = null;
-      function threadPoint(s, v) { at(s, F1); var d = disp(s); return v.copy(F1.p).addScaledVector(F1.r, d[0]).addScaledVector(F1.u, d[1]); }
-
-      function dispose() {
-        while (world.children.length) { var c = world.children.pop(); if (c.geometry) c.geometry.dispose(); if (c.dispose) c.dispose(); }
-      }
-      function build() {
-        var M = measure();
-        if (L && M.sig === L.sig) return;
-        L = M; F1 = frameObj();
-        dispose();
-        rail = makeRail(L.end + 60);
-        /* the stretch of thread seen while each section is on screen starts a little ahead of its anchor */
-        segs = L.secs.map(function (x) { return { kind: x.kind, b: x.s + 8, o: x.s + 8, s: x.s, e: x.e }; });
-        segs[0].b = -1e5;
-        var sStart = 4, sEnd = L.end + 22, A = frameObj(), v = new T.Vector3(), lines = [], i, j, s;
-        /* the thread */
-        var tp = [], ta = [];
-        for (s = sStart; s <= sEnd + 0.001; s += DS) { threadPoint(s, v); tp.push(v.x, v.y, v.z); ta.push(s); }
-        thread = { from: sStart, to: sEnd, step: DS, count: ta.length };
-        threadMesh = new T.Mesh(ribbonGeo([{ p: tp, a: ta }]), threadMat);
-        threadMat.uniforms.uFrom.value = sStart; threadMat.uniforms.uTo.value = sEnd;
-        threadMesh.frustumCulled = false; world.add(threadMesh);
-        /* gates: one at each image band, four rings over the agent steps, the closing ring the thread runs into */
-        function ring(sc, rad, lift) {
-          at(sc, A); var p = [];
-          for (j = 0; j < 96; j++) {
-            var a = j / 96 * TAU;
-            p.push(A.p.x + A.r.x * Math.cos(a) * rad + A.u.x * (Math.sin(a) * rad + lift), A.p.y + A.r.y * Math.cos(a) * rad + A.u.y * (Math.sin(a) * rad + lift),
-              A.p.z + A.r.z * Math.cos(a) * rad + A.u.z * (Math.sin(a) * rad + lift));
+          if (pr < s.h1 + s.travel) {
+            var g0 = (pr - s.h1) / s.travel, e = ease(g0);
+            /* the camera banks into each flight and levels out to arrive */
+            return { t: idxB[n] + e * (idxA[n + 1] - idxB[n]), n: e < 0.5 ? n : n + 1, arc: s.arc + (STOPS[n + 1].arc - s.arc) * e, roll: Math.sin(Math.PI * g0) * (n % 2 ? 0.2 : -0.2) };
           }
-          lines.push({ p: p, closed: true });
         }
-        segs.forEach(function (g) {
-          if (g.kind === 'band') ring(g.s + 24, 4.6, 0.2);
-          if (g.kind === 'agent') { var span = Math.max(28, g.e - g.s - 18); for (j = 0; j < 4; j++) ring(g.s + 16 + j * span / 3.4, 3.2, 0.1); }
-        });
-        ring(sEnd, 3.0, 0.2); ring(sEnd, 3.7, 0.2);
-        var rings = new T.Mesh(ribbonGeo(lines), ringMat); rings.frustumCulled = false; world.add(rings);
-        /* a ruler of ticks under the transparency rows */
-        var ticks = [];
-        segs.forEach(function (g) {
-          if (g.kind !== 'trans') return;
-          for (s = g.b + 6, j = 0; s < g.b + Math.max(30, g.e - g.s); s += 2.2, j++) {
-            at(s, A); threadPoint(s, v);
-            var h = j % 5 ? 0.42 : 0.95;
-            ticks.push({ p: [v.x, v.y, v.z, v.x + A.u.x * h, v.y + A.u.y * h, v.z + A.u.z * h] });
-          }
-        });
-        if (ticks.length) { var tk = new T.Mesh(ribbonGeo(ticks), tickMat); tk.frustumCulled = false; world.add(tk); }
-        /* dust through the whole volume */
-        var len = sEnd - S0 + 40, nd = Math.min(5200, Math.round(len * (phone ? 2.6 : 4.4))), dp = new Float32Array(nd * 3), dr = new Float32Array(nd * 4);
-        for (i = 0; i < nd; i++) {
-          s = S0 + Math.random() * len; at(s, A);
-          var ang = Math.random() * TAU, rad = 0.8 + Math.pow(Math.random(), 0.8) * 18;
-          v.copy(A.p).addScaledVector(A.r, Math.cos(ang) * rad).addScaledVector(A.u, Math.sin(ang) * rad * 0.8);
-          dp[i * 3] = v.x; dp[i * 3 + 1] = v.y; dp[i * 3 + 2] = v.z;
-          dr[i * 4] = 0.03 + Math.random() * 0.06; dr[i * 4 + 1] = Math.random(); dr[i * 4 + 2] = 0.25 + Math.random() * 0.75; dr[i * 4 + 3] = Math.random();
+      }
+      function chapterAt(pr) {
+        for (var n = 0; n < STOPS.length; n++) {
+          var s = STOPS[n], before = n ? STOPS[n - 1].travel * 0.3 : 1e9, after = n === STOPS.length - 1 ? 1e9 : s.travel * 0.3;
+          if (pr >= s.h0 - before && pr <= s.h1 + after) return n;
         }
-        var dg = new T.BufferGeometry();
-        dg.setAttribute('position', new T.BufferAttribute(dp, 3)); dg.setAttribute('aRnd', new T.BufferAttribute(dr, 4));
-        var dust = new T.Points(dg, dustMat); dust.frustumCulled = false; world.add(dust);
-        /* flares: the spark where the thread starts, the light inside the closing ring */
-        var fp = [], fr = [];
-        function flare(p, size, gain) { fp.push(p.x, p.y, p.z); fr.push(size, 0.5, gain, 0); }
-        threadPoint(sStart, v); flare(v, 0.9, 1); flare(v, 3.2, 0.35);
-        threadPoint(sEnd, v); flare(v, 1.2, 1); flare(v, 6.5, 0.4);
-        var fg = new T.BufferGeometry();
-        fg.setAttribute('position', new T.BufferAttribute(new Float32Array(fp), 3)); fg.setAttribute('aRnd', new T.BufferAttribute(new Float32Array(fr), 4));
-        var flares = new T.Points(fg, flareMat); flares.frustumCulled = false; world.add(flares);
-        /* shards: scattered round the rail, thicker round the work */
-        var base = new T.IcosahedronGeometry(1, 0), bp = base.attributes.position, jit = {};
-        for (i = 0; i < bp.count; i++) {
-          var key = bp.getX(i).toFixed(3) + ',' + bp.getY(i).toFixed(3) + ',' + bp.getZ(i).toFixed(3);
-          if (!jit[key]) jit[key] = 0.72 + Math.random() * 0.5;
-          bp.setXYZ(i, bp.getX(i) * jit[key], bp.getY(i) * jit[key], bp.getZ(i) * jit[key]);
-        }
-        base.computeVertexNormals();
-        var work = segs.filter(function (g) { return g.kind === 'work'; })[0], extra = work ? (phone ? 30 : 60) : 0;
-        var ns = Math.round(clamp(len * (phone ? 0.16 : 0.28), 60, 320)) + extra, spin = new Float32Array(ns * 4);
-        var shards = new T.InstancedMesh(base, shardMat, ns), m = new T.Matrix4(), qt = new T.Quaternion(), sc = new T.Vector3(), ax = new T.Vector3();
-        for (i = 0; i < ns; i++) {
-          var near = i >= ns - extra;
-          s = near ? work.o + Math.random() * Math.max(40, work.e - work.s + 20) : S0 + 20 + Math.random() * (len - 20);
-          at(s, A);
-          var an = Math.random() * TAU, rr = near ? 5.5 + Math.random() * 9 : 6 + Math.pow(Math.random(), 1.3) * 22;
-          v.copy(A.p).addScaledVector(A.r, Math.cos(an) * rr).addScaledVector(A.u, Math.sin(an) * rr * 0.72);
-          var k = (0.18 + Math.pow(Math.random(), 2.2) * (near ? 1.3 : 1.9)) * clamp(rr / 11, 0.45, 1);   /* the close ones stay small */
-          sc.set(k * (0.8 + Math.random() * 0.5), k * (0.7 + Math.random() * 0.6), k * (0.8 + Math.random() * 0.5));
-          qt.setFromAxisAngle(ax.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize(), Math.random() * TAU);
-          m.compose(v, qt, sc); shards.setMatrixAt(i, m);
-          ax.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize();
-          spin[i * 4] = ax.x; spin[i * 4 + 1] = ax.y; spin[i * 4 + 2] = ax.z; spin[i * 4 + 3] = (0.05 + Math.random() * 0.3) * (Math.random() < 0.5 ? -1 : 1);
-        }
-        base.setAttribute('aSpin', new T.InstancedBufferAttribute(spin, 4));
-        shards.instanceMatrix.needsUpdate = true; shards.frustumCulled = false; world.add(shards);
-        wake();
+        return -1;
       }
 
       /* ---- size, pointer, the frame */
+      var W = 1, Hh = 1, dpr = 1, lastFov = 0;
       function size() {
-        var w = cvs.clientWidth || window.innerWidth, h = cvs.clientHeight || window.innerHeight;
+        W = stage.clientWidth || window.innerWidth; Hh = stage.clientHeight || window.innerHeight;
         dpr = Math.min(window.devicePixelRatio || 1, phone ? 1.5 : 1.75);
-        renderer.setPixelRatio(dpr); renderer.setSize(w, h, false);
-        res.set(Math.round(w * dpr), Math.round(h * dpr));
-        cam.aspect = w / h;
+        renderer.setPixelRatio(dpr); renderer.setSize(W, Hh, false);
+        res.set(Math.round(W * dpr), Math.round(Hh * dpr));
+        cam.aspect = W / Hh; cam.fov = cam.aspect < 1 ? 52 : 40; cam.updateProjectionMatrix();
         threadMat.uniforms.uMinPx.value = 1.3 * dpr; ringMat.uniforms.uMinPx.value = 1.1 * dpr; tickMat.uniforms.uMinPx.value = 0.9 * dpr;
+        var pt = cam.aspect < 1;
+        if (pt !== portrait) { portrait = pt; route(); }
       }
-      var mx = 0, my = 0, cmx = 0, cmy = 0, sCam = null, vel = 0, fov = 58, raf = 0, CA = frameObj(), CB = frameObj(), tgt = new T.Vector3(), upv = new T.Vector3();
+      var mx = 0, my = 0, cmx = 0, cmy = 0, prog = null, raf = 0, last = performance.now(), time = 0;
+      var cpos = new T.Vector3(), fpos = new T.Vector3(), tgt = new T.Vector3(), fwd = new T.Vector3(), rgt = new T.Vector3(), upv = new T.Vector3();
+      var curCh = null, curN = -1, curG = 0, counted = {};
       if (fine) window.addEventListener('mousemove', function (e) { mx = e.clientX / window.innerWidth * 2 - 1; my = e.clientY / window.innerHeight * 2 - 1; }, { passive: true });
+      function cardFilm(n, on) {
+        var c = IT.cards[n] && IT.cards[n].el.firstChild, vd = c && c.querySelector('video');
+        if (!vd) return;
+        if (on) { c.classList.add('is-in'); if (!vd.getAttribute('src')) vd.src = vd.getAttribute('data-src'); var pp = vd.play(); if (pp && pp.catch) pp.catch(function () {}); }
+        else if (!vd.paused) vd.pause();
+      }
+      function enter(n) {   /* a stop comes into reach: its film plays, its figures count */
+        STOPS.forEach(function (s, k) { if (s.i != null) cardFilm(s.i, k === n); });
+        var g = STOPS[n].g;
+        if (g === 2 && !counted[2]) { counted[2] = 1; $$('[data-count-from]', stage).forEach(function (c) { count(c, +c.getAttribute('data-count-from')); }); }
+        if (g === 4 && !counted[4]) { counted[4] = 1; $$('[data-count]', stage).forEach(function (c) { count(c); }); }
+        var nx = STOPS[n + 1];
+        if (nx && nx.i != null) { var nv = IT.cards[nx.i].el.querySelector('video'); if (nv && !nv.getAttribute('src')) nv.src = nv.getAttribute('data-src'); }
+      }
 
       function frame(now) {
         raf = 0;
         var dt = Math.min(0.05, Math.max(0.001, (now - last) / 1000)); last = now;
-        if (!rail || document.hidden) return;
-        var ch = cvs.clientHeight || window.innerHeight, hbv = hero.getBoundingClientRect().bottom, rbv = root.getBoundingClientRect().bottom;
-        var on = hbv < ch - 1 && rbv > 1;
-        cvs.classList.toggle('is-on', on);
-        if (!on) { sCam = null; return; }
-        cvs.style.clipPath = 'inset(' + Math.max(0, Math.round(hbv)) + 'px 0 ' + Math.max(0, Math.round(ch - rbv)) + 'px 0)';
+        var r = track.getBoundingClientRect(), vh = window.innerHeight;
+        if (document.hidden || r.top > vh || r.bottom < 0) { prog = null; return; }
         time += dt;
-        var target = clamp((window.pageYOffset - L.hb) * L.k, S0 + 4, L.end);
-        if (sCam === null) sCam = target;
-        var prev = sCam;
-        sCam += (target - sCam) * (1 - Math.exp(-dt * 6));
-        vel += ((sCam - prev) / dt - vel) * 0.08;
+        var pinned = Math.max(1, r.height - Hh), target = clamp(-r.top / pinned, 0, 1) * TOTAL;
+        if (prog === null) prog = target;
+        prog += (target - prog) * (1 - Math.exp(-dt * 7));
+        if (Math.abs(target - prog) < 1e-4) prog = target;
+        var w = where(prog), u = w.t / (camCurve.np - 1);
+        camCurve.getPoint(u, cpos); focCurve.getPoint(u, fpos);
         cmx += (mx - cmx) * 0.05; cmy += (my - cmy) * 0.05;
-        /* camera: just above the rail, looking ahead and a touch down, leaning into the bends */
-        at(sCam, CA); at(sCam + 14, CB);
-        cam.position.copy(CA.p).addScaledVector(CA.u, 0.45 - cmy * 0.35).addScaledVector(CA.r, cmx * 0.7);
-        tgt.copy(CB.p).addScaledVector(CB.u, -0.75).addScaledVector(CB.r, cmx * 0.25);
-        var turn = (CB.t.x - CA.t.x) * CA.r.x + (CB.t.y - CA.t.y) * CA.r.y + (CB.t.z - CA.t.z) * CA.r.z, roll = clamp(-turn * 1.4, -0.22, 0.22);
-        upv.copy(CA.u).multiplyScalar(Math.cos(roll)).addScaledVector(CA.r, Math.sin(roll));
-        cam.up.copy(upv); cam.lookAt(tgt);
-        var wantFov = (cam.aspect < 1 ? 70 : 56) + Math.min(9, Math.abs(vel) * 0.12);
-        fov += (wantFov - fov) * 0.08;
-        if (Math.abs(cam.fov - fov) > 0.01) { cam.fov = fov; cam.updateProjectionMatrix(); }
-        /* pulses run ahead of the camera along the thread and light the shards they pass */
-        var i;
-        for (i = 0; i < 4; i++) {
-          var ps = sCam - 6 + ((time * 12 + i * 19) % 76);
-          pulse[i] = ps;
-          if (ps > thread.from && ps < thread.to) { threadPoint(ps, lightP[i]); lightI[i] = 1.1; } else lightI[i] = 0;
+        /* aim so the piece sits right of centre above the copy (centred on portrait screens and in the logo ring) */
+        fwd.subVectors(fpos, cpos); var dist = fwd.length(); fwd.divideScalar(dist || 1);
+        rgt.crossVectors(fwd, up).normalize(); upv.crossVectors(rgt, fwd);
+        var hh = dist * Math.tan(cam.fov * Math.PI / 360), hw = hh * cam.aspect, st = STOPS[w.n];
+        var sx = portrait || st.f.centre ? 0.5 : 0.6, sy = st.f.centre ? 0.5 : portrait ? 0.36 : 0.44;
+        tgt.copy(fpos).addScaledVector(rgt, -(sx - 0.5) * 2 * hw).addScaledVector(upv, -(0.5 - sy) * 2 * hh);
+        cam.position.copy(cpos).addScaledVector(rgt, cmx * 60).addScaledVector(upv, -cmy * 40);
+        cam.up.copy(up).multiplyScalar(Math.cos(w.roll)).addScaledVector(rgt, Math.sin(w.roll));
+        cam.lookAt(tgt); cam.updateMatrixWorld();
+        /* HTML pieces: the camera moves them all in one transform (three's CSS3DRenderer maths) */
+        var fovPx = cam.projectionMatrix.elements[5] * Hh / 2, e = cam.matrixWorldInverse.elements;
+        if (fovPx !== lastFov) { view.style.perspective = fovPx + 'px'; lastFov = fovPx; }
+        cam3.style.transform = 'translateZ(' + fovPx + 'px) matrix3d(' + [e[0], -e[1], e[2], e[3], e[4], -e[5], e[6], e[7], e[8], -e[9], e[10], e[11], e[12], -e[13], e[14], e[15]].map(eps).join(',') +
+          ') translate(' + W / 2 + 'px,' + Hh / 2 + 'px)';
+        cam.getWorldDirection(fwd);
+        for (var k = 0; k < items.length; k++) {
+          var it = items[k];
+          if (!it.pos) continue;
+          v.subVectors(it.pos, cam.position);
+          var d = v.length(), front = v.dot(fwd), op = front < 120 ? 0 : clamp((6200 - d) / 1900, 0, 1) * clamp((d - 260) / 420, 0, 1);
+          op = Math.round(op * 50) / 50;
+          if (op !== it.op) { it.op = op; it.el.style.opacity = op; it.el.style.visibility = op ? 'visible' : 'hidden'; }
         }
-        threadPoint(clamp(sCam + 5, thread.from, thread.to), lightP[4]); lightI[4] = 0.55;
-        threadPoint(clamp(sCam + 15, thread.from, thread.to), lightP[5]); lightI[5] = 0.45;
-        /* only the stretch of thread near the camera is drawn */
-        var i0 = clamp(Math.floor((sCam - 4 - thread.from) / thread.step), 0, thread.count - 1), i1 = clamp(Math.ceil((sCam + 95 - thread.from) / thread.step), 0, thread.count - 1);
-        threadMesh.geometry.setDrawRange(i0 * 6, Math.max(0, i1 - i0) * 6);
+        /* the stop in reach, its copy, the counter */
+        if (w.n !== curN) { curN = w.n; enter(curN); }
+        var ci = jReady ? chapterAt(prog) : -1, chEl = ci >= 0 ? STOPS[ci].ch : null;
+        if (chEl !== curCh) {
+          if (curCh) { curCh.classList.remove('is-on'); var so = curCh.querySelector('.lnw-stmt'); if (so) so.classList.remove('is-in'); }
+          if (chEl) {
+            chEl.classList.add('is-on');
+            var sn = chEl.querySelector('.lnw-stmt');
+            if (sn) requestAnimationFrame(function () { sn.classList.add('is-in'); });
+            $$('.lnw-lab, .lnw-tag', chEl).forEach(scramble);
+          }
+          curCh = chEl;
+        }
+        var g = STOPS[w.n].g;
+        if (g !== curG) { curG = g; hudN.textContent = '0' + g + ' / 0' + GROUPS; }
+        hudBar.style.height = (prog / TOTAL * 100).toFixed(2) + '%';
+        var end = jReady && g === GROUPS;
+        if (end !== jEnd) { jEnd = end; badgeState(); }
+        /* pulses run ahead along the thread from the piece in reach and light the shards they pass */
+        for (k = 0; k < 4; k++) {
+          var pa = w.arc - 500 + ((time * 1100 + k * 1650) % 6600);
+          pulse[k] = pa;
+          if (pa > 0 && pa < LEN) { lightP[k].copy(sp[clamp(Math.round(pa / LEN * NS), 0, NS)]); lightI[k] = 1.1; } else lightI[k] = 0;
+        }
+        lightP[4].copy(fpos); lightI[4] = 0.6;
+        lightP[5].copy(sp[clamp(Math.round(w.arc / LEN * NS), 0, NS)]); lightI[5] = 0.5;
+        /* the light where the thread meets the piece in reach burns brighter */
+        for (k = 0; k < STOPS.length; k++) fAttr.setZ(2 + k, k === w.n ? 1 : 0.3);
+        fAttr.needsUpdate = true;
         var px = res.y * cam.projectionMatrix.elements[5] * 0.5;
         dustMat.uniforms.uTime.value = flareMat.uniforms.uTime.value = shardMat.uniforms.uTime.value = time;
         dustMat.uniforms.uPx.value = flareMat.uniforms.uPx.value = px;
         renderer.render(scene, cam);
-        raf = requestAnimationFrame(frame);   /* keeps running while the world is on screen */
+        raf = requestAnimationFrame(frame);   /* keeps running while the stage is on screen */
       }
-      function wake() { if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } }
-      var bt = 0, lastW = window.innerWidth;
-      function relayout() { clearTimeout(bt); bt = setTimeout(function () { size(); build(); }, 220); }
+      wake = function () { if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } };
       window.addEventListener('scroll', wake, { passive: true });
-      window.addEventListener('resize', function () {
-        size(); wake();
-        if (window.innerWidth !== lastW) { lastW = window.innerWidth; phone = lastW < 768; relayout(); }   /* phones: the address bar alone never rebuilds */
-      });
+      var rt = 0;
+      window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { size(); wake(); }, 120); });
       document.addEventListener('visibilitychange', wake);
-      if ('ResizeObserver' in window) new ResizeObserver(relayout).observe(root);
-      size(); build();
+      size(); wake();
     }
   })();
 
@@ -930,7 +1073,7 @@
   function maybeStart() {
     if (!introDone || !fontsDone) return;
     startReveals();
-    threadOn();
+    journeyOn();
     setTimeout(function () { ready = true; badgeState(); }, reduce ? 0 : 420);
     kick();
   }
