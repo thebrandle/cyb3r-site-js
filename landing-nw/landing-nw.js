@@ -4,7 +4,8 @@
  * labels and side copy lagging the scroll, magnetic links, a scroll-scrubbed logo strip, a brand-name strip that
  * drifts with scroll speed, a scroll-linked example rail whose cards open from the bottom, fixed-layer image bands,
  * floating statements, a one-open accordion, the floating Discovery Call badge, a pop-up that opens as a circle
- * from the click and a veil that rises before leaving for another page. The hero film is a muted loop; "Watch the
+ * from the click, a veil that rises before leaving for another page, and a teal light thread that winds through
+ * the page after the hero (WebGL, after ysuriadesign.co). The hero film is a muted loop; "Watch the
  * video" or a click on the film restarts it with sound and controls. The Discovery Call modal (second block) moves
  * the page's NATIVE Webflow form (#cybDiscoveryNative) into it, so submissions still land in Webflow. */
 (function () {
@@ -517,11 +518,209 @@
     });
   }
 
+  /* ---- the light thread (after ysuriadesign.co): one teal line of light winding through the page in 3D after the
+     hero. Its point runs 72% down the screen, so it leads on as you scroll; depth gives it parallax and thickness,
+     pulses of light travel along it, dust floats around it, and it ends plugged into the closing Discovery Call
+     button. WebGL1 in a transparent fixed canvas behind the copy (the sections sit above it at z-index 1). */
+  var threadOn = function () {};
+  (function lightThread() {
+    if (reduce) return;
+    var cvs = document.createElement('canvas'), gl = null;
+    cvs.className = 'lnw-thread'; cvs.setAttribute('aria-hidden', 'true');
+    try { gl = cvs.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: true }); } catch (e) {}
+    if (!gl) return;
+    root.insertBefore(cvs, root.firstChild);
+    var D = 1.6, HEAD = 0.72, COL = [0.224, 0.945, 0.878], small = window.innerWidth < 768;
+
+    function program(vs, fs) {
+      var p = gl.createProgram();
+      [[gl.VERTEX_SHADER, vs], [gl.FRAGMENT_SHADER, fs]].forEach(function (s) {
+        var sh = gl.createShader(s[0]); gl.shaderSource(sh, s[1]); gl.compileShader(sh); gl.attachShader(p, sh);
+      });
+      gl.linkProgram(p);
+      return p;
+    }
+    /* a ribbon around the line: hot core + soft halo, pulses travelling from the start to the point, a brighter tip */
+    var line = program(
+      'attribute vec4 a;attribute float t;uniform vec2 res;varying float vs,vl,vt;' +
+      'void main(){vs=a.z;vl=a.w;vt=t;gl_Position=vec4(a.x/res.x*2.-1.,1.-a.y/res.y*2.,0.,1.);}',
+      'precision mediump float;varying float vs,vl,vt;uniform float time,head;uniform vec3 col;' +
+      'void main(){float d=vs*vs,core=exp(-d*150.),halo=exp(-d*6.5),p=0.;' +
+      'for(int k=0;k<3;k++){float e=(vt-fract(time*.06+float(k)/3.)*head)*170.;p+=exp(-e*e);}' +
+      'float q=(vt-head)*120.,tip=exp(-q*q),fade=smoothstep(0.,.012,vt);' +
+      'float i=(halo*.38+core)*(1.+p*1.5+tip*2.4)*vl*fade;' +
+      'vec3 c=col*i+vec3(.8,1.,.97)*core*vl*fade*(.55+p+tip*1.6);' +
+      'gl_FragColor=vec4(c,clamp(max(c.r,max(c.g,c.b)),0.,1.));}');
+    /* round soft points: floating dust, the spark at the point, the light where it plugs in */
+    var dots = program(
+      'attribute vec4 a;uniform vec2 res;uniform float dpr;varying float va;' +
+      'void main(){va=a.w;gl_Position=vec4(a.x/res.x*2.-1.,1.-a.y/res.y*2.,0.,1.);gl_PointSize=a.z*dpr;}',
+      'precision mediump float;varying float va;uniform vec3 col;' +
+      'void main(){vec2 q=gl_PointCoord*2.-1.;float r=dot(q,q);if(r>1.)discard;' +
+      'vec3 c=(col*exp(-r*3.2)+vec3(1.)*exp(-r*16.)*.7)*va;gl_FragColor=vec4(c,clamp(max(c.r,max(c.g,c.b)),0.,1.));}');
+    var L = { a: gl.getAttribLocation(line, 'a'), t: gl.getAttribLocation(line, 't'), res: gl.getUniformLocation(line, 'res'),
+      time: gl.getUniformLocation(line, 'time'), head: gl.getUniformLocation(line, 'head'), col: gl.getUniformLocation(line, 'col') };
+    var P = { a: gl.getAttribLocation(dots, 'a'), res: gl.getUniformLocation(dots, 'res'), dpr: gl.getUniformLocation(dots, 'dpr'), col: gl.getUniformLocation(dots, 'col') };
+    var lineBuf = gl.createBuffer(), dotBuf = gl.createBuffer();
+    var maxPt = (gl.getParameter(gl.ALIASED_POINT_SIZE_RANGE) || [1, 64])[1];
+
+    /* the path: through the side margins of each section, swooping across (toward the viewer) in the gap above it,
+       diving deep into each image band, ending on the closing button. x = px from the centre, y = page px, z = depth */
+    var SX, SY, SZ, ST, N = 0, startY = 0, endY = 0, plug = null, dust = [];
+    function crc(p0, p1, p2, p3, u) {   /* centripetal Catmull-Rom: no loops or cusps between uneven stops */
+      function knot(ti, a, b) { return ti + Math.max(Math.pow(Math.pow(b[0] - a[0], 2) + Math.pow(b[1] - a[1], 2) + Math.pow(b[2] - a[2], 2), 0.25), 1e-4); }
+      var t0 = 0, t1 = knot(t0, p0, p1), t2 = knot(t1, p1, p2), t3 = knot(t2, p2, p3), t = t1 + (t2 - t1) * u, o = [];
+      for (var j = 0; j < 3; j++) {
+        var a1 = ((t1 - t) * p0[j] + (t - t0) * p1[j]) / (t1 - t0), a2 = ((t2 - t) * p1[j] + (t - t1) * p2[j]) / (t2 - t1);
+        var a3 = ((t3 - t) * p2[j] + (t - t2) * p3[j]) / (t3 - t2);
+        var b1 = ((t2 - t) * a1 + (t - t0) * a2) / (t2 - t0), b2 = ((t3 - t) * a2 + (t - t1) * a3) / (t3 - t1);
+        o[j] = ((t2 - t) * b1 + (t - t1) * b2) / (t2 - t1);
+      }
+      return o;
+    }
+    function build() {
+      var W = window.innerWidth, sy = window.pageYOffset, E = W * (small ? 0.46 : 0.44), Z = W * 0.5, pts = [], side = 1;
+      var hero = document.getElementById('lnwHero'), cta = root.querySelector('.lnw-cta'), btn = cta && cta.querySelector('.lnw-btn');
+      if (!hero || !btn || !hero.offsetHeight) return;
+      function box(el) { var r = el.getBoundingClientRect(); return { t: r.top + sy, b: r.bottom + sy, h: r.height }; }
+      var h = box(hero);
+      startY = h.b;
+      pts.push([W * 0.28, h.b - 90, -1.3]);   /* rises from under the bottom edge of the film */
+      Array.prototype.forEach.call(root.children, function (el) {
+        if (el === hero || el === cvs || el === cta || !el.offsetHeight || el.classList.contains('lnw-badge')) return;
+        var r = box(el);
+        if (el.classList.contains('lnw-band')) { pts.push([side * W * 0.12, r.t + r.h / 2, -1.7]); side = -side; return; }
+        if (el.classList.contains('lnw-logos')) { pts.push([-side * W * 0.12, r.t + r.h * 0.42, -0.3], [side * E, r.t + r.h * 0.62, -0.12]); return; }
+        var pad = Math.min(parseFloat(getComputedStyle(el).paddingTop) || 120, r.h * 0.2);
+        pts.push([0, r.t + pad * 0.45, 0.4],
+          [side * E, r.t + pad + (r.h - 2 * pad) * 0.12, 0.05],
+          [side * E * 0.97, r.b - pad - (r.h - 2 * pad) * 0.12, -0.08]);
+        side = -side;
+      });
+      var c = box(cta), b = btn.getBoundingClientRect(), bx = b.left - W / 2 - 4, by = b.top + sy + b.height / 2;
+      pts.push([0, c.t + 70, 0.35], [-E, c.t + (by - c.t) * 0.55, 0.12], [bx - 70, by, 0.03], [bx, by, 0]);
+      plug = [bx, by];
+      endY = by;
+      /* sample the curve every ~7 px of path, depth scaled into px only for the spacing */
+      var Q = pts.map(function (p) { return [p[0], p[1], p[2] * Z]; }), n = Q.length, out = [];
+      Q.unshift([2 * Q[0][0] - Q[1][0], 2 * Q[0][1] - Q[1][1], 2 * Q[0][2] - Q[1][2]]);
+      Q.push([2 * Q[n][0] - Q[n - 1][0], 2 * Q[n][1] - Q[n - 1][1], 2 * Q[n][2] - Q[n - 1][2]]);
+      for (var i = 1; i < Q.length - 2; i++) {
+        var seg = Math.sqrt(Math.pow(Q[i + 1][0] - Q[i][0], 2) + Math.pow(Q[i + 1][1] - Q[i][1], 2) + Math.pow(Q[i + 1][2] - Q[i][2], 2));
+        for (var k = 0, m = Math.max(2, Math.ceil(seg / 7)); k < m; k++) out.push(crc(Q[i - 1], Q[i], Q[i + 1], Q[i + 2], k / m));
+      }
+      out.push(Q[Q.length - 2]);
+      N = out.length; SX = new Float32Array(N); SY = new Float32Array(N); SZ = new Float32Array(N); ST = new Float32Array(N);
+      var len = 0;
+      for (i = 0; i < N; i++) {
+        SX[i] = out[i][0]; SY[i] = out[i][1]; SZ[i] = out[i][2] / Z;
+        if (i) len += Math.sqrt(Math.pow(SX[i] - SX[i - 1], 2) + Math.pow(SY[i] - SY[i - 1], 2) + Math.pow(out[i][2] - out[i - 1][2], 2));
+        ST[i] = len;
+      }
+      for (i = 0; i < N; i++) ST[i] /= len || 1;
+      /* dust in the volume around the path */
+      dust = [];
+      for (i = 0, n = small ? 60 : 150; i < n; i++) dust.push([(Math.random() - 0.5) * W * 1.2, startY + Math.random() * (endY - startY), Math.random() * 2.3 - 1.6, 1.1 + Math.random() * 2, Math.random() * 6.28, 0.3 + Math.random() * 0.6]);
+      wake();
+    }
+    var buildT = 0;
+    function rebuild() { clearTimeout(buildT); buildT = setTimeout(build, 120); }
+
+    var dpr = 1, cw = 0, ch = 0, mx = 0, my = 0, cx = 0, cy = 0, raf = 0, ready = false;
+    var vbuf = new Float32Array(0), pbuf = new Float32Array(0);
+    function size() {
+      dpr = Math.min(window.devicePixelRatio || 1, small ? 1.5 : 2);
+      var w = Math.round(window.innerWidth * dpr), hh = Math.round(window.innerHeight * dpr);
+      if (w !== cw || hh !== ch) { cw = cvs.width = w; ch = cvs.height = hh; }
+    }
+    if (!touch) window.addEventListener('mousemove', function (e) { mx = (e.clientX / window.innerWidth - 0.5) * 60; my = (e.clientY / window.innerHeight - 0.5) * 40; }, { passive: true });
+
+    function frame(now) {
+      raf = 0;
+      var sy = window.pageYOffset, vh = window.innerHeight, W = window.innerWidth;
+      var on = ready && N > 1 && !document.hidden && sy + vh > startY + 10 && sy < endY + vh * 0.25;
+      cvs.classList.toggle('is-on', on);
+      if (!on) return;
+      size();
+      gl.viewport(0, 0, cw, ch);
+      gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);
+      cx += (mx - cx) * 0.06; cy += (my - cy) * 0.06;
+      var camY = sy + vh / 2, headY = sy + vh * HEAD, time = now / 1000, span = vh * 1.2 + 300;
+      /* screen position of a page point: the content plane (z 0) stays put, nearer/further layers drift with depth */
+      function proj(x, y, z, o) { var f = D / (D - z); o[0] = W / 2 + x * f - cx * (f - 1); o[1] = vh / 2 + (y - camY) * f - cy * (f - 1); o[2] = f; return o; }
+      var lo = 0, hi = N - 1;
+      while (lo < hi) { var mid = (lo + hi) >> 1; if (SY[mid] < headY) lo = mid + 1; else hi = mid; }
+      var hIdx = lo, head = headY >= SY[N - 1] ? 1 : ST[hIdx];
+      var i0 = 0;
+      while (i0 < hIdx && SY[i0] < camY - span) i0++;
+      var cnt = hIdx - i0 + 1, A = [0, 0, 0], B = [0, 0, 0], C = [0, 0, 0], tip = null;
+      if (vbuf.length < cnt * 10) vbuf = new Float32Array(cnt * 10 + 200);
+      var v = 0, hwBase = small ? 22 : 32;
+      for (var i = i0; i <= hIdx; i++) {
+        proj(SX[i], SY[i], SZ[i], B);
+        var ia = Math.max(i - 1, 0), ib = Math.min(i + 1, N - 1);
+        proj(SX[ia], SY[ia], SZ[ia], A); proj(SX[ib], SY[ib], SZ[ib], C);
+        var tx = C[0] - A[0], ty = C[1] - A[1], tl = Math.sqrt(tx * tx + ty * ty) || 1, nx = -ty / tl, ny = tx / tl;
+        var hw = hwBase * B[2], light = Math.min(1.25, Math.max(0.22, 0.22 + 0.78 * (SZ[i] + 1.7) / 2.1));
+        vbuf[v++] = B[0] + nx * hw; vbuf[v++] = B[1] + ny * hw; vbuf[v++] = 1; vbuf[v++] = light; vbuf[v++] = ST[i];
+        vbuf[v++] = B[0] - nx * hw; vbuf[v++] = B[1] - ny * hw; vbuf[v++] = -1; vbuf[v++] = light; vbuf[v++] = ST[i];
+        if (i === hIdx) tip = [B[0], B[1], B[2]];
+      }
+      if (v >= 20) {
+        gl.useProgram(line);
+        gl.uniform2f(L.res, W, vh); gl.uniform1f(L.time, time); gl.uniform1f(L.head, head); gl.uniform3fv(L.col, COL);
+        gl.bindBuffer(gl.ARRAY_BUFFER, lineBuf); gl.bufferData(gl.ARRAY_BUFFER, vbuf.subarray(0, v), gl.DYNAMIC_DRAW);
+        gl.enableVertexAttribArray(L.a); gl.vertexAttribPointer(L.a, 4, gl.FLOAT, false, 20, 0);
+        gl.enableVertexAttribArray(L.t); gl.vertexAttribPointer(L.t, 1, gl.FLOAT, false, 20, 16);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, v / 5);
+        gl.disableVertexAttribArray(L.t);
+      }
+      /* dust, the spark at the point, and the light on the button once the thread arrives */
+      if (pbuf.length < dust.length * 4 + 16) pbuf = new Float32Array(dust.length * 4 + 16);
+      var p = 0;
+      for (i = 0; i < dust.length; i++) {
+        var d = dust[i], y = d[1] + Math.cos(time * 0.17 + d[4] * 1.3) * 10;
+        if (Math.abs(y - camY) > span || y > endY) continue;
+        proj(d[0] + Math.sin(time * 0.21 + d[4]) * 14, y, d[2], A);
+        if (A[0] < -20 || A[0] > W + 20 || A[1] < -20 || A[1] > vh + 20) continue;
+        var tw = 0.6 + 0.4 * Math.sin(time * 1.7 + d[4] * 3);
+        pbuf[p++] = A[0]; pbuf[p++] = A[1]; pbuf[p++] = Math.min(maxPt / dpr, d[3] * A[2]); pbuf[p++] = d[5] * tw * Math.min(1, Math.max(0.2, (d[2] + 1.7) / 2.2));
+      }
+      if (tip && head < 1) {
+        pbuf[p++] = tip[0]; pbuf[p++] = tip[1]; pbuf[p++] = Math.min(maxPt / dpr, 30 * tip[2]); pbuf[p++] = 1;
+        pbuf[p++] = tip[0]; pbuf[p++] = tip[1]; pbuf[p++] = Math.min(maxPt / dpr, 110 * tip[2]); pbuf[p++] = 0.2;
+      }
+      if (head >= 1 && plug) {
+        proj(plug[0], plug[1], 0, A);
+        var beat = 0.75 + 0.25 * Math.sin(time * 3);
+        pbuf[p++] = A[0]; pbuf[p++] = A[1]; pbuf[p++] = Math.min(maxPt / dpr, 34); pbuf[p++] = beat;
+        pbuf[p++] = A[0]; pbuf[p++] = A[1]; pbuf[p++] = Math.min(maxPt / dpr, 120); pbuf[p++] = 0.22 * beat;
+      }
+      if (p) {
+        gl.useProgram(dots);
+        gl.uniform2f(P.res, W, vh); gl.uniform1f(P.dpr, dpr); gl.uniform3fv(P.col, COL);
+        gl.bindBuffer(gl.ARRAY_BUFFER, dotBuf); gl.bufferData(gl.ARRAY_BUFFER, pbuf.subarray(0, p), gl.DYNAMIC_DRAW);
+        gl.enableVertexAttribArray(P.a); gl.vertexAttribPointer(P.a, 4, gl.FLOAT, false, 16, 0);
+        gl.drawArrays(gl.POINTS, 0, p / 4);
+      }
+      raf = requestAnimationFrame(frame);   /* keeps running while on screen: the pulses never stop */
+    }
+    function wake() { if (!raf && ready) raf = requestAnimationFrame(frame); }
+    window.addEventListener('scroll', wake, { passive: true });
+    window.addEventListener('resize', function () { small = window.innerWidth < 768; rebuild(); wake(); });
+    document.addEventListener('visibilitychange', wake);
+    if ('ResizeObserver' in window) new ResizeObserver(rebuild).observe(root);
+    cvs.addEventListener('webglcontextlost', function (e) { e.preventDefault(); ready = false; cvs.classList.remove('is-on'); });
+    threadOn = function () { ready = true; build(); };
+  })();
+
   /* ---- intro: a navy field (already covering the first frame) pulls up off the film, then the page comes alive */
   var introDone = false, fontsDone = false;
   function maybeStart() {
     if (!introDone || !fontsDone) return;
     startReveals();
+    threadOn();
     setTimeout(function () { ready = true; badgeState(); }, reduce ? 0 : 420);
     kick();
   }
