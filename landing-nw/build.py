@@ -86,8 +86,14 @@ hero = (
     '<section class="lnw-hero" id="lnwHero" aria-label="Watch the video">'
     f'<video class="lnw-hero__v" muted loop playsinline autoplay preload="auto" poster="{MEDIA}relevance-poster-1280.webp"'
     f' data-s1080="{MEDIA}relevance-1080.mp4" data-s720="{MEDIA}relevance-720.mp4" data-s540="{MEDIA}relevance-540.mp4"></video>'
-    # pick the rendition before the hosted script arrives, so the film starts with the page
-    '<script>(function(v){var c=navigator.connection;if(c&&c.saveData)return;'
+    # a film uploaded to the "Hero film" Background Video element (Designer: select it > Upload video) takes the hero's
+    # place; otherwise pick our rendition before the hosted script arrives, so the film starts with the page
+    "<script>(function(v){var f=document.querySelector('.lnw-film'),b=f&&f.querySelector('video');"
+    "if(b&&b.querySelector('source[src]')){var p=f.getAttribute('data-poster-url');b.className=v.className;"
+    "b.removeAttribute('id');b.removeAttribute('style');b.muted=true;b.loop=true;b.setAttribute('playsinline','');"
+    "b.setAttribute('data-film','webflow');if(p)b.setAttribute('poster',p);v.parentNode.replaceChild(b,v);"
+    "var q=b.play();if(q&&q.catch)q.catch(function(){});return;}"
+    'var c=navigator.connection;if(c&&c.saveData)return;'
     'var w=(innerWidth>innerHeight?Math.max(innerWidth,innerHeight*16/9):innerWidth)*Math.min(devicePixelRatio||1,2);'
     "v.src=v.getAttribute(w>1100?'data-s1080':w>700?'data-s720':'data-s540');})(document.currentScript.previousElementSibling)</script>"
     '<button class="lnw-hero__hit" type="button" aria-label="Watch the video"></button>'

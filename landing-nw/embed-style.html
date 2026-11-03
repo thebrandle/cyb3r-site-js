@@ -47,6 +47,9 @@
 .lnw-hero.is-watching::after{opacity:1}
 .lnw-hero.is-watching .lnw-hero__v{object-fit:contain}
 .lnw-hero.is-watching .lnw-hero__hit{display:none}
+/* the "Hero film" Background Video element only feeds the hero (shown in the Designer, never on the site) */
+.lnw-film{display:none!important}
+.lnw-hero.is-silent .lnw-ctrl [data-c=sound]{display:none}
 .lnw-ctrl{position:absolute;left:0;right:0;bottom:0;z-index:3;display:flex;align-items:center;gap:18px;
   padding:0 max(25px,5vw) clamp(20px,2.6vw,36px);opacity:0;visibility:hidden;transition:opacity .4s ease,visibility 0s .4s}
 .lnw-hero.is-watching .lnw-ctrl{opacity:1;visibility:visible;transition:opacity .4s ease}

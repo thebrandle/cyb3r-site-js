@@ -269,13 +269,17 @@
     var w = (innerWidth > innerHeight ? Math.max(innerWidth, innerHeight * 16 / 9) : innerWidth) * Math.min(window.devicePixelRatio || 1, 2);
     return vid.getAttribute(w > 1100 ? 'data-s1080' : w > 700 ? 'data-s720' : 'data-s540');
   }
-  function ensureSrc() { if (!vid.getAttribute('src')) vid.src = pickSrc(); }
+  function ensureSrc() {
+    if (vid.getAttribute('src') || vid.querySelector('source')) return;   /* a film uploaded in Webflow brings its own sources */
+    var u = pickSrc(); if (u) vid.src = u;
+  }
   function fmt(s) { s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2); }
   function modalOpen() { var m = document.getElementById('cybModal'); return !!(m && m.classList.contains('is-open')); }
   if (vid) {
     var ctrl = hero.querySelector('.lnw-ctrl'), bPlay = ctrl.querySelector('[data-c=play]'), bSound = ctrl.querySelector('[data-c=sound]');
     var bar = ctrl.querySelector('[data-c=seek]'), fill = bar.querySelector('i'), time = ctrl.querySelector('.lnw-ctrl__t');
     var saveData = navigator.connection && navigator.connection.saveData;
+    if (vid.getAttribute('data-film') === 'webflow') hero.classList.add('is-silent');   /* Webflow strips audio from uploads */
     if (reduce || saveData) { vid.removeAttribute('autoplay'); vid.pause(); }
 
     var sync = function () {
