@@ -526,15 +526,15 @@
     });
   }
 
-  /* ---- the journey (after ysuriadesign.co). Between the hero and the footer the page becomes one pinned 3D world.
-     Every screen of scroll flies the camera along a teal thread of light to the next piece of the page - one piece per
-     screen, each in its own place and at its own angle: the client logos in a ring, each agent step, each example, each
-     result, the platform, each transparency row, each activation model. The thread plugs into every piece at its edges
-     (bright joints) and runs on to the next; the pieces ahead and behind stay faded until the camera reaches them. The
-     piece in view sits mid-screen, its copy bottom left. It opens on the thread itself sweeping away into the distance
-     and ends with the thread spiralling into a knot of light. Every word and picture is the page's own, moved into place
-     (not copied); the pieces are HTML set in 3D over a three.js canvas (r128, the copy the homepage loads). Off for
-     reduced motion and without WebGL, where the page keeps its normal sections. */
+  /* ---- the journey (after ysuriadesign.co). Between the hero and the footer the page becomes one pinned 3D world: a
+     teal thread of light climbs, dives, swings and corkscrews through space and the camera rides along it, one piece of
+     the page per screen of scroll - the client logos in a ring round the thread, each agent step, each example, each
+     result, the platform, each transparency row, each activation model - each hung beside the thread where it runs
+     level, joined to it by a bright joint; the pieces ahead and behind stay faded until the camera reaches them. The
+     piece in view sits mid-screen, its copy bottom left. It opens on the thread rising away from under the camera and
+     ends in a point of light. Every word and picture is the page's own, moved into place (not copied); the pieces are
+     HTML set in 3D over a three.js canvas (r128, the copy the homepage loads). Off for reduced motion and without
+     WebGL, where the page keeps its normal sections. */
   var jEnd = false, journeyOn = function () {};
   (function journey() {
     if (!JOURNEY) return;
@@ -732,25 +732,43 @@
       });
       function add(obj) { obj.frustumCulled = false; world.add(obj); return obj; }
 
-      /* ---- the thread: a long winding line through space, one bend per piece, gentle enough to ride along. It opens
-         just under the camera and leads away; a piece hangs beside it at every bend (the results float above it, the
-         logo ring stands round it) and it ends in a knot of light */
-      var TURN = [0, -26, 30, -32, 28, -30, 34, -26, 30, -32, 24, -32, 30, -26, 32, -28, 26, -34, 30, -24, 28, -26];
-      var RISE = [0, 4, -5, 6, -4, 5, -6, 4, -5, 6, -4, 5, -6, 4, -5, 5, -4, 6, -5, 4, -3, 3];
-      var yawAcc = 0, spot = new T.Vector3(0, 0, -2600), TP = [new T.Vector3(0, 0, 900), new T.Vector3(0, 0, 0), new T.Vector3(160, 60, -1300)];
+      /* ---- the thread: a long line through space that climbs, dives, swings wide and corkscrews between the pieces - a
+         different move each time - and runs level for a short stretch at each piece so it can be read. It opens just
+         under the camera and rises away; a piece hangs beside it on every level stretch (the results float above it, the
+         logo ring stands round it) and it ends in a point of light */
+      var TURN = [0, 0, 38, -44, 36, -40, 46, -36, 42, -44, 34, -42, 40, -36, 44, -38, 36, -46, 40, -34, 38, -36];
+      var LIFT = [0, 0, 700, -900, 600, -800, 900, -600, 700, -900, 500, -800, 800, -600, 900, -700, 600, -900, 700, -500, 600, -400];
+      var MOVES = ['climb', 'swingL', 'dive', 'cork', 'swingR', 'dip', 'climbR', 'diveL'];
+      var yawAcc = 0, spot = new T.Vector3(0, 900, -4200), TP = [new T.Vector3(0, 0, 900), new T.Vector3(0, 0, 0), new T.Vector3(0, 80, -1000)];
+      function hdir(y) { return new T.Vector3(Math.sin(y), 0, -Math.cos(y)); }
+      function moves(a, b, kind) {   /* the flight from one piece to the next */
+        var D = b.clone().sub(a), L = D.length(), h = D.clone().setY(0).normalize(), side = new T.Vector3().crossVectors(h, up).normalize();
+        function at(f, sd, u) { return a.clone().lerp(b, f).addScaledVector(side, sd * L).addScaledVector(up, u * L); }
+        switch (kind) {
+          case 'climb': return [at(0.5, 0.1, 0.45)];
+          case 'dive': return [at(0.5, -0.12, -0.42)];
+          case 'swingL': return [at(0.5, 0.55, 0.08)];
+          case 'swingR': return [at(0.5, -0.55, -0.05)];
+          case 'cork': return [at(0.3, 0.38, 0.3), at(0.64, -0.34, 0.42)];
+          case 'dip': return [at(0.36, 0.05, -0.4), at(0.7, -0.08, 0.22)];
+          case 'climbR': return [at(0.5, -0.36, 0.38)];
+          default: return [at(0.5, 0.38, -0.36)];
+        }
+      }
+      var prevOut = TP[TP.length - 1];
       STOPS.forEach(function (s, n) {
         if (!n) return;
         if (n > 1) {
           yawAcc += TURN[n % TURN.length] * Math.PI / 180;
-          var pitch = RISE[n % RISE.length] * Math.PI / 180, gap = STOPS[n - 1].k === 'logos' ? 3400 : s.k === 'plat' || STOPS[n - 1].k === 'plat' ? 3400 : 2900;
-          spot = spot.clone().add(new T.Vector3(Math.sin(yawAcc) * Math.cos(pitch), Math.sin(pitch), -Math.cos(yawAcc) * Math.cos(pitch)).multiplyScalar(gap));
+          spot = spot.clone().addScaledVector(hdir(yawAcc), STOPS[n - 1].k === 'plat' || s.k === 'plat' ? 5200 : 4600).addScaledVector(up, LIFT[n % LIFT.length]);
         }
-        s.J = spot.clone(); TP.push(s.J);
+        var d = hdir(yawAcc), inA = spot.clone().addScaledVector(d, -1300), inB = spot.clone().addScaledVector(d, -600);
+        s.J = spot.clone();
+        moves(prevOut, inA, n === 1 ? 'climb' : MOVES[(n - 2) % MOVES.length]).forEach(function (p) { TP.push(p); });
+        TP.push(inA, inB, s.J);
+        if (n < STOPS.length - 1) { prevOut = s.J.clone().addScaledVector(d, 700); TP.push(prevOut); }
       });
-      /* the knot: past the last bend the thread runs on and spirals in, facing the way it came */
-      var sEnd = STOPS[STOPS.length - 1], dEnd = sEnd.J.clone().sub(STOPS[STOPS.length - 2].J).setY(0).normalize();
-      var rEnd = new T.Vector3().crossVectors(dEnd, up).normalize(), knot = sEnd.J.clone().addScaledVector(dEnd, 900).addScaledVector(up, 120);
-      for (var j = 0; j <= 48; j++) { var th = j / 48 * Math.PI * 5 + Math.PI, rr = 480 * (1 - j / 48) + 10; TP.push(knot.clone().addScaledVector(rEnd, Math.cos(th) * rr).addScaledVector(up, Math.sin(th) * rr).addScaledVector(dEnd, -120 * (1 - j / 48))); }
+      var sEnd = STOPS[STOPS.length - 1];
       var curve = new T.CatmullRomCurve3(TP, false, 'centripetal');
       curve.arcLengthDivisions = TP.length * 60;
       var LEN = curve.getLength(), NS = Math.round(LEN / 24), sp = curve.getSpacedPoints(NS), tp = [], ta = [], i;
@@ -826,14 +844,14 @@
         var sw = works[Math.floor(works.length / 2)];
         place(IT.names, sw.J.clone().addScaledVector(sw.t, 6200).addScaledVector(up, 900), Math.atan2(-sw.t.x, -sw.t.z), 0);
       }
-      /* joints where each piece meets the thread, and the knot it ends in */
+      /* joints where each piece meets the thread, and the light it ends in */
       var fp = [], fr = [], kc = sp[NS];
       JOINTS.forEach(function (jn) { fp.push(jn.p.x, jn.p.y, jn.p.z, jn.p.x, jn.p.y, jn.p.z); fr.push(46, 0.5, 0.3, 0, 160, 0.5, 0.1, 0); });
       fp.push(kc.x, kc.y, kc.z, kc.x, kc.y, kc.z); fr.push(110, 0.5, 1, 0, 620, 0.5, 0.45, 0);
       var fg = new T.BufferGeometry(), fAttr = new T.BufferAttribute(new Float32Array(fr), 4);
       fg.setAttribute('position', new T.BufferAttribute(new Float32Array(fp), 3)); fg.setAttribute('aRnd', fAttr);
       add(new T.Points(fg, flareMat));
-      sEnd.P = knot;
+      sEnd.P = sEnd.J.clone();   /* the point of light the thread ends in */
 
       /* ---- dust and shards along the route, kept off the thread (the camera rides it) and clear of the pieces */
       var pieces = items.filter(function (it) { return it.pos && it !== IT.names; }).map(function (it) { return it.pos; }), v = new T.Vector3(), dir = new T.Vector3();
@@ -883,7 +901,7 @@
       }
       function route() {
         STOPS.forEach(function (s, n) {
-          var back = !n ? 0 : s.k === 'logos' ? (portrait ? 2000 : 1600) : s.k === 'cta' ? (portrait ? 1500 : 1100) : viewDist(s.it[0]) * (s.k === 'stat' ? 1 : 0.92);
+          var back = !n ? 0 : s.k === 'logos' ? (portrait ? 2000 : 1600) : s.k === 'cta' ? (portrait ? 1700 : 1300) : viewDist(s.it[0]) * (s.k === 'stat' ? 1 : 0.92);
           var at = !n ? 260 : s.arc - back;
           s.c0 = at - 130; s.c1 = at + 130;
           if (!n) { s.c0 = 0; s.c1 = 420; }
@@ -970,7 +988,7 @@
         ptAt(w.s, cpos); tanAt(w.s, t1);
         tr.crossVectors(t1, up).normalize();
         cmx += (mx - cmx) * 0.05; cmy += (my - cmy) * 0.05;
-        cam.position.copy(cpos).addScaledVector(up, 200 + lift * 160 - cmy * 30).addScaledVector(tr, -sideNow * 190 + cmx * 50);
+        cam.position.copy(cpos).addScaledVector(up, 200 + lift * 80 - cmy * 30).addScaledVector(tr, -sideNow * 190 + cmx * 50);
         /* look along the thread ahead, turning to frame the piece in reach (it sits right of centre over the copy,
            centred on portrait screens) */
         ptAt(w.s + 1100, ahead); ahead.addScaledVector(up, -30);
