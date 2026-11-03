@@ -84,15 +84,16 @@
 .lnw-3d__it{position:absolute;left:0;top:0;visibility:hidden;-webkit-backface-visibility:hidden;backface-visibility:hidden}
 .lnw.is-journey .lnw-sec,.lnw.is-journey .lnw-logos,.lnw.is-journey .lnw-band{display:none}
 /* pieces in space */
-.lnw-3d__it.is-card>*{background:rgba(19,28,37,.84);border:1px solid rgba(245,246,247,.16)}
-.lnw-3d__it .lnw-step{min-height:250px;padding:26px 26px 24px;border-left:1px solid rgba(245,246,247,.16)}
-.lnw-3d__it .lnw-row{display:block;padding:26px 28px}
-.lnw-3d__it .lnw-row__d{margin-top:10px;max-width:none}
-.lnw-3d__it .lnw-cap__s{display:block;padding:24px 28px 0;cursor:default}
-.lnw-3d__it .lnw-cap__n{display:inline-block;margin:0 0 6px}
-.lnw-3d__it .lnw-cap__x{display:none}
-.lnw-3d__it .lnw-cap__in{display:block}
-.lnw-3d__it .lnw-cap__in>div{padding:14px 28px 26px}
+/* (.lnw first: the stacked layout's first-column rules must not strip a card's padding or border) */
+.lnw .lnw-3d__it.is-card>*{background:rgba(19,28,37,.84);border:1px solid rgba(245,246,247,.16)}
+.lnw .lnw-3d__it .lnw-step{min-height:250px;padding:30px;gap:14px}
+.lnw .lnw-3d__it .lnw-row{display:block;padding:30px}
+.lnw .lnw-3d__it .lnw-row__d{margin-top:10px;max-width:none}
+.lnw .lnw-3d__it .lnw-cap__s{display:block;padding:30px 30px 0;cursor:default}
+.lnw .lnw-3d__it .lnw-cap__n{display:inline-block;margin:0 0 6px}
+.lnw .lnw-3d__it .lnw-cap__x{display:none}
+.lnw .lnw-3d__it .lnw-cap__in{display:block}
+.lnw .lnw-3d__it .lnw-cap__in>div{padding:14px 30px 30px}
 .lnw.is-journey .lnw-3d__it .lnw-cap__body{grid-template-rows:1fr}
 .lnw.is-journey .lnw-3d__it .lnw-cap__in{visibility:visible}
 .lnw-3d__it.is-stat .lnw-stat{border:0;padding:0}

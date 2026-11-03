@@ -585,7 +585,7 @@
       steps: $$('.lnw-agent .lnw-step').map(function (s) { return item(s, tall ? 300 : 360, 'is-card is-step'); }),
       names: item(q('.lnw-work .lnw-marq'), 5600, 'is-names'),
       cards: cards.map(function (c) { return item(c, tall ? 260 : 300, 'is-film'); }),
-      stats: $$('.lnw-res .lnw-stat').map(function (s) { return item(s, tall ? 340 : 460, 'is-stat'); }),
+      stats: $$('.lnw-res .lnw-stat').map(function (s) { var it = item(s, tall ? 340 : 460, 'is-stat'); if (it) it.solo = true; return it; }),
       plat: item(q('.lnw-plat__img'), tall ? 760 : 1000, 'is-plat'),
       rows: $$('.lnw-trans .lnw-row').map(function (r) { return item(r, tall ? 310 : 500, 'is-card is-row'); }),
       caps: $$('.lnw-int .lnw-cap').map(function (c) { return item(c, tall ? 310 : 480, 'is-card is-cap'); })
@@ -663,7 +663,7 @@
       ' float a=abs(vSide),dpx=a*vPx,cw=max(vPx*0.1,1.2),q=dpx/cw;',
       ' float core=exp(-q*q);float halo=exp(-dpx/max(vPx*0.3,1.6))*(1.0-smoothstep(0.7,1.0,a));',
       ' float p=0.0;for(int k=0;k<4;k++){float e=(vArc-uPulse[k])/90.0;p+=exp(-e*e);}p*=uPulseGain;',
-      ' float f=exp(-vDepth*vDepth*uFog*uFog)*smoothstep(60.0,320.0,vDepth);',
+      ' float f=exp(-vDepth*vDepth*uFog*uFog)*mix(0.25,1.0,smoothstep(120.0,1100.0,vDepth))*smoothstep(60.0,320.0,vDepth);',   /* softer right under the camera, over the copy */
       ' float ends=smoothstep(uFrom,uFrom+60.0,vArc)*(1.0-smoothstep(uTo-20.0,uTo,vArc));',
       ' vec3 col=(uColor*halo*0.55*(1.0+p*2.2)+uCore*core*(0.85+p*1.6))*f*ends*uGain;',
       ' gl_FragColor=vec4(col,1.0);}'
@@ -732,68 +732,27 @@
       });
       function add(obj) { obj.frustumCulled = false; world.add(obj); return obj; }
 
-      /* ---- where each stop sits: a step further along a zigzag spine, turning and climbing a little each time */
-      var TURN = [0, -32, 36, -40, 30, -36, 42, -30, 34, -38, 28, -40, 36, -30, 38, -34, 30, -42, 36, -28, 34, -30];
-      var RISE = [0, 5, -7, 9, -5, 7, -9, 5, -6, 8, -6, 7, -8, 5, -7, 6, -5, 8, -7, 5, -4, 4];
-      var yawAcc = 0, spot = new T.Vector3();
-      STOPS.forEach(function (s, n) {
-        if (n) {
-          yawAcc += TURN[n % TURN.length] * Math.PI / 180;
-          var pitch = RISE[n % RISE.length] * Math.PI / 180, gap = s.k === 'logos' || STOPS[n - 1].k === 'logos' ? 3300 : 2700;
-          spot = spot.clone().add(new T.Vector3(Math.sin(yawAcc) * Math.cos(pitch), Math.sin(pitch), -Math.cos(yawAcc) * Math.cos(pitch)).multiplyScalar(gap));
-        }
-        s.pos = spot.clone(); s.side = n % 2 ? 1 : -1;
-        /* a piece turns a little away from the line of travel, so the camera meets it at an angle */
-        s.ry = s.it.length === 1 ? -yawAcc + s.side * 0.42 : -yawAcc;
-        s.N = new T.Vector3(Math.sin(s.ry), 0, Math.cos(s.ry));
-        s.X = new T.Vector3(Math.cos(s.ry), 0, -Math.sin(s.ry));
-      });
-      function L(s, x, y, z) { return s.pos.clone().addScaledVector(s.X, x).addScaledVector(up, y).addScaledVector(s.N, z); }   /* a point in a stop's frame */
-      var dummy = new T.Object3D();
-      function eps(v) { return Math.abs(v) < 1e-10 ? 0 : v; }
-      function place(it, p, ry, rx) {   /* an HTML piece at a point in space (CSS3D, as three's CSS3DRenderer) */
-        if (!it) return;
-        dummy.position.copy(p); dummy.rotation.set(rx || 0, ry, 0, 'YXZ'); dummy.updateMatrixWorld(true);
-        var e = dummy.matrixWorld.elements;
-        it.el.style.transform = 'translate(-50%,-50%) matrix3d(' + [e[0], e[1], e[2], e[3], -e[4], -e[5], -e[6], -e[7], e[8], e[9], e[10], e[11], e[12], e[13], e[14], e[15]].map(eps).join(',') + ')';
-        it.pos = p.clone(); it.h = it.el.offsetHeight || it.w * 0.7;
-      }
-      var sLogo = STOPS.filter(function (s) { return s.k === 'logos'; })[0], LR = tall ? [420, 660] : [800, 480];
-      IT.logos.forEach(function (it, k) {
-        var th = k / IT.logos.length * TAU + 0.2;
-        place(it, L(sLogo, Math.cos(th) * LR[0], Math.sin(th) * LR[1], Math.sin(th * 2) * 120), sLogo.ry - Math.cos(th) * 0.45, Math.sin(th) * 0.3);
-      });
-      STOPS.forEach(function (s) { if (s.it.length === 1) place(s.it[0], s.pos, s.ry, 0); });
-      var works = STOPS.filter(function (s) { return s.k === 'work'; });
-      if (works.length) { var sw = works[Math.floor(works.length / 2)]; place(IT.names, L(sw, 0, -150, -4400), sw.ry, 0); }
-
-      /* ---- the thread: it opens sweeping in from the lower right and away into the distance, then crosses every piece
-         from the edge facing the last one to the far edge (bright joints where it plugs in), and ends in a spiral knot */
-      var TP = [], JOINTS = [], s0 = STOPS[0];
-      TP.push(L(s0, 560, -470, 1350), L(s0, 330, -260, 1150), L(s0, 180, -90, 600), L(s0, 20, 40, -200));
+      /* ---- the thread: a long winding line through space, one bend per piece, gentle enough to ride along. It opens
+         just under the camera and leads away; a piece hangs beside it at every bend (the results float above it, the
+         logo ring stands round it) and it ends in a knot of light */
+      var TURN = [0, -26, 30, -32, 28, -30, 34, -26, 30, -32, 24, -32, 30, -26, 32, -28, 26, -34, 30, -24, 28, -26];
+      var RISE = [0, 4, -5, 6, -4, 5, -6, 4, -5, 6, -4, 5, -6, 4, -5, 5, -4, 6, -5, 4, -3, 3];
+      var yawAcc = 0, spot = new T.Vector3(0, 0, -2600), TP = [new T.Vector3(0, 0, 900), new T.Vector3(0, 0, 0), new T.Vector3(160, 60, -1300)];
       STOPS.forEach(function (s, n) {
         if (!n) return;
-        var nx = STOPS[n + 1];
-        if (s.k === 'logos') {   /* it swoops in from the lower left and through the ring, below the camera's way through */
-          TP.push(L(s, -900, -420, 1500), L(s, -300, -230, 700), L(s, 0, -180, 200), L(s, 0, -180, -400), L(s, 220, -200, -1000));
-          return;
+        if (n > 1) {
+          yawAcc += TURN[n % TURN.length] * Math.PI / 180;
+          var pitch = RISE[n % RISE.length] * Math.PI / 180, gap = STOPS[n - 1].k === 'logos' ? 3400 : s.k === 'plat' || STOPS[n - 1].k === 'plat' ? 3400 : 2900;
+          spot = spot.clone().add(new T.Vector3(Math.sin(yawAcc) * Math.cos(pitch), Math.sin(pitch), -Math.cos(yawAcc) * Math.cos(pitch)).multiplyScalar(gap));
         }
-        if (s.k === 'cta') {
-          for (var j = 0; j <= 44; j++) { var th = j / 44 * Math.PI * 5, r = 470 * (1 - j / 44) + 10; TP.push(L(s, Math.cos(th) * r, Math.sin(th) * r, 180 * (1 - j / 44))); }
-          return;
-        }
-        var it = s.it[0], hw = it.w / 2 + 10, cy = s.k === 'stat' ? -it.h / 2 - 30 : 0, under = s.k === 'stat';
-        var ein = STOPS[n - 1].pos.clone().sub(s.pos).dot(s.X) < 0 ? -1 : 1, ex = ein * hw, xx = -ein * hw;
-        TP.push(L(s, ex + ein * 340, cy + 60, 160), L(s, ex, cy, 4), L(s, 0, cy, under ? 4 : -50), L(s, xx, cy, 4), L(s, xx - ein * 340, cy - 60, 160));
-        JOINTS.push({ n: n, p: L(s, ex, cy, 8) }, { n: n, p: L(s, xx, cy, 8) });
-        if (nx && nx.k !== 'logos') {   /* a wide sweep on the way to the next piece */
-          var a = L(s, xx - ein * 340, cy - 60, 160), d = nx.pos.clone().sub(a), mid = a.clone().addScaledVector(d, 0.5);
-          var sideV = new T.Vector3().crossVectors(d, up).normalize();
-          TP.push(mid.addScaledVector(up, (n % 2 ? 1 : -1) * 420).addScaledVector(sideV, (n % 2 ? -1 : 1) * 520));
-        }
+        s.J = spot.clone(); TP.push(s.J);
       });
+      /* the knot: past the last bend the thread runs on and spirals in, facing the way it came */
+      var sEnd = STOPS[STOPS.length - 1], dEnd = sEnd.J.clone().sub(STOPS[STOPS.length - 2].J).setY(0).normalize();
+      var rEnd = new T.Vector3().crossVectors(dEnd, up).normalize(), knot = sEnd.J.clone().addScaledVector(dEnd, 900).addScaledVector(up, 120);
+      for (var j = 0; j <= 48; j++) { var th = j / 48 * Math.PI * 5 + Math.PI, rr = 480 * (1 - j / 48) + 10; TP.push(knot.clone().addScaledVector(rEnd, Math.cos(th) * rr).addScaledVector(up, Math.sin(th) * rr).addScaledVector(dEnd, -120 * (1 - j / 48))); }
       var curve = new T.CatmullRomCurve3(TP, false, 'centripetal');
-      curve.arcLengthDivisions = TP.length * 40;
+      curve.arcLengthDivisions = TP.length * 60;
       var LEN = curve.getLength(), NS = Math.round(LEN / 24), sp = curve.getSpacedPoints(NS), tp = [], ta = [], i;
       for (i = 0; i <= NS; i++) { tp.push(sp[i].x, sp[i].y, sp[i].z); ta.push(i / NS * LEN); }
       (function () {   /* the ribbon: two vertices per sample (its edges) */
@@ -815,69 +774,77 @@
         add(new T.Mesh(g, threadMat));
       })();
       threadMat.uniforms.uTo.value = LEN;
-      function nearestArc(v) { var best = 0, bd = 1e18; for (var k = 0; k <= NS; k++) { var d = sp[k].distanceToSquared(v); if (d < bd) { bd = d; best = k; } } return best; }
-      STOPS.forEach(function (s, n) { s.arcI = nearestArc(n ? s.pos : L(s0, 180, -90, 600)); s.arc = ta[s.arcI]; });
-      /* joints where the thread plugs into each piece, and the knot of light it ends in */
-      var fp = [], fr = [];
-      JOINTS.forEach(function (j) { fp.push(j.p.x, j.p.y, j.p.z); fr.push(44, 0.5, 0.3, 0); fp.push(j.p.x, j.p.y, j.p.z); fr.push(150, 0.5, 0.1, 0); });
-      fp.push(sp[NS].x, sp[NS].y, sp[NS].z, sp[NS].x, sp[NS].y, sp[NS].z); fr.push(110, 0.5, 1, 0, 620, 0.5, 0.45, 0);
+      function ptAt(s, out) { var f = clamp(s / LEN, 0, 1) * NS, k = Math.min(NS - 1, Math.floor(f)); return out.copy(sp[k]).lerp(sp[k + 1], f - k); }
+      function tanAt(s, out) { var k = clamp(Math.round(s / LEN * NS), 4, NS - 4); return out.subVectors(sp[k + 4], sp[k - 4]).normalize(); }
+      function nearestArc(v) { var best = 0, bd = 1e18; for (var k = 0; k <= NS; k++) { var d = sp[k].distanceToSquared(v); if (d < bd) { bd = d; best = k; } } return ta[best]; }
+
+      /* ---- the pieces, hung beside the thread at their bends, turned a little toward it */
+      var dummy = new T.Object3D();
+      function eps(v) { return Math.abs(v) < 1e-10 ? 0 : v; }
+      function place(it, p, ry, rx) {   /* an HTML piece at a point in space (CSS3D, as three's CSS3DRenderer) */
+        if (!it) return;
+        dummy.position.copy(p); dummy.rotation.set(rx || 0, ry, 0, 'YXZ'); dummy.updateMatrixWorld(true);
+        var e = dummy.matrixWorld.elements;
+        it.el.style.transform = 'translate(-50%,-50%) matrix3d(' + [e[0], e[1], e[2], e[3], -e[4], -e[5], -e[6], -e[7], e[8], e[9], e[10], e[11], e[12], e[13], e[14], e[15]].map(eps).join(',') + ')';
+        it.pos = p.clone();
+      }
+      var JOINTS = [], tv = new T.Vector3(), rv = new T.Vector3();
+      STOPS.forEach(function (s, n) {
+        if (!n) { s.arc = 0; return; }
+        s.arc = nearestArc(s.J); tanAt(s.arc, tv);
+        var t = tv.clone().setY(0).normalize(), r = new T.Vector3().crossVectors(t, up).normalize();
+        s.t = t; s.r = r; s.side = n % 2 ? 1 : -1;
+        if (s.k === 'logos') {   /* the ring stands round the thread, square to it */
+          var ry0 = Math.atan2(-t.x, -t.z), LR = tall ? [420, 660] : [800, 480];
+          s.ry = ry0; s.side = 0;
+          IT.logos.forEach(function (it, k) {
+            var a = k / IT.logos.length * TAU + 0.2;
+            place(it, s.J.clone().addScaledVector(r, Math.cos(a) * LR[0]).addScaledVector(up, Math.sin(a) * LR[1]).addScaledVector(t, Math.sin(a * 2) * 120), ry0 - Math.cos(a) * 0.45, Math.sin(a) * 0.3);
+          });
+          return;
+        }
+        if (s.k === 'cta') { s.side = 0; return; }
+        var it = s.it[0];
+        it.h = it.el.offsetHeight || it.w * 0.7;
+        var nrm = t.clone().negate(), face, p, jp;
+        if (s.k === 'stat') {   /* a result floats above the thread, which runs on underneath it */
+          face = nrm; p = s.J.clone().addScaledVector(up, it.h / 2 + 50); jp = s.J.clone().addScaledVector(up, 20);
+          s.side = 0;
+        } else {   /* anything else hangs off to one side, its near edge on the thread */
+          face = nrm.clone().multiplyScalar(Math.cos(0.28)).addScaledVector(r, -s.side * Math.sin(0.28)).normalize();
+          var X = new T.Vector3(face.z, 0, -face.x);   /* the piece's own right */
+          p = s.J.clone().addScaledVector(X, s.side * (it.w / 2 + 34));
+          jp = s.J.clone().addScaledVector(X, s.side * 14);
+        }
+        s.ry = Math.atan2(face.x, face.z);
+        place(it, p, s.ry, 0);
+        s.P = p;
+        JOINTS.push({ n: n, p: jp });
+      });
+      var works = STOPS.filter(function (s) { return s.k === 'work'; });
+      if (works.length && IT.names) {   /* the brand names, a faint wall far behind the examples */
+        var sw = works[Math.floor(works.length / 2)];
+        place(IT.names, sw.J.clone().addScaledVector(sw.t, 6200).addScaledVector(up, 900), Math.atan2(-sw.t.x, -sw.t.z), 0);
+      }
+      /* joints where each piece meets the thread, and the knot it ends in */
+      var fp = [], fr = [], kc = sp[NS];
+      JOINTS.forEach(function (jn) { fp.push(jn.p.x, jn.p.y, jn.p.z, jn.p.x, jn.p.y, jn.p.z); fr.push(46, 0.5, 0.3, 0, 160, 0.5, 0.1, 0); });
+      fp.push(kc.x, kc.y, kc.z, kc.x, kc.y, kc.z); fr.push(110, 0.5, 1, 0, 620, 0.5, 0.45, 0);
       var fg = new T.BufferGeometry(), fAttr = new T.BufferAttribute(new Float32Array(fr), 4);
       fg.setAttribute('position', new T.BufferAttribute(new Float32Array(fp), 3)); fg.setAttribute('aRnd', fAttr);
       add(new T.Points(fg, flareMat));
+      sEnd.P = knot;
 
-      /* ---- the camera: per stop an arrival (A) and a departure (B) view - off to one side of the piece, swinging round
-         toward the front while easing in - and a wide swing between stops; the camera follows one curve, its point of
-         interest another */
-      var camCurve, focCurve, idxA = [], idxB = [], portrait = null, W = 1, Hh = 1;
-      function rotY(v, a) { var c = Math.cos(a), si = Math.sin(a); return new T.Vector3(v.x * c + v.z * si, v.y, -v.x * si + v.z * c); }
-      function viewDist(it) {   /* far enough to frame the piece, never so close its type is enlarged much */
-        var vt = Math.tan(cam.fov * Math.PI / 360), ht = vt * cam.aspect, fovPx = Hh / (2 * vt);
-        return Math.max(it.w / (2 * ht * (portrait ? 0.8 : 0.4)), it.h / (2 * vt * (portrait ? 0.44 : 0.6)), fovPx * 0.88);
-      }
-      function route() {
-        STOPS.forEach(function (s) {
-          if (s.k === 'pos') { s.f = { A: [L(s, -60, 120, 1750), L(s, 60, -20, -400)], B: [L(s, 40, 100, 1380), L(s, 40, 0, -600)] }; return; }
-          if (s.k === 'logos') {
-            var back = portrait ? 2500 : 2100;
-            s.f = { A: [L(s, 0, 40, back), s.pos.clone()], B: [L(s, 0, 20, back * 0.45), L(s, 0, 0, -300)], via: [L(s, 0, 0, -1300), L(s, 0, -40, -2600)], centre: true };
-            return;
-          }
-          if (s.k === 'cta') { var dc = portrait ? 2300 : 1900; s.f = { A: [L(s, -240, 90, dc), s.pos.clone()], B: [L(s, -120, 50, dc * 0.8), s.pos.clone()] }; return; }
-          var it = s.it[0], d = viewDist(it), c = s.pos.clone();
-          s.f = { A: [c.clone().addScaledVector(rotY(s.N, s.side * 0.3), d * 1.08).addScaledVector(up, d * 0.08), c.clone()],
-                  B: [c.clone().addScaledVector(rotY(s.N, s.side * 0.16), d * 0.95).addScaledVector(up, d * 0.03), c.clone()] };
-        });
-        var CP = [], AP = [];
-        STOPS.forEach(function (s, n) {
-          idxA[n] = CP.length; CP.push(s.f.A[0]); AP.push(s.f.A[1]);
-          idxB[n] = CP.length; CP.push(s.f.B[0]); AP.push(s.f.B[1]);
-          var nx = STOPS[n + 1];
-          if (!nx) return;
-          if (s.f.via) { CP.push(s.f.via[0]); AP.push(s.f.via[1]); return; }
-          var b = s.f.B[0], a2 = nx.f.A[0], mid = b.clone().add(a2).multiplyScalar(0.5), dd = a2.clone().sub(b), L2 = dd.length();
-          var sideV = new T.Vector3().crossVectors(dd, up).normalize();
-          mid.addScaledVector(up, L2 * 0.12).addScaledVector(sideV, L2 * 0.14 * (n % 2 ? 1 : -1));
-          CP.push(mid); AP.push(s.f.B[1].clone().add(nx.f.A[1]).multiplyScalar(0.5));
-        });
-        camCurve = new T.CatmullRomCurve3(CP, false, 'centripetal');
-        focCurve = new T.CatmullRomCurve3(AP, false, 'centripetal');
-        camCurve.np = CP.length;
-      }
-
-      /* ---- dust and shards along the whole route, kept clear of the pieces and of the camera's path */
-      W = stage.clientWidth || window.innerWidth; Hh = stage.clientHeight || window.innerHeight;
-      cam.aspect = W / Hh; cam.fov = cam.aspect < 1 ? 52 : 40; cam.updateProjectionMatrix();
-      portrait = cam.aspect < 1; route();
-      var camPts = camCurve.getPoints(Math.max(300, camCurve.np * 6));
+      /* ---- dust and shards along the route, kept off the thread (the camera rides it) and clear of the pieces */
       var pieces = items.filter(function (it) { return it.pos && it !== IT.names; }).map(function (it) { return it.pos; }), v = new T.Vector3(), dir = new T.Vector3();
-      function clear(p, r) {
-        for (var k = 0; k < pieces.length; k++) if (pieces[k].distanceToSquared(p) < r * r) return false;
-        for (k = 0; k < camPts.length; k++) if (camPts[k].distanceToSquared(p) < 640 * 640) return false;
+      function clear(p) {
+        for (var k = 0; k < pieces.length; k++) if (pieces[k].distanceToSquared(p) < 700 * 700) return false;
+        for (k = 0; k <= NS; k += 6) if (sp[k].distanceToSquared(p) < 720 * 720) return false;
         return true;
       }
       var nd = phone ? 2200 : 4600, dp = new Float32Array(nd * 3), dr = new Float32Array(nd * 4);
       for (i = 0; i < nd; i++) {
-        v.copy(sp[Math.floor(Math.random() * NS)]).add(dir.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize().multiplyScalar(160 + Math.pow(Math.random(), 0.7) * 2800));
+        v.copy(sp[Math.floor(Math.random() * NS)]).add(dir.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize().multiplyScalar(220 + Math.pow(Math.random(), 0.7) * 2800));
         dp[i * 3] = v.x; dp[i * 3 + 1] = v.y; dp[i * 3 + 2] = v.z;
         dr[i * 4] = 3 + Math.random() * 6; dr[i * 4 + 1] = Math.random(); dr[i * 4 + 2] = 0.25 + Math.random() * 0.75; dr[i * 4 + 3] = Math.random();
       }
@@ -894,8 +861,8 @@
       var nsh = phone ? 150 : 300, spin = new Float32Array(nsh * 4), shards = new T.InstancedMesh(base, shardMat, nsh), m4 = new T.Matrix4(), qt = new T.Quaternion(), sc = new T.Vector3(), ax = new T.Vector3();
       for (i = 0; i < nsh; i++) {
         var tries = 0;
-        do { v.copy(sp[Math.floor(Math.random() * NS)]).add(dir.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize().multiplyScalar(420 + Math.pow(Math.random(), 1.2) * 2600)); }
-        while (!clear(v, 700) && ++tries < 14);
+        do { v.copy(sp[Math.floor(Math.random() * NS)]).add(dir.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize().multiplyScalar(760 + Math.pow(Math.random(), 1.2) * 2400)); }
+        while (!clear(v) && ++tries < 14);
         var k = 26 + Math.pow(Math.random(), 2.4) * 190;
         sc.set(k * (0.8 + Math.random() * 0.5), k * (0.7 + Math.random() * 0.6), k * (0.8 + Math.random() * 0.5));
         qt.setFromAxisAngle(ax.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize(), Math.random() * TAU);
@@ -906,21 +873,33 @@
       base.setAttribute('aSpin', new T.InstancedBufferAttribute(spin, 4));
       shards.instanceMatrix.needsUpdate = true; add(shards);
 
+      /* ---- the ride: the camera travels along the thread itself, just above and to one side of it, and never leaves
+         it. At each piece it slows to a hold a little before the bend, so the piece hangs in view beside the line; then
+         it runs on along the thread to the next. Each stop: c0..c1 = the stretch of thread held, in arc length */
+      var W = 1, Hh = 1, portrait = null;
+      function viewDist(it) {   /* far enough to frame the piece, never so close its type is enlarged much */
+        var vt = Math.tan(cam.fov * Math.PI / 360), ht = vt * cam.aspect, fovPx = Hh / (2 * vt);
+        return Math.max(it.w / (2 * ht * (portrait ? 0.8 : 0.42)), (it.h || it.w * 0.7) / (2 * vt * (portrait ? 0.44 : 0.6)), fovPx * 0.9);
+      }
+      function route() {
+        STOPS.forEach(function (s, n) {
+          var back = !n ? 0 : s.k === 'logos' ? (portrait ? 2000 : 1600) : s.k === 'cta' ? (portrait ? 1500 : 1100) : viewDist(s.it[0]) * (s.k === 'stat' ? 1 : 0.92);
+          var at = !n ? 260 : s.arc - back;
+          s.c0 = at - 130; s.c1 = at + 130;
+          if (!n) { s.c0 = 0; s.c1 = 420; }
+        });
+        for (var n = 1; n < STOPS.length; n++) {   /* the ride only ever moves forward */
+          var p0 = STOPS[n - 1];
+          if (STOPS[n].c0 < p0.c1 + 300) { STOPS[n].c0 = p0.c1 + 300; STOPS[n].c1 = Math.max(STOPS[n].c1, STOPS[n].c0 + 120); }
+        }
+      }
       function ease(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
       function sstep(a, b, x) { var t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
-      function where(pr) {   /* curve parameter, the stop in reach, the hold or travel we are in */
+      function where(pr) {   /* where on the thread the camera is, the stop in reach, the hold or travel we are in */
         for (var n = 0; n < STOPS.length; n++) {
           var s = STOPS[n];
-          if (pr <= s.h1 || n === STOPS.length - 1) {
-            var f = clamp((pr - s.h0) / s.hold, 0, 1);
-            return { t: idxA[n] + f * (idxB[n] - idxA[n]), n: n, a: n, g: -1, arc: s.arc, roll: 0 };
-          }
-          if (pr < s.h1 + s.travel) {
-            var g0 = (pr - s.h1) / s.travel, e = ease(g0);
-            /* the camera banks into each flight and levels out to arrive */
-            return { t: idxB[n] + e * (idxA[n + 1] - idxB[n]), n: e < 0.5 ? n : n + 1, a: n, g: g0, arc: s.arc + (STOPS[n + 1].arc - s.arc) * e,
-              roll: Math.sin(Math.PI * g0) * (n % 2 ? 0.2 : -0.2) };
-          }
+          if (pr <= s.h1 || n === STOPS.length - 1) { var f = clamp((pr - s.h0) / s.hold, 0, 1); return { s: s.c0 + f * (s.c1 - s.c0), n: n, a: n, g: -1 }; }
+          if (pr < s.h1 + s.travel) { var g0 = (pr - s.h1) / s.travel, e = ease(g0); return { s: s.c1 + e * (STOPS[n + 1].c0 - s.c1), n: e < 0.5 ? n : n + 1, a: n, g: g0 }; }
         }
       }
       function chapterOf(w) {   /* copy shared by neighbouring stops stays up; otherwise it hands over mid-flight */
@@ -936,12 +915,13 @@
         dpr = Math.min(window.devicePixelRatio || 1, phone ? 1.5 : 1.75);
         renderer.setPixelRatio(dpr); renderer.setSize(W, Hh, false);
         res.set(Math.round(W * dpr), Math.round(Hh * dpr));
-        cam.aspect = W / Hh; cam.fov = cam.aspect < 1 ? 52 : 40; cam.updateProjectionMatrix();
+        cam.aspect = W / Hh; cam.fov = cam.aspect < 1 ? 56 : 42; cam.updateProjectionMatrix();
         threadMat.uniforms.uMinPx.value = 1.3 * dpr;
         portrait = cam.aspect < 1; route();
       }
       var mx = 0, my = 0, cmx = 0, cmy = 0, prog = null, raf = 0, last = performance.now(), time = 0, act = new Float32Array(STOPS.length);
-      var cpos = new T.Vector3(), fpos = new T.Vector3(), tgt = new T.Vector3(), fwd = new T.Vector3(), rgt = new T.Vector3(), upv = new T.Vector3();
+      var cpos = new T.Vector3(), ahead = new T.Vector3(), tgt = new T.Vector3(), fwd = new T.Vector3(), rgt = new T.Vector3(), upv = new T.Vector3();
+      var t1 = new T.Vector3(), t2 = new T.Vector3(), tr = new T.Vector3(), aim = new T.Vector3(), sideNow = 0, lift = 0;
       var curCh = null, curN = -1, curG = 0;
       if (fine) window.addEventListener('mousemove', function (e) { mx = e.clientX / window.innerWidth * 2 - 1; my = e.clientY / window.innerHeight * 2 - 1; }, { passive: true });
       function cardFilm(n, on) {
@@ -960,6 +940,12 @@
         var nx = STOPS[n + 1];
         if (nx && nx.i != null) { var nv = IT.cards[nx.i].el.querySelector('video'); if (nv && !nv.getAttribute('src')) nv.src = nv.getAttribute('data-src'); }
       }
+      function aimAt(p, sx, sy, out) {   /* the point to look at so p lands at (sx, sy) of the screen */
+        fwd.subVectors(p, cam.position); var d = fwd.length(); fwd.divideScalar(d || 1);
+        rgt.crossVectors(fwd, up).normalize(); upv.crossVectors(rgt, fwd);
+        var hh = d * Math.tan(cam.fov * Math.PI / 360), hw = hh * cam.aspect;
+        return out.copy(p).addScaledVector(rgt, -(sx - 0.5) * 2 * hw).addScaledVector(upv, -(0.5 - sy) * 2 * hh);
+      }
 
       function frame(now) {
         raf = 0;
@@ -971,17 +957,34 @@
         if (prog === null) prog = target;
         prog += (target - prog) * (1 - Math.exp(-dt * 7));
         if (Math.abs(target - prog) < 1e-4) prog = target;
-        var w = where(prog), u = w.t / (camCurve.np - 1), k;
-        camCurve.getPoint(u, cpos); focCurve.getPoint(u, fpos);
+        var w = where(prog), k;
+        /* which pieces are lit: the one held, crossfading to the next as the camera nears it */
+        for (k = 0; k < act.length; k++) act[k] = 0;
+        if (w.g < 0) act[w.a] = 1; else { act[w.a] = 1 - sstep(0.05, 0.55, w.g); act[w.a + 1] = sstep(0.4, 0.92, w.g); }
+        /* on the thread: just above it, off to the side away from the piece in reach, a little higher in flight */
+        var sideT = 0;
+        for (k = 0; k < act.length; k++) sideT += act[k] * (STOPS[k].side || 0);
+        sideNow += (sideT - sideNow) * (1 - Math.exp(-dt * 4));
+        var liftT = w.g < 0 ? 0 : Math.sin(Math.PI * w.g);
+        lift += (liftT - lift) * (1 - Math.exp(-dt * 4));
+        ptAt(w.s, cpos); tanAt(w.s, t1);
+        tr.crossVectors(t1, up).normalize();
         cmx += (mx - cmx) * 0.05; cmy += (my - cmy) * 0.05;
-        /* aim so the piece sits right of centre above the copy (centred on portrait screens and in the logo ring) */
-        fwd.subVectors(fpos, cpos); var dist = fwd.length(); fwd.divideScalar(dist || 1);
-        rgt.crossVectors(fwd, up).normalize(); upv.crossVectors(rgt, fwd);
-        var hh = dist * Math.tan(cam.fov * Math.PI / 360), hw = hh * cam.aspect, st = STOPS[w.n];
-        var sx = portrait || st.f.centre ? 0.5 : 0.62, sy = st.f.centre ? 0.5 : portrait ? 0.36 : 0.44;
-        tgt.copy(fpos).addScaledVector(rgt, -(sx - 0.5) * 2 * hw).addScaledVector(upv, -(0.5 - sy) * 2 * hh);
-        cam.position.copy(cpos).addScaledVector(rgt, cmx * 60).addScaledVector(upv, -cmy * 40);
-        cam.up.copy(up).multiplyScalar(Math.cos(w.roll)).addScaledVector(rgt, Math.sin(w.roll));
+        cam.position.copy(cpos).addScaledVector(up, 200 + lift * 160 - cmy * 30).addScaledVector(tr, -sideNow * 190 + cmx * 50);
+        /* look along the thread ahead, turning to frame the piece in reach (it sits right of centre over the copy,
+           centred on portrait screens) */
+        ptAt(w.s + 1100, ahead); ahead.addScaledVector(up, -30);
+        tgt.copy(ahead);
+        for (k = 0; k < act.length; k++) {
+          if (!act[k] || !STOPS[k].P) continue;
+          var sk = STOPS[k];
+          aimAt(sk.P, portrait ? 0.5 : (sk.side ? 0.62 : 0.6), portrait ? 0.36 : 0.44, aim);
+          tgt.lerp(aim, act[k] * (portrait ? 1 : 0.9));
+        }
+        /* lean into the bends */
+        tanAt(w.s + 500, t2);
+        var roll = clamp(-((t2.x - t1.x) * tr.x + (t2.z - t1.z) * tr.z) * 1.1, -0.16, 0.16) * lift;   /* level while a piece is held */
+        cam.up.copy(up).multiplyScalar(Math.cos(roll)).addScaledVector(tr, Math.sin(roll));
         cam.lookAt(tgt); cam.updateMatrixWorld();
         /* HTML pieces: the camera moves them all in one transform (three's CSS3DRenderer maths) */
         var fovPx = cam.projectionMatrix.elements[5] * Hh / 2, e = cam.matrixWorldInverse.elements;
@@ -989,8 +992,6 @@
         cam3.style.transform = 'translateZ(' + fovPx + 'px) matrix3d(' + [e[0], -e[1], e[2], e[3], e[4], -e[5], e[6], e[7], e[8], -e[9], e[10], e[11], e[12], -e[13], e[14], e[15]].map(eps).join(',') +
           ') translate(' + W / 2 + 'px,' + Hh / 2 + 'px)';
         /* only the piece in reach is lit; the rest wait faded until the camera gets to them */
-        for (k = 0; k < act.length; k++) act[k] = 0;
-        if (w.g < 0) act[w.a] = 1; else { act[w.a] = 1 - sstep(0.05, 0.55, w.g); act[w.a + 1] = sstep(0.4, 0.92, w.g); }
         var workW = 0;
         STOPS.forEach(function (s, n) { if (s.k === 'work') workW = Math.max(workW, act[n]); });
         cam.getWorldDirection(fwd);
@@ -998,8 +999,9 @@
           var it = items[k];
           if (!it.pos) continue;
           v.subVectors(it.pos, cam.position);
-          var d = v.length(), lit = it.stop >= 0 ? act[it.stop] : it === IT.names ? workW * 0.8 : 0;
-          var op = v.dot(fwd) < 120 ? 0 : Math.max(lit, d < 4600 ? 0.07 : 0) * clamp((d - 260) / 420, 0, 1) * clamp((7200 - d) / 1600, 0, 1);
+          var d = v.length(), lit = it.stop >= 0 ? act[it.stop] : it === IT.names ? workW * 0.5 : 0;
+          var ghost = d < 4600 && !it.solo ? 0.07 : 0;   /* a result waits unseen: its figure has not counted yet */
+          var op = v.dot(fwd) < 120 ? 0 : Math.max(lit, ghost) * clamp((d - 300) / 450, 0, 1) * clamp((7200 - d) / 1600, 0, 1);
           op = Math.round(op * 50) / 50;
           if (op !== it.op) { it.op = op; it.el.style.opacity = op; it.el.style.visibility = op ? 'visible' : 'hidden'; }
         }
@@ -1021,14 +1023,14 @@
         hudBar.style.height = (prog / TOTAL * 100).toFixed(2) + '%';
         var end = jReady && g === GROUPS;
         if (end !== jEnd) { jEnd = end; badgeState(); }
-        /* pulses run ahead along the thread from the piece in reach and light the shards they pass */
+        /* pulses run on ahead of the camera along the thread and light the shards they pass */
         for (k = 0; k < 4; k++) {
-          var pa = w.arc - 500 + ((time * 1100 + k * 1650) % 6600);
+          var pa = w.s + 200 + ((time * 1100 + k * 1650) % 6600);
           pulse[k] = pa;
-          if (pa > 0 && pa < LEN) { lightP[k].copy(sp[clamp(Math.round(pa / LEN * NS), 0, NS)]); lightI[k] = 1.1; } else lightI[k] = 0;
+          if (pa > 0 && pa < LEN) { ptAt(pa, lightP[k]); lightI[k] = 1.1; } else lightI[k] = 0;
         }
-        lightP[4].copy(fpos); lightI[4] = 0.6;
-        lightP[5].copy(sp[clamp(Math.round(w.arc / LEN * NS), 0, NS)]); lightI[5] = 0.5;
+        ptAt(w.s + 900, lightP[4]); lightI[4] = 0.6;
+        lightP[5].copy(STOPS[w.n].P || ahead); lightI[5] = 0.5;
         /* the joints of the piece in reach burn bright */
         for (k = 0; k < JOINTS.length; k++) { var jl = act[JOINTS[k].n]; fAttr.setZ(k * 2, 0.3 + 0.85 * jl); fAttr.setZ(k * 2 + 1, 0.08 + 0.3 * jl); }
         fAttr.needsUpdate = true;
