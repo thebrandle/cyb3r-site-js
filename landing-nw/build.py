@@ -106,9 +106,9 @@ hero = (
 position = (
     '<section class="lnw-sec lnw-pos"><div class="lnw-frame lnw-grid">'
     + head('The Relevance Agent for Google Ads', 'Make every', 'moment matter', 'h1', ' lnw-stmt--xl') +
-    '<div class="lnw-side" data-reveal>'
-    '<p class="lnw-lead">Agentic AI that makes real-time, placement-level decisions at scale.</p>'
-    f'<div class="lnw-acts"><a href="#" class="lnw-btn">Book a Discovery Call{ARROW}</a>'
+    '<div class="lnw-side">'
+    '<p class="lnw-lead" data-reveal>Agentic AI that makes real-time, placement-level decisions at scale.</p>'
+    f'<div class="lnw-acts" data-reveal style="--d:1"><a href="#" class="lnw-btn">Book a Discovery Call{ARROW}</a>'
     f'<a href="#lnwHero" class="lnw-link" data-watch>Watch the video{ARROW}</a></div>'
     '</div></div></section>'
 )
@@ -140,7 +140,7 @@ def cards():
     out = []
     for i, (cat, brand, line, vid, poster) in enumerate(EXAMPLES):
         out.append(
-            f'<article class="lnw-card" data-reveal style="--d:{i}"><div class="lnw-card__m">'
+            f'<article class="lnw-card" style="--delay:{min(i, 6) * 80}ms"><div class="lnw-card__m">'
             f'<video muted loop playsinline preload="none" poster="{MEDIA}{poster}" data-src="https://cdn.prod.website-files.com/{vid}"></video></div>'
             f'<div class="lnw-card__meta"><h3>{e(brand)}</h3><p class="lnw-tag">{e(cat)}</p><p class="lnw-card__d">{e(line)}</p></div></article>')
     return ''.join(out)
@@ -149,7 +149,7 @@ def cards():
 names = ''.join(f'<span>{e(b)}</span><i>·</i>' for _, b, _, _, _ in EXAMPLES)
 work = (
     '<section class="lnw-sec lnw-work">'
-    f'<div class="lnw-marq" aria-hidden="true"><div class="lnw-marq__track">{names * 3}</div></div>'
+    f'<div class="lnw-marq" data-drift="1" aria-hidden="true"><div class="lnw-marq__track">{names * 3}</div></div>'
     f'<div class="lnw-rail"><div class="lnw-rail__track">{cards()}</div></div>'
     '</section>'
 )
@@ -167,7 +167,7 @@ results = (
 platform = (
     '<section class="lnw-sec lnw-plat"><div class="lnw-frame lnw-grid">'
     + head('Inside the platform', 'Detailed, actionable insights', 'for creative and media') +
-    '<div class="lnw-side" data-reveal><p class="lnw-lead">Our AI-DCO reporting unlocks opportunities with every targeting partner and publisher you work with.</p></div>'
+    '<div class="lnw-side"><p class="lnw-lead" data-reveal>Our AI-DCO reporting unlocks opportunities with every targeting partner and publisher you work with.</p></div>'
     '</div><div class="lnw-frame"><figure class="lnw-plat__img" data-reveal>'
     f'<img src="{MEDIA}platform-dashboard-1100.webp" srcset="{MEDIA}platform-dashboard-1100.webp 1100w, {MEDIA}platform-dashboard-1650.webp 1650w"'
     ' sizes="(max-width: 1240px) 92vw, 1180px" width="1650" height="956" alt="Reporting dashboard" loading="lazy" decoding="async"></figure></div></section>'
@@ -177,7 +177,7 @@ rows = ''.join(f'<div class="lnw-row" data-reveal><h3 class="lnw-row__t">{e(t)}<
 transparency = (
     '<section class="lnw-sec lnw-trans"><div class="lnw-frame lnw-grid">'
     + head('', 'Built on', 'Absolute Transparency') +
-    '<div class="lnw-side" data-reveal><p class="lnw-lead">We work in the open. We bring a new standard of trust to Google Ads display by sharing the exact placement data other platforms keep hidden.</p></div>'
+    '<div class="lnw-side"><p class="lnw-lead" data-reveal>We work in the open. We bring a new standard of trust to Google Ads display by sharing the exact placement data other platforms keep hidden.</p></div>'
     f'</div><div class="lnw-frame"><div class="lnw-rows">{rows}</div></div></section>'
 )
 
@@ -200,15 +200,15 @@ def caps():
 integration = (
     '<section class="lnw-sec lnw-int"><div class="lnw-frame lnw-grid">'
     + head('Proven Results', 'Seamless', 'Enterprise Integration') +
-    '<div class="lnw-side" data-reveal><p class="lnw-lead">One intelligent layer on top of Google Ads, built for enterprise scale.</p></div>'
+    '<div class="lnw-side"><p class="lnw-lead" data-reveal>One intelligent layer on top of Google Ads, built for enterprise scale.</p></div>'
     f'</div><div class="lnw-frame"><div class="lnw-acc">{caps()}</div></div></section>'
 )
 
 cta = (
     '<section class="lnw-sec lnw-cta"><div class="lnw-frame lnw-grid">'
     + head('', 'Running', 'Google Display Ads?') +
-    '<div class="lnw-side" data-reveal><p class="lnw-lead">Partner with us to make every Google Display Ads placement meet real human intent and drive stronger commercial outcomes.</p>'
-    f'<div class="lnw-acts"><a href="#" class="lnw-btn">Book a Discovery Call{ARROW}</a></div></div>'
+    '<div class="lnw-side"><p class="lnw-lead" data-reveal>Partner with us to make every Google Display Ads placement meet real human intent and drive stronger commercial outcomes.</p>'
+    f'<div class="lnw-acts" data-reveal style="--d:1"><a href="#" class="lnw-btn">Book a Discovery Call{ARROW}</a></div></div>'
     '</div></section>'
 )
 
