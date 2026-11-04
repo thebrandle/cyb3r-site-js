@@ -84,7 +84,10 @@
 .lnw-3d{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 .lnw-3d__cam{position:absolute;left:0;top:0;width:100%;height:100%;transform-style:preserve-3d}
 .lnw-3d__it{position:absolute;left:0;top:0;visibility:hidden;-webkit-backface-visibility:hidden;backface-visibility:hidden}
-.lnw.is-journey .lnw-sec:not(.lnw-int):not(.lnw-cta),.lnw.is-journey .lnw-logos,.lnw.is-journey .lnw-band{display:none}
+.lnw.is-journey .lnw-sec:not(.lnw-int):not(.lnw-cta):not(.lnw-stay),.lnw.is-journey .lnw-logos,.lnw.is-journey .lnw-band{display:none}
+/* portrait screens: the opening copy sits right under the film, in the navy the thread starts from */
+.lnw-sec.lnw-stay{padding-block:clamp(28px,7vw,48px) clamp(36px,9vw,64px);background:#131c25}
+.lnw-stay .lnw-side{margin-top:clamp(14px,3.6vw,22px)}
 /* the world fades out at the foot of the stage and the page picks up from the same navy */
 .lnw-stage::after{content:"";position:absolute;left:0;right:0;bottom:0;height:clamp(80px,14vh,140px);pointer-events:none;background:linear-gradient(to top,#131c25,rgba(19,28,37,0))}
 .lnw.is-journey .lnw-int{background:linear-gradient(180deg,#131c25,rgba(19,28,37,0) clamp(180px,24vw,340px))}
@@ -127,6 +130,11 @@
 .lnw-ch .lnw-card__meta{padding:0}
 .lnw-ch .lnw-card__meta h3{font-size:clamp(30px,3vw,50px);line-height:1.1;letter-spacing:-.03em}
 .lnw-ch .lnw-card__d{font-size:clamp(15px,1.15vw,18px);max-width:40ch;text-wrap:balance}
+/* portrait screens: the thread fades out behind the copy, it never runs across it */
+@media (max-aspect-ratio:1/1){
+  .lnw-3d::before{content:"";position:absolute;left:0;right:0;bottom:0;height:46%;background:linear-gradient(to top,#131c25 56%,rgba(19,28,37,0));opacity:0;transition:opacity .5s ease}
+  .lnw-3d.is-copy::before{opacity:1}
+}
 /* chapter count and progress */
 .lnw-hud{position:absolute;inset:0;z-index:1;pointer-events:none}
 .lnw-hud__n{position:absolute;left:50%;top:clamp(80px,9vh,96px);transform:translateX(-50%);font:400 11px/1 var(--mono);letter-spacing:.1em;color:var(--soft)}

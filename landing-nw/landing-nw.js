@@ -537,7 +537,7 @@
      one piece of the page per screen of scroll - the client logos in a ring round the thread, each agent step, each
      example, each result, the platform, each transparency row - each hung beside the thread where it runs level, joined
      to it by a bright joint; the pieces ahead and behind stay faded until the camera reaches them. The piece in view
-     sits mid-screen, its copy bottom left. It opens on the thread rising away from under the camera and ends under
+     sits mid-screen, its copy bottom left. It opens on the thread running straight into the screen and ends under
      the transparency cards; the activation models (three open cards side by side) and the closing call to action follow as
      normal sections. Every word and picture is the page's own, moved into place (not copied); the pieces are HTML set
      in 3D over a three.js canvas (r128, the copy the homepage loads). Off for reduced motion and without WebGL, where
@@ -559,7 +559,8 @@
     view.appendChild(cam3);
     [cvs, view, ov, hud].forEach(function (el) { stage.appendChild(el); });
     track.appendChild(stage);
-    hero.parentNode.insertBefore(track, hero.nextSibling);
+    var before = tall ? q('.lnw-pos') : hero;   /* portrait screens: the opening copy stays under the film, the thread starts after it */
+    before.parentNode.insertBefore(track, before.nextSibling);
     var hudN = hud.firstChild, hudBar = hud.lastChild.firstChild;
 
     var moved = [];
@@ -579,7 +580,8 @@
     }
     /* copy into chapters (page order), pieces into space */
     var cards = $$('.lnw-work .lnw-card'), CH = {};
-    CH.pos = chapter([q('.lnw-pos .lnw-head'), q('.lnw-pos .lnw-side')]);
+    if (tall) q('.lnw-pos').classList.add('lnw-stay');
+    else CH.pos = chapter([q('.lnw-pos .lnw-head'), q('.lnw-pos .lnw-side')]);
     CH.agent = chapter([q('.lnw-agent .lnw-lab'), q('.lnw-agent .lnw-stmt')]);
     CH.cards = cards.map(function (c) { return chapter([c.querySelector('.lnw-card__meta')]); });
     CH.res = chapter([q('.lnw-res .lnw-lab'), q('.lnw-res .lnw-stmt')]);
@@ -618,7 +620,7 @@
     if (IT.stats.length) stop('stat', 4, CH.res, IT.stats);
     if (IT.plat) stop('plat', 5, CH.plat, [IT.plat]);
     if (IT.rows.length) stop('row', 6, CH.trans, IT.rows);
-    STOPS[0].hold = 0.6; STOPS[STOPS.length - 1].hold = 0.6; STOPS[STOPS.length - 1].travel = 0;
+    STOPS[0].hold = tall ? 0.2 : 0.6; STOPS[STOPS.length - 1].hold = 0.6; STOPS[STOPS.length - 1].travel = 0;
     var TOTAL = 0, GROUPS = STOPS[STOPS.length - 1].g;
     STOPS.forEach(function (s) { s.h0 = TOTAL; TOTAL += s.hold; s.h1 = TOTAL; TOTAL += s.travel; });
     track.style.height = ((TOTAL + 1) * 100) + 'vh';
@@ -669,7 +671,7 @@
       ' float core=exp(-q*q);float halo=exp(-dpx/max(vPx*0.3,1.6))*(1.0-smoothstep(0.7,1.0,a));',
       ' float p=0.0;for(int k=0;k<4;k++){float e=(vArc-uPulse[k])/90.0;p+=exp(-e*e);}p*=uPulseGain;',
       ' float f=exp(-vDepth*vDepth*uFog*uFog)*mix(0.25,1.0,smoothstep(120.0,1100.0,vDepth))*smoothstep(60.0,320.0,vDepth);',   /* softer right under the camera, over the copy */
-      ' float ends=smoothstep(uFrom,uFrom+60.0,vArc)*(1.0-smoothstep(uTo-20.0,uTo,vArc));',
+      ' float ends=smoothstep(uFrom,uFrom+60.0,vArc)*(1.0-smoothstep(uTo-2600.0,uTo,vArc));',
       ' vec3 col=(uColor*halo*0.55*(1.0+p*2.2)+uCore*core*(0.85+p*1.6))*f*ends*uGain;',
       ' gl_FragColor=vec4(col,1.0);}'
     ].join('\n');
@@ -737,53 +739,35 @@
       });
       function add(obj) { obj.frustumCulled = false; world.add(obj); return obj; }
 
-      /* ---- the thread: a long line through space that climbs, dives, swings wide and corkscrews between the pieces - a
-         different move each time - and runs level for a short stretch at each piece so it can be read. It opens just
-         under the camera and rises away; a piece hangs beside it on every level stretch (the results float above it, the
-         logo ring stands round it) and it ends under the last cards, in a point of light */
-      var TURN = [0, 0, 38, -44, 36, -40, 46, -36, 42, -44, 34, -42, 40, -36];
-      var LIFT = [0, 0, 700, -900, 600, -800, 900, -600, 700, -900, 500, -800, -800, 800];
-      var MOVES = ['climb', 'swingL', 'dive', 'cork', 'swingR', 'dip', 'climbR', 'diveL'];
+      /* ---- the thread: one long line whose heading swings slowly, left and right a quarter turn out of step with up and
+         down, so it sweeps every way in long even curves, with no corner anywhere, and never doubles back. Seen from this
+         low a sideways bend on its own would flatten into a sharp tip, which is why a climb or a dive always comes with it.
+         It opens going straight into the screen and ends under the last cards, in a point of light */
       /* pieces that share one point: centre to centre (stacked gapY), the outer two pulled toward the camera and turned in
-         (stacked, tilted), their share of the screen, their height on it and how far above the thread they float */
+         (stacked, tilted), their share of the screen, their height on it, how far above the thread they float and the
+         slope the thread takes under them (the results keep it below their labels) */
       var GROUP = {
-        stat: { gap: 480, gapY: 40, pull: 170, turn: 0.3, tilt: 0.22, fw: 0.72, fh: 0.56, sy: tall ? 0.47 : 0.44, rise: 120 },
-        row: { gap: 470, gapY: 24, pull: 110, turn: 0.2, tilt: 0.1, fw: 0.69, fh: 0.54, sy: tall ? 0.42 : 0.36, rise: 40 }
+        stat: { gap: 480, gapY: 40, pull: 170, turn: 0.3, tilt: 0.22, fw: 0.72, fh: 0.56, sy: tall ? 0.47 : 0.44, rise: 250, dip: -0.1 },
+        row: { gap: 470, gapY: 24, pull: 110, turn: 0.2, tilt: 0.1, fw: 0.69, fh: 0.54, sy: tall ? 0.42 : 0.36, rise: 40, dip: 0 }
       };
-      var yawAcc = 0, spot = new T.Vector3(0, 900, -4200), TP = [new T.Vector3(0, 0, 900), new T.Vector3(0, 0, 0), new T.Vector3(0, 80, -1000)];
-      function hdir(y) { return new T.Vector3(Math.sin(y), 0, -Math.cos(y)); }
-      function moves(a, b, kind) {   /* the flight from one piece to the next */
-        var D = b.clone().sub(a), L = D.length(), h = D.clone().setY(0).normalize(), side = new T.Vector3().crossVectors(h, up).normalize();
-        function at(f, sd, u) { return a.clone().lerp(b, f).addScaledVector(side, sd * L).addScaledVector(up, u * L); }
-        switch (kind) {
-          case 'climb': return [at(0.5, 0.1, 0.4)];
-          case 'dive': return [at(0.5, -0.12, -0.38)];
-          case 'swingL': return [at(0.5, 0.5, 0.08)];
-          case 'swingR': return [at(0.5, -0.5, -0.05)];
-          case 'cork': return [at(0.3, 0.34, 0.28), at(0.64, -0.3, 0.36)];
-          case 'dip': return [at(0.36, 0.05, -0.34), at(0.7, -0.08, 0.2)];
-          case 'climbR': return [at(0.5, -0.32, 0.34)];
-          default: return [at(0.5, 0.34, -0.32)];
-        }
-      }
-      var prevOut = TP[TP.length - 1];
+      var LEN = 5200;   /* the stops sit along it at set distances */
       STOPS.forEach(function (s, n) {
-        if (!n) return;
-        if (n > 1) {
-          yawAcc += TURN[n % TURN.length] * Math.PI / 180;
-          spot = spot.clone().addScaledVector(hdir(yawAcc), STOPS[n - 1].k === 'plat' || s.k === 'plat' || GROUP[s.k] ? 5200 : 4600).addScaledVector(up, LIFT[n % LIFT.length]);
-        }
-        /* a group is met head on, so the level run in starts further back */
-        var d = hdir(yawAcc), inA = spot.clone().addScaledVector(d, GROUP[s.k] ? -2200 : -1300), inB = spot.clone().addScaledVector(d, -600);
-        s.J = spot.clone();
-        moves(prevOut, inA, n === 1 ? 'climb' : STOPS[n - 1].k === 'stat' ? 'diveL' : s.k === 'row' ? 'climbR' : MOVES[(n - 2) % MOVES.length]).forEach(function (p) { TP.push(p); });
-        TP.push(inA, inB, s.J);
-        if (n < STOPS.length - 1) { prevOut = s.J.clone().addScaledVector(d, 700); TP.push(prevOut); }
+        if (n > 1) LEN += STOPS[n - 1].k === 'plat' || s.k === 'plat' || GROUP[s.k] ? 5200 : 4600;
+        s.arc = n ? LEN : 0;
       });
-      var curve = new T.CatmullRomCurve3(TP, false, 'centripetal');
-      curve.arcLengthDivisions = TP.length * 60;
-      var LEN = curve.getLength(), NS = Math.round(LEN / 24), sp = curve.getSpacedPoints(NS), tp = [], ta = [], i;
-      for (i = 0; i <= NS; i++) { tp.push(sp[i].x, sp[i].y, sp[i].z); ta.push(i / NS * LEN); }
+      function ease(x) { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); }
+      var NS = Math.round(LEN / 24), ds = LEN / NS, sp = [], tp = [], ta = [], i, head = new T.Vector3(0, 0, 900);
+      for (i = 0; i <= NS; i++) {
+        var u = i * ds, e = ease((u - 3000) / 7000) * ease((LEN - u - 1200) / 7000), calm = 0, dip = 0;   /* straight at both ends */
+        var yaw = e * (0.62 * Math.sin(u / 2300) + 0.2 * Math.sin(u / 1300 + 1)), pitch = e * (0.36 * Math.cos(u / 2300) + 0.12 * Math.sin(u / 1700 + 2));
+        STOPS.forEach(function (s) {   /* and runs straight in under a group, which is met head on */
+          var c = GROUP[s.k] ? ease((4300 - Math.abs(u - s.arc - 500)) / 1800) : 0;
+          if (c > calm) { calm = c; dip = GROUP[s.k].dip; }
+        });
+        yaw *= 1 - calm; pitch = pitch * (1 - calm) + dip * calm;
+        sp.push(head.clone()); tp.push(head.x, head.y, head.z); ta.push(u);
+        head.x += ds * Math.sin(yaw) * Math.cos(pitch); head.y += ds * Math.sin(pitch); head.z -= ds * Math.cos(yaw) * Math.cos(pitch);
+      }
       (function () {   /* the ribbon: two vertices per sample (its edges) */
         var n = NS + 1, pos = new Float32Array(n * 6), td = new Float32Array(n * 6), side = new Float32Array(n * 2), arc = new Float32Array(n * 2), idx = [];
         for (var k = 0; k < n; k++) {
@@ -802,10 +786,8 @@
         g.setIndex(idx);
         add(new T.Mesh(g, threadMat));
       })();
-      threadMat.uniforms.uTo.value = LEN;
       function ptAt(s, out) { var f = clamp(s / LEN, 0, 1) * NS, k = Math.min(NS - 1, Math.floor(f)); return out.copy(sp[k]).lerp(sp[k + 1], f - k); }
       function tanAt(s, out) { var k = clamp(Math.round(s / LEN * NS), 4, NS - 4); return out.subVectors(sp[k + 4], sp[k - 4]).normalize(); }
-      function nearestArc(v) { var best = 0, bd = 1e18; for (var k = 0; k <= NS; k++) { var d = sp[k].distanceToSquared(v); if (d < bd) { bd = d; best = k; } } return ta[best]; }
 
       /* ---- the pieces, hung beside the thread at their bends, turned a little toward it */
       var dummy = new T.Object3D();
@@ -819,9 +801,9 @@
       }
       var JOINTS = [], tv = new T.Vector3(), rv = new T.Vector3();
       STOPS.forEach(function (s, n) {
-        if (!n) { s.arc = 0; return; }
-        s.arc = nearestArc(s.J); tanAt(s.arc, tv);
-        var t = tv.clone().setY(0).normalize(), r = new T.Vector3().crossVectors(t, up).normalize();
+        if (!n) return;
+        s.J = ptAt(s.arc, new T.Vector3());
+        var t = tv.subVectors(s.J, ptAt(s.arc - 1300, rv)).clone().setY(0).normalize(), r = new T.Vector3().crossVectors(t, up).normalize();   /* square to the way in, which is still curving */
         s.t = t; s.r = r; s.side = n % 2 ? 1 : -1;
         if (s.k === 'logos') {   /* the ring stands round the thread, square to it */
           var ry0 = Math.atan2(-t.x, -t.z), LR = tall ? [420, 660] : [800, 480];
@@ -1023,7 +1005,8 @@
         /* which piece is in view: a smooth weight per stop, peaking at its hold */
         var inView = 0;
         for (k = 0; k < act.length; k++) { act[k] = bell(k, prog); inView += act[k]; }
-        /* on the thread: just above it, off to the side away from the piece in reach, a little higher in flight */
+        /* on the thread: just above it, off to the side away from the piece in reach; in flight it rises to look down on the
+           line, since from level even a long curve foreshortens into a corner */
         var sideT = 0;
         for (k = 0; k < act.length; k++) sideT += act[k] * (STOPS[k].side || 0);
         sideNow += (sideT - sideNow) * (1 - Math.exp(-dt * 4));
@@ -1032,7 +1015,7 @@
         ptAt(w.s, cpos); tanAt(w.s, t1);
         tr.crossVectors(t1, up).normalize();
         cmx += (mx - cmx) * 0.05; cmy += (my - cmy) * 0.05;
-        cam.position.copy(cpos).addScaledVector(up, 200 + lift * 80 - cmy * 30).addScaledVector(tr, -sideNow * 190 + cmx * 50);
+        cam.position.copy(cpos).addScaledVector(up, 200 + lift * 520 - cmy * 30).addScaledVector(tr, -sideNow * 190 + cmx * 50);
         /* look along the thread ahead, turning to frame the piece in reach (it sits right of centre over the copy,
            centred on portrait screens) */
         ptAt(w.s + 2000, ahead); ahead.addScaledVector(up, -30);
@@ -1082,11 +1065,13 @@
             if (sn) requestAnimationFrame(function () { sn.classList.add('is-in'); });
             $$('.lnw-lab, .lnw-tag', chEl).forEach(scramble);
           }
-          curCh = chEl;
+          curCh = chEl; view.classList.toggle('is-copy', !!chEl);
         }
         var g = STOPS[w.n].g;
         if (g !== curG) { curG = g; hudN.textContent = '0' + g + ' / 0' + GROUPS; }
         hudBar.style.height = (prog / TOTAL * 100).toFixed(2) + '%';
+        /* the thread melts away a set way ahead: far off, a bend foreshortens into what reads as a corner */
+        threadMat.uniforms.uTo.value = w.s + (tall ? 3800 : 5400);
         /* pulses run on ahead of the camera along the thread and light the shards they pass */
         for (k = 0; k < 4; k++) {
           var pa = w.s + 200 + ((time * 1100 + k * 1650) % 6600);
