@@ -615,7 +615,7 @@
     stop('logos', 1, null, IT.logos);
     IT.steps.forEach(function (it) { stop('step', 2, CH.agent, [it]); });
     IT.cards.forEach(function (it, i) { stop('work', 3, CH.cards[i], [it]); STOPS[STOPS.length - 1].i = i; });
-    IT.stats.forEach(function (it) { stop('stat', 4, CH.res, [it]); });
+    if (IT.stats.length) stop('stat', 4, CH.res, IT.stats);
     if (IT.plat) stop('plat', 5, CH.plat, [IT.plat]);
     IT.rows.forEach(function (it) { stop('row', 6, CH.trans, [it]); });
     STOPS[0].hold = 0.6; STOPS[STOPS.length - 1].hold = 0.6; STOPS[STOPS.length - 1].travel = 0;
@@ -741,8 +741,8 @@
          different move each time - and runs level for a short stretch at each piece so it can be read. It opens just
          under the camera and rises away; a piece hangs beside it on every level stretch (the results float above it, the
          logo ring stands round it) and it ends at the last piece, in a point of light */
-      var TURN = [0, 0, 38, -44, 36, -40, 46, -36, 42, -44, 34, -42, 40, -36, 44, -38, 36, -46, 40, -34, 38, -36];
-      var LIFT = [0, 0, 700, -900, 600, -800, 900, -600, 700, -900, 500, -800, 800, -600, 900, -700, 600, -900, 700, -500, 600, -400];
+      var TURN = [0, 0, 38, -44, 36, -40, 46, -36, 42, -44, 34, -42, 40, -36, 44, -38];
+      var LIFT = [0, 0, 700, -900, 600, -800, 900, -600, 700, -900, 500, -800, -800, 800, -700, 700];
       var MOVES = ['climb', 'swingL', 'dive', 'cork', 'swingR', 'dip', 'climbR', 'diveL'];
       var yawAcc = 0, spot = new T.Vector3(0, 900, -4200), TP = [new T.Vector3(0, 0, 900), new T.Vector3(0, 0, 0), new T.Vector3(0, 80, -1000)];
       function hdir(y) { return new T.Vector3(Math.sin(y), 0, -Math.cos(y)); }
@@ -765,11 +765,12 @@
         if (!n) return;
         if (n > 1) {
           yawAcc += TURN[n % TURN.length] * Math.PI / 180;
-          spot = spot.clone().addScaledVector(hdir(yawAcc), STOPS[n - 1].k === 'plat' || s.k === 'plat' ? 5200 : 4600).addScaledVector(up, LIFT[n % LIFT.length]);
+          spot = spot.clone().addScaledVector(hdir(yawAcc), STOPS[n - 1].k === 'plat' || s.k === 'plat' || s.k === 'stat' ? 5200 : 4600).addScaledVector(up, LIFT[n % LIFT.length]);
         }
-        var d = hdir(yawAcc), inA = spot.clone().addScaledVector(d, -1300), inB = spot.clone().addScaledVector(d, -600);
+        /* the results are met head on, so the level run in starts further back */
+        var d = hdir(yawAcc), inA = spot.clone().addScaledVector(d, s.k === 'stat' ? -2200 : -1300), inB = spot.clone().addScaledVector(d, -600);
         s.J = spot.clone();
-        moves(prevOut, inA, n === 1 ? 'climb' : MOVES[(n - 2) % MOVES.length]).forEach(function (p) { TP.push(p); });
+        moves(prevOut, inA, n === 1 ? 'climb' : STOPS[n - 1].k === 'stat' ? 'diveL' : MOVES[(n - 2) % MOVES.length]).forEach(function (p) { TP.push(p); });
         TP.push(inA, inB, s.J);
         if (n < STOPS.length - 1) { prevOut = s.J.clone().addScaledVector(d, 700); TP.push(prevOut); }
       });
@@ -825,18 +826,24 @@
           });
           return;
         }
+        if (s.k === 'stat') {   /* the results float together above the thread, which dives away beneath them: an arc round it, a stack on portrait screens */
+          var rh = s.it[0].el.offsetHeight || 240, c = s.J.clone().addScaledVector(up, (tall ? 1.5 * rh + 40 : rh / 2) + 120);
+          s.ry = Math.atan2(-t.x, -t.z); s.side = 0; s.P = c;
+          s.box = tall ? { w: s.it[0].w, h: 3 * rh + 80, fh: 0.56 } : { w: 2 * 480 + s.it[0].w, h: rh, fw: 0.72 };
+          s.it.forEach(function (it, k) {
+            var o = k - 1;
+            if (tall) place(it, c.clone().addScaledVector(up, -o * (rh + 40)), s.ry, -o * 0.22);
+            else place(it, c.clone().addScaledVector(r, o * 480).addScaledVector(t, -Math.abs(o) * 170), s.ry - o * 0.3, 0);
+          });
+          JOINTS.push({ n: n, p: s.J.clone().addScaledVector(up, 20) });
+          return;
+        }
+        /* anything else hangs off to one side, its near edge on the thread */
         var it = s.it[0];
         it.h = it.el.offsetHeight || it.w * 0.7;
-        var nrm = t.clone().negate(), face, p, jp;
-        if (s.k === 'stat') {   /* a result floats above the thread, which runs on underneath it */
-          face = nrm; p = s.J.clone().addScaledVector(up, it.h / 2 + 50); jp = s.J.clone().addScaledVector(up, 20);
-          s.side = 0;
-        } else {   /* anything else hangs off to one side, its near edge on the thread */
-          face = nrm.clone().multiplyScalar(Math.cos(0.28)).addScaledVector(r, -s.side * Math.sin(0.28)).normalize();
-          var X = new T.Vector3(face.z, 0, -face.x);   /* the piece's own right */
-          p = s.J.clone().addScaledVector(X, s.side * (it.w / 2 + 34));
-          jp = s.J.clone().addScaledVector(X, s.side * 14);
-        }
+        var face = t.clone().negate().multiplyScalar(Math.cos(0.28)).addScaledVector(r, -s.side * Math.sin(0.28)).normalize();
+        var X = new T.Vector3(face.z, 0, -face.x);   /* the piece's own right */
+        var p = s.J.clone().addScaledVector(X, s.side * (it.w / 2 + 34)), jp = s.J.clone().addScaledVector(X, s.side * 14);
         s.ry = Math.atan2(face.x, face.z);
         place(it, p, s.ry, 0);
         s.P = p;
@@ -899,11 +906,11 @@
       var W = 1, Hh = 1, portrait = null;
       function viewDist(it) {   /* far enough to frame the piece, never so close its type is enlarged much */
         var vt = Math.tan(cam.fov * Math.PI / 360), ht = vt * cam.aspect, fovPx = Hh / (2 * vt);
-        return Math.max(it.w / (2 * ht * (portrait ? 0.8 : 0.42)), (it.h || it.w * 0.7) / (2 * vt * (portrait ? 0.44 : 0.6)), fovPx * 0.9);
+        return Math.max(it.w / (2 * ht * (portrait ? 0.8 : it.fw || 0.42)), (it.h || it.w * 0.7) / (2 * vt * (portrait ? it.fh || 0.44 : 0.6)), fovPx * 0.9);
       }
       function route() {
         STOPS.forEach(function (s, n) {
-          var back = !n ? 0 : s.k === 'logos' ? (portrait ? 2000 : 1600) : viewDist(s.it[0]) * (s.k === 'stat' ? 1 : 0.92);
+          var back = !n ? 0 : s.k === 'logos' ? (portrait ? 2000 : 1600) : viewDist(s.box || s.it[0]) * (s.box ? 1 : 0.92);
           var at = !n ? 260 : s.arc - back;
           s.c0 = at - 130; s.c1 = at + 130;
           if (!n) { s.c0 = 0; s.c1 = 420; }
@@ -977,12 +984,12 @@
         else if (!vd.paused) vd.pause();
       }
       function enter(n) {   /* a stop comes into reach: its film plays, its figure counts */
-        var s = STOPS[n], el = s.it.length === 1 && s.it[0].el;
+        var s = STOPS[n];
         STOPS.forEach(function (x, k) { if (x.i != null) cardFilm(x.i, k === n); });
-        if (el) {
-          $$('[data-count-from]', el).forEach(function (c) { count(c, +c.getAttribute('data-count-from')); });
-          $$('[data-count]', el).forEach(function (c) { count(c); });
-        }
+        s.it.forEach(function (it) {
+          $$('[data-count-from]', it.el).forEach(function (c) { count(c, +c.getAttribute('data-count-from')); });
+          $$('[data-count]', it.el).forEach(function (c) { count(c); });
+        });
         var nx = STOPS[n + 1];
         if (nx && nx.i != null) { var nv = IT.cards[nx.i].el.querySelector('video'); if (nv && !nv.getAttribute('src')) nv.src = nv.getAttribute('data-src'); }
       }
@@ -1024,7 +1031,7 @@
         for (k = 0; k < act.length; k++) {
           if (!act[k] || !STOPS[k].P) continue;
           var sk = STOPS[k];
-          aimAt(sk.P, portrait ? 0.5 : (sk.side ? 0.62 : 0.6), portrait ? 0.36 : 0.44, aim);
+          aimAt(sk.P, portrait || !sk.side ? 0.5 : 0.62, !portrait ? 0.44 : sk.side ? 0.36 : 0.47, aim);
           tgt.lerp(aim, act[k] * (portrait ? 1 : 0.9));
         }
         /* lean into the bends */
