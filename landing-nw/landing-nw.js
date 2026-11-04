@@ -533,10 +533,10 @@
   }
 
   /* ---- the journey (after ysuriadesign.co). Between the hero and the integration section the page becomes one pinned
-     3D world: a teal thread of light climbs, dives, swings and corkscrews through space and the camera rides along it,
-     one piece of the page per screen of scroll - the client logos in a ring round the thread, each agent step, each
-     example, each result, the platform, each transparency row - each hung beside the thread where it runs level, joined
-     to it by a bright joint; the pieces ahead and behind stay faded until the camera reaches them. The piece in view
+     3D world: a teal thread of light sweeps up, down and sideways through space in long curves and the camera rides along
+     it, one stop per screen of scroll - the client logos in a ring round the thread, each agent step, each example, the
+     three results together, the platform, the three transparency cards together - each hung by the thread, joined to it
+     by a bright joint; the pieces ahead and behind stay faded until the camera reaches them. The piece in view
      sits mid-screen, its copy bottom left. It opens on the thread running straight into the screen and ends under
      the transparency cards; the activation models (three open cards side by side) and the closing call to action follow as
      normal sections. Every word and picture is the page's own, moved into place (not copied); the pieces are HTML set
