@@ -126,6 +126,11 @@
         }
       });
     })(el, '');
+    /* these two keep the muted lead-in on its own line once it is split into words too, see the matching rule in the style embed */
+    if (el.closest('.lnw-trans, .lnw-ch--trans, .lnw-int')) {
+      var lead = words.filter(function (w) { return w.classList.contains('lnw-dim'); }).pop();
+      el.insertBefore(document.createElement('br'), lead.nextSibling);
+    }
     var tol = Math.max(8, parseFloat(getComputedStyle(el).fontSize) * 0.45), lines = [], cur = [], top = null;
     words.forEach(function (w) {
       var t = w.offsetTop;
@@ -226,7 +231,7 @@
   }
 
   /* ---- labels and side copy trail the scroll; statements float a few px against it */
-  var lag = (reduce || JOURNEY) ? [] : $$('.lnw-lab, .lnw-side').map(function (el, i) {
+  var lag = reduce ? [] : $$(JOURNEY ? '.lnw-int .lnw-lab, .lnw-int .lnw-side, .lnw-cta .lnw-side' : '.lnw-lab, .lnw-side').map(function (el, i) {
     el.classList.add('lnw-lag');
     return { el: el, cur: 28 + (i % 3) * 6, tgt: 28 };
   });
@@ -240,7 +245,8 @@
       if (Math.abs(it.tgt - it.cur) > 0.12) moving = true; else it.cur = it.tgt;
       it.el.style.transform = 'translate3d(0,' + it.cur.toFixed(2) + 'px,0)';
     });
-    if (!reduce && !JOURNEY) stmts.forEach(function (el) {
+    if (!reduce) stmts.forEach(function (el) {
+      if (inJourney(el)) return;
       var r = el.getBoundingClientRect();
       if (r.bottom < -200 || r.top > vh + 200) return;
       el.style.transform = 'translate3d(0,' + ((((r.top + r.height / 2) - vh / 2) / vh) * 14).toFixed(2) + 'px,0)';
@@ -479,9 +485,9 @@
   var badge = root.querySelector('.lnw-badge'), ready = false, ending = 0;
   function badgeState() {
     if (!badge) return;
-    badge.classList.toggle('is-on', ready && !watching && !ending && !jEnd && !modalOpen());
+    badge.classList.toggle('is-on', ready && !watching && !ending && !modalOpen());
   }
-  var endEls = [JOURNEY ? null : root.querySelector('.lnw-cta')].concat(Array.prototype.slice.call(document.querySelectorAll('section.for-services, .foot2, footer')))
+  var endEls = [JOURNEY && root.querySelector('.lnw-int'), root.querySelector('.lnw-cta')].concat(Array.prototype.slice.call(document.querySelectorAll('section.for-services, .foot2, footer')))
     .filter(function (el, i, a) { return el && a.indexOf(el) === i; });
   if (IO) {
     var endIO = new IntersectionObserver(function (es) {
@@ -526,16 +532,17 @@
     });
   }
 
-  /* ---- the journey (after ysuriadesign.co). Between the hero and the footer the page becomes one pinned 3D world: a
-     teal thread of light climbs, dives, swings and corkscrews through space and the camera rides along it, one piece of
-     the page per screen of scroll - the client logos in a ring round the thread, each agent step, each example, each
-     result, the platform, each transparency row, each activation model - each hung beside the thread where it runs
-     level, joined to it by a bright joint; the pieces ahead and behind stay faded until the camera reaches them. The
-     piece in view sits mid-screen, its copy bottom left. It opens on the thread rising away from under the camera and
-     ends in a point of light. Every word and picture is the page's own, moved into place (not copied); the pieces are
-     HTML set in 3D over a three.js canvas (r128, the copy the homepage loads). Off for reduced motion and without
-     WebGL, where the page keeps its normal sections. */
-  var jEnd = false, journeyOn = function () {};
+  /* ---- the journey (after ysuriadesign.co). Between the hero and the integration section the page becomes one pinned
+     3D world: a teal thread of light climbs, dives, swings and corkscrews through space and the camera rides along it,
+     one piece of the page per screen of scroll - the client logos in a ring round the thread, each agent step, each
+     example, each result, the platform, each transparency row - each hung beside the thread where it runs level, joined
+     to it by a bright joint; the pieces ahead and behind stay faded until the camera reaches them. The piece in view
+     sits mid-screen, its copy bottom left. It opens on the thread rising away from under the camera and ends plugged
+     into the last row; the activation models (three open cards side by side) and the closing call to action follow as
+     normal sections. Every word and picture is the page's own, moved into place (not copied); the pieces are HTML set
+     in 3D over a three.js canvas (r128, the copy the homepage loads). Off for reduced motion and without WebGL, where
+     the page keeps its normal sections. */
+  var journeyOn = function () {};
   (function journey() {
     if (!JOURNEY) return;
     var jReady = false, failed = false, wake = function () {};
@@ -578,8 +585,7 @@
     CH.res = chapter([q('.lnw-res .lnw-lab'), q('.lnw-res .lnw-stmt')]);
     CH.plat = chapter([q('.lnw-plat .lnw-head'), q('.lnw-plat .lnw-side')]);
     CH.trans = chapter([q('.lnw-trans .lnw-head'), q('.lnw-trans .lnw-side')]);
-    CH['int'] = chapter([q('.lnw-int .lnw-head'), q('.lnw-int .lnw-side')]);
-    CH.cta = chapter([q('.lnw-cta .lnw-head'), q('.lnw-cta .lnw-side')]);
+    CH.trans.classList.add('lnw-ch--trans');
     var IT = {
       logos: $$('.lnw-logos__list:first-child img').map(function (img) { return item(img, tall ? 150 : 170, 'is-logo'); }),
       steps: $$('.lnw-agent .lnw-step').map(function (s) { return item(s, tall ? 300 : 360, 'is-card is-step'); }),
@@ -587,14 +593,15 @@
       cards: cards.map(function (c) { return item(c, tall ? 260 : 300, 'is-film'); }),
       stats: $$('.lnw-res .lnw-stat').map(function (s) { var it = item(s, tall ? 340 : 460, 'is-stat'); if (it) it.solo = true; return it; }),
       plat: item(q('.lnw-plat__img'), tall ? 760 : 1000, 'is-plat'),
-      rows: $$('.lnw-trans .lnw-row').map(function (r) { return item(r, tall ? 310 : 500, 'is-card is-row'); }),
-      caps: $$('.lnw-int .lnw-cap').map(function (c) { return item(c, tall ? 310 : 480, 'is-card is-cap'); })
+      rows: $$('.lnw-trans .lnw-row').map(function (r) { return item(r, tall ? 310 : 500, 'is-card is-row'); })
     };
     $$('img', stage).forEach(function (img) { img.loading = 'eager'; });
     $$('[data-reveal]', stage).forEach(function (el) { el.classList.add('is-in'); });
-    $$('.lnw-cap', stage).forEach(function (c) {
-      c.classList.add('is-open');
-      var b = c.querySelector('.lnw-cap__s'); b.setAttribute('aria-expanded', 'true'); b.setAttribute('tabindex', '-1');
+    /* after the journey the activation models are plain open cards: nothing to toggle, so no buttons */
+    $$('.lnw-cap').forEach(function (c, i) {
+      var b = c.querySelector('.lnw-cap__s'), h = document.createElement('span');
+      h.className = b.className; h.innerHTML = b.innerHTML; b.parentNode.replaceChild(h, b);
+      c.classList.add('is-open'); c.setAttribute('data-reveal', ''); c.style.setProperty('--d', i);
     });
     root.classList.add('is-journey');
 
@@ -611,10 +618,8 @@
     IT.stats.forEach(function (it) { stop('stat', 4, CH.res, [it]); });
     if (IT.plat) stop('plat', 5, CH.plat, [IT.plat]);
     IT.rows.forEach(function (it) { stop('row', 6, CH.trans, [it]); });
-    IT.caps.forEach(function (it) { stop('cap', 7, CH['int'], [it]); });
-    stop('cta', 8, CH.cta);
-    STOPS[0].hold = 0.6; STOPS[STOPS.length - 1].hold = 1; STOPS[STOPS.length - 1].travel = 0;
-    var TOTAL = 0, GROUPS = 8;
+    STOPS[0].hold = 0.6; STOPS[STOPS.length - 1].hold = 0.6; STOPS[STOPS.length - 1].travel = 0;
+    var TOTAL = 0, GROUPS = STOPS[STOPS.length - 1].g;
     STOPS.forEach(function (s) { s.h0 = TOTAL; TOTAL += s.hold; s.h1 = TOTAL; TOTAL += s.travel; });
     track.style.height = ((TOTAL + 1) * 100) + 'vh';
 
@@ -735,7 +740,7 @@
       /* ---- the thread: a long line through space that climbs, dives, swings wide and corkscrews between the pieces - a
          different move each time - and runs level for a short stretch at each piece so it can be read. It opens just
          under the camera and rises away; a piece hangs beside it on every level stretch (the results float above it, the
-         logo ring stands round it) and it ends in a point of light */
+         logo ring stands round it) and it ends at the last piece, in a point of light */
       var TURN = [0, 0, 38, -44, 36, -40, 46, -36, 42, -44, 34, -42, 40, -36, 44, -38, 36, -46, 40, -34, 38, -36];
       var LIFT = [0, 0, 700, -900, 600, -800, 900, -600, 700, -900, 500, -800, 800, -600, 900, -700, 600, -900, 700, -500, 600, -400];
       var MOVES = ['climb', 'swingL', 'dive', 'cork', 'swingR', 'dip', 'climbR', 'diveL'];
@@ -768,7 +773,6 @@
         TP.push(inA, inB, s.J);
         if (n < STOPS.length - 1) { prevOut = s.J.clone().addScaledVector(d, 700); TP.push(prevOut); }
       });
-      var sEnd = STOPS[STOPS.length - 1];
       var curve = new T.CatmullRomCurve3(TP, false, 'centripetal');
       curve.arcLengthDivisions = TP.length * 60;
       var LEN = curve.getLength(), NS = Math.round(LEN / 24), sp = curve.getSpacedPoints(NS), tp = [], ta = [], i;
@@ -821,7 +825,6 @@
           });
           return;
         }
-        if (s.k === 'cta') { s.side = 0; return; }
         var it = s.it[0];
         it.h = it.el.offsetHeight || it.w * 0.7;
         var nrm = t.clone().negate(), face, p, jp;
@@ -844,14 +847,13 @@
         var sw = works[Math.floor(works.length / 2)];
         place(IT.names, sw.J.clone().addScaledVector(sw.t, 6200).addScaledVector(up, 900), Math.atan2(-sw.t.x, -sw.t.z), 0);
       }
-      /* joints where each piece meets the thread, and the light it ends in */
+      /* joints where each piece meets the thread, and the light where it ends, on the last row */
       var fp = [], fr = [], kc = sp[NS];
       JOINTS.forEach(function (jn) { fp.push(jn.p.x, jn.p.y, jn.p.z, jn.p.x, jn.p.y, jn.p.z); fr.push(46, 0.5, 0.3, 0, 160, 0.5, 0.1, 0); });
-      fp.push(kc.x, kc.y, kc.z, kc.x, kc.y, kc.z); fr.push(110, 0.5, 1, 0, 620, 0.5, 0.45, 0);
+      fp.push(kc.x, kc.y, kc.z, kc.x, kc.y, kc.z); fr.push(90, 0.5, 1, 0, 340, 0.5, 0.3, 0);
       var fg = new T.BufferGeometry(), fAttr = new T.BufferAttribute(new Float32Array(fr), 4);
       fg.setAttribute('position', new T.BufferAttribute(new Float32Array(fp), 3)); fg.setAttribute('aRnd', fAttr);
       add(new T.Points(fg, flareMat));
-      sEnd.P = sEnd.J.clone();   /* the point of light the thread ends in */
 
       /* ---- dust and shards along the route, kept off the thread (the camera rides it) and clear of the pieces */
       var pieces = items.filter(function (it) { return it.pos && it !== IT.names; }).map(function (it) { return it.pos; }), v = new T.Vector3(), dir = new T.Vector3();
@@ -901,7 +903,7 @@
       }
       function route() {
         STOPS.forEach(function (s, n) {
-          var back = !n ? 0 : s.k === 'logos' ? (portrait ? 2000 : 1600) : s.k === 'cta' ? (portrait ? 1700 : 1300) : viewDist(s.it[0]) * (s.k === 'stat' ? 1 : 0.92);
+          var back = !n ? 0 : s.k === 'logos' ? (portrait ? 2000 : 1600) : viewDist(s.it[0]) * (s.k === 'stat' ? 1 : 0.92);
           var at = !n ? 260 : s.arc - back;
           s.c0 = at - 130; s.c1 = at + 130;
           if (!n) { s.c0 = 0; s.c1 = 420; }
@@ -1069,8 +1071,6 @@
         var g = STOPS[w.n].g;
         if (g !== curG) { curG = g; hudN.textContent = '0' + g + ' / 0' + GROUPS; }
         hudBar.style.height = (prog / TOTAL * 100).toFixed(2) + '%';
-        var end = jReady && g === GROUPS;
-        if (end !== jEnd) { jEnd = end; badgeState(); }
         /* pulses run on ahead of the camera along the thread and light the shards they pass */
         for (k = 0; k < 4; k++) {
           var pa = w.s + 200 + ((time * 1100 + k * 1650) % 6600);
