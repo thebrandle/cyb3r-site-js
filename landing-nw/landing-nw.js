@@ -231,7 +231,7 @@
   }
 
   /* ---- labels and side copy trail the scroll; statements float a few px against it */
-  var lag = reduce ? [] : $$(JOURNEY ? '.lnw-int .lnw-lab, .lnw-int .lnw-side, .lnw-cta .lnw-side' : '.lnw-lab, .lnw-side').map(function (el, i) {
+  var lag = reduce || JOURNEY ? [] : $$('.lnw-lab, .lnw-side').filter(function (el) { return !el.closest('.lnw-int, .lnw-cta'); }).map(function (el, i) {
     el.classList.add('lnw-lag');
     return { el: el, cur: 28 + (i % 3) * 6, tgt: 28 };
   });
@@ -537,8 +537,8 @@
      one piece of the page per screen of scroll - the client logos in a ring round the thread, each agent step, each
      example, each result, the platform, each transparency row - each hung beside the thread where it runs level, joined
      to it by a bright joint; the pieces ahead and behind stay faded until the camera reaches them. The piece in view
-     sits mid-screen, its copy bottom left. It opens on the thread rising away from under the camera and ends plugged
-     into the last row; the activation models (three open cards side by side) and the closing call to action follow as
+     sits mid-screen, its copy bottom left. It opens on the thread rising away from under the camera and ends under
+     the transparency cards; the activation models (three open cards side by side) and the closing call to action follow as
      normal sections. Every word and picture is the page's own, moved into place (not copied); the pieces are HTML set
      in 3D over a three.js canvas (r128, the copy the homepage loads). Off for reduced motion and without WebGL, where
      the page keeps its normal sections. */
@@ -593,7 +593,7 @@
       cards: cards.map(function (c) { return item(c, tall ? 260 : 300, 'is-film'); }),
       stats: $$('.lnw-res .lnw-stat').map(function (s) { var it = item(s, tall ? 340 : 460, 'is-stat'); if (it) it.solo = true; return it; }),
       plat: item(q('.lnw-plat__img'), tall ? 760 : 1000, 'is-plat'),
-      rows: $$('.lnw-trans .lnw-row').map(function (r) { return item(r, tall ? 310 : 500, 'is-card is-row'); })
+      rows: $$('.lnw-trans .lnw-row').map(function (r) { return item(r, tall ? 640 : 440, 'is-card is-row'); })
     };
     $$('img', stage).forEach(function (img) { img.loading = 'eager'; });
     $$('[data-reveal]', stage).forEach(function (el) { el.classList.add('is-in'); });
@@ -605,7 +605,7 @@
     });
     root.classList.add('is-journey');
 
-    /* ---- the stops: one piece per screen of scroll (hold + travel = 1 screen) */
+    /* ---- the stops: one per screen of scroll (hold + travel = 1 screen) */
     var STOPS = [];
     function stop(k, g, ch, its) {
       STOPS.push({ k: k, g: g, ch: ch, it: (its || []).filter(Boolean), hold: 0.42, travel: 0.58 });
@@ -617,7 +617,7 @@
     IT.cards.forEach(function (it, i) { stop('work', 3, CH.cards[i], [it]); STOPS[STOPS.length - 1].i = i; });
     if (IT.stats.length) stop('stat', 4, CH.res, IT.stats);
     if (IT.plat) stop('plat', 5, CH.plat, [IT.plat]);
-    IT.rows.forEach(function (it) { stop('row', 6, CH.trans, [it]); });
+    if (IT.rows.length) stop('row', 6, CH.trans, IT.rows);
     STOPS[0].hold = 0.6; STOPS[STOPS.length - 1].hold = 0.6; STOPS[STOPS.length - 1].travel = 0;
     var TOTAL = 0, GROUPS = STOPS[STOPS.length - 1].g;
     STOPS.forEach(function (s) { s.h0 = TOTAL; TOTAL += s.hold; s.h1 = TOTAL; TOTAL += s.travel; });
@@ -740,10 +740,16 @@
       /* ---- the thread: a long line through space that climbs, dives, swings wide and corkscrews between the pieces - a
          different move each time - and runs level for a short stretch at each piece so it can be read. It opens just
          under the camera and rises away; a piece hangs beside it on every level stretch (the results float above it, the
-         logo ring stands round it) and it ends at the last piece, in a point of light */
-      var TURN = [0, 0, 38, -44, 36, -40, 46, -36, 42, -44, 34, -42, 40, -36, 44, -38];
-      var LIFT = [0, 0, 700, -900, 600, -800, 900, -600, 700, -900, 500, -800, -800, 800, -700, 700];
+         logo ring stands round it) and it ends under the last cards, in a point of light */
+      var TURN = [0, 0, 38, -44, 36, -40, 46, -36, 42, -44, 34, -42, 40, -36];
+      var LIFT = [0, 0, 700, -900, 600, -800, 900, -600, 700, -900, 500, -800, -800, 800];
       var MOVES = ['climb', 'swingL', 'dive', 'cork', 'swingR', 'dip', 'climbR', 'diveL'];
+      /* pieces that share one point: centre to centre (stacked gapY), the outer two pulled toward the camera and turned in
+         (stacked, tilted), their share of the screen, their height on it and how far above the thread they float */
+      var GROUP = {
+        stat: { gap: 480, gapY: 40, pull: 170, turn: 0.3, tilt: 0.22, fw: 0.72, fh: 0.56, sy: tall ? 0.47 : 0.44, rise: 120 },
+        row: { gap: 470, gapY: 24, pull: 110, turn: 0.2, tilt: 0.1, fw: 0.69, fh: 0.54, sy: tall ? 0.42 : 0.36, rise: 40 }
+      };
       var yawAcc = 0, spot = new T.Vector3(0, 900, -4200), TP = [new T.Vector3(0, 0, 900), new T.Vector3(0, 0, 0), new T.Vector3(0, 80, -1000)];
       function hdir(y) { return new T.Vector3(Math.sin(y), 0, -Math.cos(y)); }
       function moves(a, b, kind) {   /* the flight from one piece to the next */
@@ -765,12 +771,12 @@
         if (!n) return;
         if (n > 1) {
           yawAcc += TURN[n % TURN.length] * Math.PI / 180;
-          spot = spot.clone().addScaledVector(hdir(yawAcc), STOPS[n - 1].k === 'plat' || s.k === 'plat' || s.k === 'stat' ? 5200 : 4600).addScaledVector(up, LIFT[n % LIFT.length]);
+          spot = spot.clone().addScaledVector(hdir(yawAcc), STOPS[n - 1].k === 'plat' || s.k === 'plat' || GROUP[s.k] ? 5200 : 4600).addScaledVector(up, LIFT[n % LIFT.length]);
         }
-        /* the results are met head on, so the level run in starts further back */
-        var d = hdir(yawAcc), inA = spot.clone().addScaledVector(d, s.k === 'stat' ? -2200 : -1300), inB = spot.clone().addScaledVector(d, -600);
+        /* a group is met head on, so the level run in starts further back */
+        var d = hdir(yawAcc), inA = spot.clone().addScaledVector(d, GROUP[s.k] ? -2200 : -1300), inB = spot.clone().addScaledVector(d, -600);
         s.J = spot.clone();
-        moves(prevOut, inA, n === 1 ? 'climb' : STOPS[n - 1].k === 'stat' ? 'diveL' : MOVES[(n - 2) % MOVES.length]).forEach(function (p) { TP.push(p); });
+        moves(prevOut, inA, n === 1 ? 'climb' : STOPS[n - 1].k === 'stat' ? 'diveL' : s.k === 'row' ? 'climbR' : MOVES[(n - 2) % MOVES.length]).forEach(function (p) { TP.push(p); });
         TP.push(inA, inB, s.J);
         if (n < STOPS.length - 1) { prevOut = s.J.clone().addScaledVector(d, 700); TP.push(prevOut); }
       });
@@ -826,14 +832,16 @@
           });
           return;
         }
-        if (s.k === 'stat') {   /* the results float together above the thread, which dives away beneath them: an arc round it, a stack on portrait screens */
-          var rh = s.it[0].el.offsetHeight || 240, c = s.J.clone().addScaledVector(up, (tall ? 1.5 * rh + 40 : rh / 2) + 120);
-          s.ry = Math.atan2(-t.x, -t.z); s.side = 0; s.P = c;
-          s.box = tall ? { w: s.it[0].w, h: 3 * rh + 80, fh: 0.56 } : { w: 2 * 480 + s.it[0].w, h: rh, fw: 0.72 };
+        var G = GROUP[s.k];
+        if (G) {   /* a group floats above the thread, which runs away beneath it: an arc round it, a stack on portrait screens */
+          var rh = Math.max.apply(null, s.it.map(function (it) { return it.el.offsetHeight; })) || 240, c = s.J.clone().addScaledVector(up, (tall ? 1.5 * rh + G.gapY : rh / 2) + G.rise);
+          s.ry = Math.atan2(-t.x, -t.z); s.side = 0; s.P = c; s.sy = G.sy;
+          s.box = tall ? { w: s.it[0].w, h: 3 * rh + 2 * G.gapY, fh: G.fh } : { w: 2 * G.gap + s.it[0].w, h: rh, fw: G.fw };
           s.it.forEach(function (it, k) {
             var o = k - 1;
-            if (tall) place(it, c.clone().addScaledVector(up, -o * (rh + 40)), s.ry, -o * 0.22);
-            else place(it, c.clone().addScaledVector(r, o * 480).addScaledVector(t, -Math.abs(o) * 170), s.ry - o * 0.3, 0);
+            it.el.firstChild.style.minHeight = rh + 'px';
+            if (tall) place(it, c.clone().addScaledVector(up, -o * (rh + G.gapY)), s.ry, -o * G.tilt);
+            else place(it, c.clone().addScaledVector(r, o * G.gap).addScaledVector(t, -Math.abs(o) * G.pull), s.ry - o * G.turn, 0);
           });
           JOINTS.push({ n: n, p: s.J.clone().addScaledVector(up, 20) });
           return;
@@ -854,7 +862,7 @@
         var sw = works[Math.floor(works.length / 2)];
         place(IT.names, sw.J.clone().addScaledVector(sw.t, 6200).addScaledVector(up, 900), Math.atan2(-sw.t.x, -sw.t.z), 0);
       }
-      /* joints where each piece meets the thread, and the light where it ends, on the last row */
+      /* joints where each piece meets the thread, and the light where it ends, under the last cards */
       var fp = [], fr = [], kc = sp[NS];
       JOINTS.forEach(function (jn) { fp.push(jn.p.x, jn.p.y, jn.p.z, jn.p.x, jn.p.y, jn.p.z); fr.push(46, 0.5, 0.3, 0, 160, 0.5, 0.1, 0); });
       fp.push(kc.x, kc.y, kc.z, kc.x, kc.y, kc.z); fr.push(90, 0.5, 1, 0, 340, 0.5, 0.3, 0);
@@ -985,6 +993,7 @@
       }
       function enter(n) {   /* a stop comes into reach: its film plays, its figure counts */
         var s = STOPS[n];
+        root.classList.toggle('is-end', n === STOPS.length - 1);
         STOPS.forEach(function (x, k) { if (x.i != null) cardFilm(x.i, k === n); });
         s.it.forEach(function (it) {
           $$('[data-count-from]', it.el).forEach(function (c) { count(c, +c.getAttribute('data-count-from')); });
@@ -1031,7 +1040,7 @@
         for (k = 0; k < act.length; k++) {
           if (!act[k] || !STOPS[k].P) continue;
           var sk = STOPS[k];
-          aimAt(sk.P, portrait || !sk.side ? 0.5 : 0.62, !portrait ? 0.44 : sk.side ? 0.36 : 0.47, aim);
+          aimAt(sk.P, portrait || !sk.side ? 0.5 : 0.62, sk.sy || (portrait ? 0.36 : 0.44), aim);
           tgt.lerp(aim, act[k] * (portrait ? 1 : 0.9));
         }
         /* lean into the bends */

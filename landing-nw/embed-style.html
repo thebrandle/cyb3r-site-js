@@ -102,7 +102,8 @@
 .lnw .lnw-3d__it.is-card>*{background:rgba(19,28,37,.84);border:1px solid rgba(245,246,247,.16)}
 .lnw .lnw-3d__it .lnw-step{min-height:250px;padding:30px;gap:14px}
 .lnw .lnw-3d__it .lnw-row{display:block;padding:30px}
-.lnw .lnw-3d__it .lnw-row__d{margin-top:10px;max-width:none}
+.lnw .lnw-3d__it .lnw-row__t{font-size:24px}
+.lnw .lnw-3d__it .lnw-row__d{margin-top:10px;max-width:none;font-size:19px;line-height:1.5;text-wrap:pretty}
 .lnw-3d__it.is-stat .lnw-stat{border:0;padding:0;text-align:center}
 .lnw-3d__it.is-stat .lnw-stat__n{font-size:190px;text-shadow:0 0 40px rgba(57,241,224,.25)}
 .lnw-3d__it.is-stat .lnw-stat__l{font-size:26px;text-wrap:balance}
@@ -144,9 +145,13 @@
   .lnw-ch .lnw-lead{font-size:15px}
   .lnw-int .lnw-stmt{font-size:7.4vw}
   .lnw-3d__it.is-stat .lnw-stat__l{font-size:32px}
+  .lnw .lnw-3d__it .lnw-row__t{font-size:32px}
+  .lnw .lnw-3d__it .lnw-row__d{font-size:27px;line-height:1.45}
   .lnw-hud__bar{display:none}
   .lnw-hud__n{top:76px}
   .lnw.is-journey .lnw-badge{top:84px;bottom:auto;right:14px;width:74px;height:74px}
+  /* the three last cards need that corner */
+  .lnw.is-end .lnw-badge{opacity:0;pointer-events:none}
 }
 
 /* logo marquee */
@@ -255,8 +260,15 @@
 .lnw-pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
 .lnw-pills li{font:400 11px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);padding:9px 12px;border:1px solid var(--line)}
 
-/* closing call to action */
-.lnw-cta{padding-bottom:clamp(110px,12vw,200px)}
+/* after the journey: the integration copy sits under its title, the closing section is centred */
+.lnw-int .lnw-head,.lnw-int .lnw-side,.lnw-cta .lnw-head,.lnw-cta .lnw-side{grid-column:1/-1}
+.lnw-int .lnw-side,.lnw-cta .lnw-side{margin-top:clamp(14px,1.5vw,22px)}
+.lnw-sec.lnw-int{padding-block:clamp(64px,6.4vw,104px) clamp(36px,3.6vw,56px)}
+.lnw-int .lnw-acc{margin-top:clamp(32px,3.4vw,50px)}
+.lnw-sec.lnw-cta{padding-block:clamp(36px,3.6vw,56px) clamp(72px,7vw,112px);text-align:center}
+.lnw-cta .lnw-stmt,.lnw-cta .lnw-side,.lnw-cta .lnw-lead{margin-inline:auto}
+.lnw-cta .lnw-lead{text-wrap:balance}
+.lnw-cta .lnw-acts{justify-content:center;margin-top:clamp(22px,2.2vw,32px)}
 
 /* floating Discovery Call badge (teal disc, black type: never white on teal) */
 .lnw-badge{position:fixed;left:50%;bottom:clamp(24px,3vw,44px);z-index:900;width:clamp(104px,8.5vw,132px);height:clamp(104px,8.5vw,132px);
