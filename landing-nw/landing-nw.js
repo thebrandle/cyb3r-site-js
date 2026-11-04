@@ -487,7 +487,8 @@
     if (!badge) return;
     badge.classList.toggle('is-on', ready && !watching && !ending && !modalOpen());
   }
-  var endEls = [JOURNEY && root.querySelector('.lnw-int'), root.querySelector('.lnw-cta')].concat(Array.prototype.slice.call(document.querySelectorAll('section.for-services, .foot2, footer')))
+  /* it also rests over the opening copy on portrait screens, where it would sit on the headline */
+  var endEls = [JOURNEY && window.innerWidth < window.innerHeight && root.querySelector('.lnw-pos'), JOURNEY && root.querySelector('.lnw-int'), root.querySelector('.lnw-cta')].concat(Array.prototype.slice.call(document.querySelectorAll('section.for-services, .foot2, footer')))
     .filter(function (el, i, a) { return el && a.indexOf(el) === i; });
   if (IO) {
     var endIO = new IntersectionObserver(function (es) {
