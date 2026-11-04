@@ -748,8 +748,8 @@
          (stacked, tilted), their share of the screen, their height on it, how far above the thread they float and the
          slope the thread takes under them (the results keep it below their labels) */
       var GROUP = {
-        stat: { gap: 480, gapY: 40, pull: 170, turn: 0.3, tilt: 0.22, fw: 0.72, fh: 0.56, sy: tall ? 0.47 : 0.44, rise: 250, dip: -0.1 },
-        row: { gap: 470, gapY: 24, pull: 110, turn: 0.2, tilt: 0.1, fw: 0.69, fh: 0.54, sy: tall ? 0.42 : 0.36, rise: 40, dip: 0 }
+        stat: { gap: 480, gapY: 40, pull: 170, turn: 0.3, tilt: 0.22, fw: 0.72, fh: 0.56, sy: tall ? 0.45 : 0.44, rise: 250, dip: -0.1 },
+        row: { gap: 470, gapY: 24, pull: 110, turn: 0.2, tilt: 0.1, fw: 0.69, fh: 0.5, sy: tall ? 0.385 : 0.36, rise: 40, dip: 0 }
       };
       var LEN = 5200;   /* the stops sit along it at set distances */
       STOPS.forEach(function (s, n) {
