@@ -11,6 +11,14 @@
   var root = document.querySelector(".bp");
   if (!root || root.dataset.bpReady) return;
   root.dataset.bpReady = "1";
+  // the global service pages point to their Dubai pages, just above View all
+  var local = { "/web-design-development": [["/web-design-dubai", "Web design in Dubai"]], "/brand-identity": [["/branding-agency-dubai", "Branding in Dubai"]],
+    "/social-media-content": [["/social-media-agency-dubai", "Social media in Dubai"]],
+    "/seo-google-ads": [["/seo-agency-dubai", "SEO in Dubai"], ["/google-ads-agency-dubai", "Google Ads in Dubai"]] }[location.pathname.replace(/\/$/, "")];
+  var more = document.querySelector(".bp-more");
+  if (local && more) more.insertAdjacentHTML("afterbegin", '<p style="margin:0 0 24px;opacity:1;font:400 16px/1.5 Inter,sans-serif">' + local.map(function (l) {
+    return '<a href="' + l[0] + '" style="color:#fff;text-decoration:underline;text-underline-offset:4px;margin-right:24px">' + l[1] + "</a>";
+  }).join("") + "</p>");
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;   // CSS hides the 3, rows stay still
   var mark = root.querySelector(".bp-mark");
   var rows = [].slice.call(root.querySelectorAll(".bp-row")).map(function (el) {
