@@ -118,3 +118,6 @@
 /* the 3, as a mask here so the embeds stay small */
 .bp-mark{background:currentColor;-webkit-mask:url(three.svg) center/contain no-repeat;mask:url(three.svg) center/contain no-repeat}
 @media (max-width:767px){.dx-s{grid-template-columns:1fr}.dx{padding-left:20px;padding-right:20px}}
+/* no stranded last word in FAQ questions; longest 20-char bold label fits a phone */
+.dx summary{text-wrap:balance}
+@media (max-width:767px){.bp-wrap{font-size:4.1vw}}
