@@ -1,9 +1,9 @@
 /* ============================================================================
    CYB3R Media - homepage logo band (the learnwithzero.com "5,000+ companies" wave)
    The client logos ride three curved rows on the brand teal: each row bows up at the
-   edges, logos shrink and tilt as they round the curve, the rows drift (alternating
-   directions), sweep in from the sides when the band arrives, take a shove when you
-   scroll and slow to a third under the pointer. Motion maths ported from learnwithzero.
+   edges, logos tilt along the curve at the size they had in the old ticker (height H for
+   the padded file), the rows drift (alternating directions), sweep in from the sides when
+   the band arrives, take a shove when you scroll and slow to a third under the pointer.
    Logos come from the homepage CMS ticker (section.ticker-reveal, Ticker Logos
    collection), which the band's embed hides and keeps only as the data source, so a
    logo added in the CMS shows up here too. BOX = each logo's content box inside its
@@ -45,7 +45,7 @@
     "6ab0bef2f64ef41e6288b113": [0.0000, 0.1972, 1.0000, 0.8043, 1.979, 1.09],
     "6ab0bef2f64ef41e6288b109": [0.0615, 0.1178, 0.9757, 0.8232, 1.557, 0.98],
     "6ab0bef2f64ef41e6288b125": [0.1270, 0.0474, 0.8699, 0.9480, 0.991, 0.88],
-    "6ab0bef1f64ef41e6288b0ec": [0.0835, 0.1261, 0.9372, 0.7869, 1.552, 1.45],
+    "6aed7a58428d97344eeddc69": [0.0195, 0.3343, 0.9811, 0.6664, 3.478, 1],
     "6ab0bef2f64ef41e6288b10c": [0.0187, 0.2244, 0.9813, 0.7688, 2.124, 0.80],
     "6ab0bef0f64ef41e6288b0e2": [0.1326, 0.0437, 0.8944, 0.9571, 1.002, 0.91],
     "6ab0bef0f64ef41e6288b0e5": [0.0413, 0.2184, 0.9587, 0.7604, 2.033, 1.38],
@@ -56,7 +56,7 @@
     "6ab0bef1f64ef41e6288b0ff": [0.0199, 0.2827, 0.9725, 0.6893, 2.814, 1.45],
     "6ab0bef2f64ef41e6288b110": [0.0363, 0.3099, 0.9876, 0.6946, 2.970, 0.98]
   };
-  var HALF = 62 * Math.PI / 180, MIN_SCALE = .4, SLOW = 1 / 3, BEND = .85, F = 2;   // logos are drawn at 2x and scaled down
+  var HALF = 62 * Math.PI / 180, SLOW = 1 / 3, BEND = .85, F = 2, FILE = 1588 / 1322;   // logos are drawn at 2x and scaled down; FILE = the padded logo canvas
 
   /* the logos, in collection order, de-duplicated */
   var seen = {}, logos = [];
@@ -87,14 +87,14 @@
   var rows = [[], [], []], L = null, lastS = 0, off = null, prog = [0, 0, 0], dirty = true;
   var speed = 1, speedTo = 1, kick = 0, raf = 0, last = 0, near = false, inView = false, t0 = -1, lastY = window.scrollY || 0, bandY = 70;
 
-  /* every logo gets the same visual area (wide wordmarks come out shorter), capped in width */
+  /* every logo at the old ticker's size: the padded file shown H tall, cropped to its content box */
   function build(s) {
     rowsEl.textContent = "";
     rows = [[], [], []];
-    var area = s * s * 3, wmax = s * 4.8, n = 0;
+    var n = 0;
     logos.forEach(function (o) {
       if (!o.box) { if (!o.asked) { o.asked = 1; measure(o); } return; }
-      var b = o.box, a = b[4], h = Math.sqrt(area * (b[5] || 1) / Math.max(a, 1)), w = Math.min(wmax, h * a); h = w / a;
+      var b = o.box, w = (b[2] - b[0]) * s * FILE, h = w / b[4];
       var el = document.createElement("span"), iw = w * F / (b[2] - b[0]), ih = h * F / (b[3] - b[1]);
       el.className = "lb-logo";
       el.style.width = (w * F).toFixed(1) + "px"; el.style.height = (h * F).toFixed(1) + "px";
@@ -108,25 +108,25 @@
   function layout() {
     var W = root.offsetWidth, vh = window.innerHeight || 800;
     if (!W || !near) return;
-    var mob = W < 700, s = mob ? clamp(W * .072, 26, 34) : clamp(Math.min(W, 1440) * .017, 18, 46);
+    var mob = W < 700, s = mob ? 54 : 96;   // the ticker's logo height (.logo-ticker-img) at these widths
     if (Math.abs(s - lastS) >= .5) { build(s); lastS = s; }
     var R = W / 2 / Math.sin(HALF), lift = Math.min(vh * .105, W * .085, W * W / (4.6 * vh)), Rf = (W * W / 4 + lift * lift) / (2 * lift);
-    /* top down: padding, the two-line heading, a clear gap above the top row where it passes the heading's ends, the rows, padding */
+    /* top down: padding, the one-line title, a clear gap above the top row where it passes the heading's ends, the rows, padding */
     var rr = root.getBoundingClientRect(), half = 0, tall = function (r) { return r.reduce(function (m, o) { return Math.max(m, o.h); }, s) / 2; };
     [].forEach.call(head.querySelectorAll(".lb-l"), function (ln) {
       var g = document.createRange(); g.selectNodeContents(ln);
       var q = g.getBoundingClientRect(); if (q.width) half = Math.max(half, Math.abs(q.left - rr.left - W / 2), Math.abs(q.right - rr.left - W / 2));
     });
-    var hx = Math.min(half + 12, Rf * .9), rise = (Rf - Math.sqrt(Rf * Rf - hx * hx)) * BEND, gap = mob ? 36 : clamp(W * .036, 40, 64);
-    var yt = head.offsetTop + head.offsetHeight + gap + rise + tall(rows[0]), ym = yt + s * 2.85, yb = ym + s * 2.85, wmax = 0;
+    var hx = Math.min(half + 12, Rf * .9), rise = (Rf - Math.sqrt(Rf * Rf - hx * hx)) * BEND, gap = mob ? 20 : 28;
+    var pitch = s * 1.12, yt = head.offsetTop + head.offsetHeight + gap + rise + tall(rows[0]), ym = yt + pitch, yb = ym + pitch, wmax = 0;
     root.style.minHeight = "0px";   // the CSS min-height only holds the space until this exact height lands
     root.style.height = Math.ceil(yb + tall(rows[2]) + (parseFloat(getComputedStyle(root).paddingBottom) || 0)) + "px";
     var sums = rows.map(function (r) { return r.reduce(function (a, o) { if (o.w > wmax) wmax = o.w; return a + o.w; }, 0); });
-    var span = 2 * R * Math.asin(Math.min(1, (W / 2 + wmax * .3) / R)), gap = s * 3.4;
+    var span = W + wmax, gap = mob ? 40 : 80;   // the ticker's gap
     rows.forEach(function (r, i) { if (r.length) gap = Math.max(gap, (span + wmax + 8 - sums[i]) / r.length); });
     var loop = rows.map(function (r, i) { var a = gap / 2; r.forEach(function (o) { o.x = a + o.w / 2; a += o.w + gap; }); return Math.max(1, sums[i] + r.length * gap); });
     if (!off) off = [0, loop[1] / Math.max(1, rows[1].length) / 2, loop[2] / Math.max(1, rows[2].length) / 4];
-    L = { W: W, s: s, R: R, bow: s * 2.1, Rf: Rf, cap: Rf * .9, y: [yt, ym, yb], loop: loop, v: [-W * .022, W * .019, -W * .016], top: yt - s * 1.6, mob: mob };
+    L = { W: W, s: s, R: R, bow: s * 2.1, Rf: Rf, cap: Rf * .9, y: [yt, ym, yb], loop: loop, v: [-W * .022, W * .019, -W * .016], top: yt - s * .6, mob: mob, edge: W / 2 + wmax };
     var burger = document.querySelector(".navigation-top .hamburger-flex"), br = burger && burger.getBoundingClientRect();
     bandY = br && br.height ? br.top + br.height / 2 : 70;
     dirty = true; draw(); headerTone();
@@ -138,15 +138,16 @@
     if (!L || !dirty) return; dirty = false;
     for (var r = 0; r < 3; r++) {
       var e = prog[r], list = rows[r], n = L.loop[r], dir = r % 2 ? -1 : 1, l = 1 - e;
-      var u = L.R * (.42 + .58 * e), bow = L.bow * 3 * l, c = 1 + 1.7 * l, d = dir * l * L.W, y0 = L.y[r], lim = L.mob ? 1.54 : 1.5;
+      var u = L.R * (.42 + .58 * e), bow = L.bow * 3 * l, c = 1 + 1.7 * l, d = dir * l * L.W, y0 = L.y[r];
       if (L.mob) { u = L.R; c = 1; d = 0; bow = L.s * 2.4 * l; }
       for (var j = 0; j < list.length; j++) {
         var o = list[j], k = ((o.x + off[r]) % n + n) % n - n / 2, T = L.mob ? k / u + dir * l * 2.35 : (k + d * 1.15) / u;
-        if (e <= .001 || T > lim || T < -lim) {
+        var cs = Math.cos(T), sn = Math.sin(T), x = L.W / 2 + u * T * c + d * .3;   // straight along the row, so one size never crowds at the edges
+        if (e <= .001 || Math.abs(x - L.W / 2) > L.edge) {
           if (o.vis) { o.vis = false; o.el.style.transform = "translate3d(-200vw,0,0)"; }
           continue;
         }
-        var cs = Math.cos(T), sn = Math.sin(T), sc = Math.max(MIN_SCALE, cs) * c, x = L.W / 2 + u * sn * c + d * .3, dx = clamp(x - L.W / 2, -L.cap, L.cap);
+        var sc = c, dx = clamp(x - L.W / 2, -L.cap, L.cap);
         var q = Math.sqrt(L.Rf * L.Rf - dx * dx), y = y0 - (L.Rf - q) * BEND - bow * (1 - cs) * c;
         var rot = Math.atan(-dx / q * BEND - bow / u * sn / Math.max(.3, cs)) * 57.2958;
         o.vis = true;
@@ -177,16 +178,6 @@
   function headerTone() {
     var r = root.getBoundingClientRect();
     html.classList.toggle("lb-dark", near && r.top <= bandY && r.bottom >= bandY);
-  }
-
-  /* heading (two .lb-l lines): words rise into place when the band arrives */
-  if (!reduce && head) {
-    var wi = 0;
-    head.setAttribute("aria-label", head.textContent.replace(/\s+/g, " ").trim());
-    [].forEach.call(head.querySelectorAll(".lb-l"), function (ln) {
-      ln.innerHTML = ln.textContent.trim().split(/\s+/).map(function (w) { return '<span class="lb-w" aria-hidden="true"><span style="--i:' + (wi++) + '">' + esc(w) + "</span></span>"; }).join(" ");
-    });
-    root.classList.add("lb-split");
   }
 
   new IntersectionObserver(function (en) {   // build (and load the logos) only when the band gets close

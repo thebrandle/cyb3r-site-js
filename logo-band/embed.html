@@ -1,30 +1,25 @@
 <style>
-/* Homepage logo band (learnwithzero.com wave): the client logos on three curved rows over the brand teal, the heading centred
-   above on two lines (site section-title classes). logo-band.js builds and moves the logos; it reads them from the CMS ticker below,
+/* Homepage logo band (learnwithzero.com wave): the client logos on three curved rows over the brand teal, the site's plus + small title line
+   at the top left (dark, no white on teal). logo-band.js builds and moves the logos; it reads them from the CMS ticker below,
    which stays on the page only as the data source (Ticker Logos collection), so a logo added there appears here too. */
 section.ticker-reveal{display:none!important}
-/* height = padding + the two-line heading + a gap + the three rows + padding (logo-band.js sets it; min-height is its estimate) */
-.lb{position:relative;box-sizing:border-box;min-height:480px;padding:clamp(88px,7vw,104px) 0 clamp(64px,7vw,104px);overflow:hidden;background:#39F1E0;color:#0F0E0E}
+/* height = padding + the title line + a gap + the three rows + padding (logo-band.js sets it; min-height is its estimate) */
+.lb{position:relative;box-sizing:border-box;min-height:480px;padding:clamp(88px,7vw,104px) 0 clamp(44px,4.5vw,64px);overflow:hidden;background:#39F1E0;color:#0F0E0E}
 @media (min-width:700px){.lb{min-height:clamp(520px,43vw,680px)}}
-.lb .lb-head{position:relative;z-index:1;box-sizing:border-box;margin:0 auto;max-width:none;padding:0 16px;
-  font-weight:600;color:#0F0E0E;text-align:center;pointer-events:none}
-.lb-l{display:block;white-space:nowrap}
-@media (max-width:359px){.lb .lb-head{font-size:8.4vw}}
-.lb-w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.08em;margin-bottom:-.08em}
-.lb-w>span{display:inline-block}
-.lb.lb-split .lb-w>span{transform:translate3d(0,110%,0);transition:transform .2s cubic-bezier(.4,0,1,1)}
-.lb.lb-split.is-in .lb-w>span{transform:none;transition:transform .85s cubic-bezier(.16,1,.3,1) calc(var(--i) * 70ms)}
+.lb .lb-head{position:relative;z-index:1;pointer-events:none}
+.lb .plus-icon,.lb .plus-icon img{opacity:1}
+.lb .plus-icon img{filter:brightness(0)}
+.lb h2.top-text{margin:0;font:inherit;letter-spacing:inherit;text-transform:none;color:#0F0E0E}
 .lb-rows{position:absolute;inset:0;overflow:hidden}
 .lb-logo{position:absolute;left:0;top:0;display:block;transform:translate3d(-200vw,0,0);transform-origin:50% 50%;will-change:transform}
 .lb-logo i{position:absolute;inset:0;background-repeat:no-repeat;transition:transform .35s cubic-bezier(.22,1,.36,1)}
 .lb-logo:hover i{transform:scale(1.12)}
 .lb .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
-@media (prefers-reduced-motion:reduce){.lb.lb-split .lb-w>span{transform:none;transition:none}}
 /* the site header over the teal: dark logo and menu lines (set by logo-band.js while the band is behind them) */
 html.lb-dark .navigation-top .logo-first{filter:brightness(0)}
 html.lb-dark .navigation-top .hamburger-flex:not(.cy-burger-open) .hamburger-line{background-color:#0F0E0E}
 </style>
 <section class="lb" aria-labelledby="lb-h">
-<h2 class="h1 for-h2 lb-head" id="lb-h"><span class="lb-l">Brands we have</span> <span class="lb-l">worked with</span></h2>
+<div class="container ticker-head lb-head"><div class="flex-small-title"><div data-wf--plus-icon--variant="second" class="plus-icon w-variant-001b65ae-dd0f-2ce8-c9c5-a9d1ab468148"><img src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6a44c6196a38f1b057c124e8_svglogoplus.png" loading="lazy" aria-hidden="true" alt="" class="image-3"></div><h2 class="top-text lb-l" id="lb-h">Brands we have worked with</h2></div></div>
 <div class="lb-rows" role="group" aria-labelledby="lb-h"></div>
 </section>

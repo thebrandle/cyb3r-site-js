@@ -1,143 +1,143 @@
 {
- "h1": "AI-Driven Advertising",
- "short": "AI Ads",
- "slug": "ai-driven-advertising",
- "intro": "AI-assisted creative, targeting and optimisation that make every advertising budget work harder across the whole funnel.",
- "cards": [
-  {
-   "img": "6ae3a5ad569524a554ffc3dd_cyb3r-ai-creative-iteration.webp",
-   "name": "AI creative & iteration",
-   "alt": "Wall of glowing abstract image tiles in teal and navy",
-   "line": "Ad concepts, headlines and visuals generated and refined in rapid rounds, so you test more ideas and find winning creative faster."
-  },
-  {
-   "img": "6ae3a5adcad9c49bcf45760f_cyb3r-ai-audience-modelling.webp",
-   "name": "Audience modelling",
-   "alt": "Glowing points forming clusters of seated figures in dark space",
-   "line": "Models built from your own customer data to find and reach the people most likely to buy, across search, social and display."
-  },
-  {
-   "img": "6ae3a5ad2224cf631bd344b1_cyb3r-ai-automated-bidding-budgets.webp",
-   "name": "Automated bidding & budgets",
-   "alt": "Robotic arm placing glowing teal cubes in rows",
-   "line": "Smart bidding and budget rules that move spend towards the campaigns, audiences and hours converting best, adjusting as results change."
-  },
-  {
-   "img": "6ae3a5ae953fd3d0e6dd7407_cyb3r-ai-predictive-optimisation.webp",
-   "name": "Predictive optimisation",
-   "alt": "Glass prism casting a beam of teal light across a dark table",
-   "line": "Forecasts that flag what is likely to perform before money is spent, so campaigns scale winners early and cut losers fast."
-  },
-  {
-   "img": "6ae3a5b0ffedbe8516e59860_cyb3r-ai-full-funnel-measurement.webp",
-   "name": "Full-funnel measurement",
-   "alt": "Glass funnel with glowing teal particles streaming through it",
-   "line": "Attribution that connects first click to final sale, showing how each channel and campaign contributes to revenue, not just clicks."
-  },
-  {
-   "img": "6ae3a5b09cd5106668430cea_cyb3r-ai-continuous-experimentation.webp",
-   "name": "Continuous experimentation",
-   "alt": "Laboratory flasks holding glowing teal liquid",
-   "line": "Structured tests across creative, audiences, bids and landing pages, run continuously so performance keeps improving instead of stalling."
-  }
- ],
- "pairs_h2": "What our AI advertising service covers",
- "pairs": [
-  [
-   "B",
-   "AI advertising",
-   "l",
-   "London & Dubai"
+  "h1": "AI-Driven Advertising",
+  "short": "AI Ads",
+  "slug": "ai-driven-advertising",
+  "intro": "AI-powered Google Ads and advertising: smarter creative, targeting and bidding that make every budget work harder across the whole funnel.",
+  "cards": [
+    {
+      "img": "6ae3a5ad569524a554ffc3dd_cyb3r-ai-creative-iteration.webp",
+      "name": "AI creative & iteration",
+      "alt": "Wall of glowing abstract image tiles in teal and navy",
+      "line": "Google Ads headlines, ad concepts and visuals generated and refined in rapid rounds, so you test more ideas and find winners faster."
+    },
+    {
+      "img": "6ae3a5adcad9c49bcf45760f_cyb3r-ai-audience-modelling.webp",
+      "name": "Audience modelling",
+      "alt": "Glowing points forming clusters of seated figures in dark space",
+      "line": "Models built from your own customer data to find the people most likely to buy across Google Search, YouTube, social and display."
+    },
+    {
+      "img": "6ae3a5ad2224cf631bd344b1_cyb3r-ai-automated-bidding-budgets.webp",
+      "name": "Automated bidding & budgets",
+      "alt": "Robotic arm placing glowing teal cubes in rows",
+      "line": "Google Ads Smart Bidding and budget rules that move spend towards the campaigns, audiences and hours converting best as results change."
+    },
+    {
+      "img": "6ae3a5ae953fd3d0e6dd7407_cyb3r-ai-predictive-optimisation.webp",
+      "name": "Predictive optimisation",
+      "alt": "Glass prism casting a beam of teal light across a dark table",
+      "line": "Forecasts that flag what is likely to perform before money is spent, so campaigns scale winners early and cut losers fast."
+    },
+    {
+      "img": "6ae3a5b0ffedbe8516e59860_cyb3r-ai-full-funnel-measurement.webp",
+      "name": "Full-funnel measurement",
+      "alt": "Glass funnel with glowing teal particles streaming through it",
+      "line": "Attribution that connects first click to final sale, showing how each channel and campaign contributes to revenue, not just clicks."
+    },
+    {
+      "img": "6ae3a5b09cd5106668430cea_cyb3r-ai-continuous-experimentation.webp",
+      "name": "Continuous experimentation",
+      "alt": "Laboratory flasks holding glowing teal liquid",
+      "line": "Structured tests across creative, audiences, bids and landing pages, run continuously so performance keeps improving instead of stalling."
+    }
   ],
-  [
-   "l",
-   "AI marketing agency",
-   "B",
-   "AI ad creative"
-  ],
-  [
-   "B",
-   "Generative AI ads",
-   "l",
-   "Ad variations"
-  ],
-  [
-   "l",
-   "AI copywriting",
-   "B",
-   "Visual testing"
-  ],
-  [
-   "B",
-   "Predictive models",
-   "l",
-   "Forecasting"
-  ],
-  [
-   "l",
-   "Audience modelling",
-   "B",
-   "Lookalikes"
-  ],
-  [
-   "B",
-   "First-party data",
-   "l",
-   "Segmentation"
-  ],
-  [
-   "l",
-   "Smart bidding",
-   "B",
-   "Budget rules"
-  ],
-  [
-   "B",
-   "Performance Max",
-   "l",
-   "Advantage+"
-  ],
-  [
-   "l",
-   "Bid automation",
-   "B",
-   "Dayparting"
-  ],
-  [
-   "B",
-   "Ad automation",
-   "l",
-   "AI workflows"
-  ],
-  [
-   "l",
-   "Creative testing",
-   "B",
-   "Holdout tests"
-  ],
-  [
-   "B",
-   "Attribution",
-   "l",
-   "Incrementality"
-  ],
-  [
-   "l",
-   "Media mix modelling",
-   "B",
-   "Funnel analytics"
-  ],
-  [
-   "B",
-   "Product feeds",
-   "l",
-   "Feed audits"
-  ],
-  [
-   "l",
-   "Anomaly alerts",
-   "B",
-   "AI dashboards"
+  "pairs_h2": "What our AI advertising and Google Ads service covers",
+  "pairs": [
+    [
+      "B",
+      "AI advertising",
+      "l",
+      "London & Dubai"
+    ],
+    [
+      "l",
+      "AI ad agency",
+      "B",
+      "UK & Dubai"
+    ],
+    [
+      "B",
+      "AI marketing agency",
+      "l",
+      "London & Dubai"
+    ],
+    [
+      "l",
+      "AI Google Ads",
+      "B",
+      "Management"
+    ],
+    [
+      "B",
+      "Google AI Max",
+      "l",
+      "For Search"
+    ],
+    [
+      "l",
+      "Google AI ads",
+      "B",
+      "Ad optimisation"
+    ],
+    [
+      "B",
+      "Performance Max",
+      "l",
+      "Demand Gen"
+    ],
+    [
+      "l",
+      "AI PPC management",
+      "B",
+      "AI PPC agency"
+    ],
+    [
+      "B",
+      "Automated Google Ads",
+      "l",
+      "Smart Bidding"
+    ],
+    [
+      "l",
+      "AI ad creative",
+      "B",
+      "Ad generation"
+    ],
+    [
+      "B",
+      "AI-powered ads",
+      "l",
+      "AI ad targeting"
+    ],
+    [
+      "l",
+      "Generative AI ads",
+      "B",
+      "Ad variations"
+    ],
+    [
+      "B",
+      "AI media buying",
+      "l",
+      "Budget rules"
+    ],
+    [
+      "l",
+      "Audience modelling",
+      "B",
+      "First-party data"
+    ],
+    [
+      "B",
+      "Contextual ads",
+      "l",
+      "Google Display"
+    ],
+    [
+      "l",
+      "AI ad reporting",
+      "B",
+      "Incrementality"
+    ]
   ]
- ]
 }
