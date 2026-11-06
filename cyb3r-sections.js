@@ -219,7 +219,7 @@
   const CARDS=[
     ["https://rmvgighiqekznberfkiz.supabase.co/storage/v1/object/public/media/svc/brand_w_800.mp4","Brand & Identity"],
     ["https://rmvgighiqekznberfkiz.supabase.co/storage/v1/object/public/media/svc/webui_w_800.mp4","Web Design & Development"],
-    ["https://rmvgighiqekznberfkiz.supabase.co/storage/v1/object/public/media/svc/seoupsacled_w_800.mp4","SEO & Google Ads"],
+    ["https://cdn.jsdelivr.net/gh/thebrandle/cyb3r-svc-media@d7601e38fc11347b45e9017e0d8cd5b6a88241b6/svc/seoads_w_800.mp4","SEO & Google Ads"],
     ["https://rmvgighiqekznberfkiz.supabase.co/storage/v1/object/public/media/svc/socialmedia_w_800.mp4","Social Media & Content"],
     ["https://rmvgighiqekznberfkiz.supabase.co/storage/v1/object/public/media/svc/commercialprint_w_800.mp4","Commercial Print & Production"],
     ["https://rmvgighiqekznberfkiz.supabase.co/storage/v1/object/public/media/svc/aidriven_w_800.mp4","AI-Driven Advertising"]
