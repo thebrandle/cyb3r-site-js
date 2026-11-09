@@ -240,7 +240,7 @@
   const SLUG=["brand-identity","web-design-development","seo-google-ads","social-media-content","commercial-print-production","ai-driven-advertising"];
 
   const _cardCache={};
-  const DMV=[]; let dmSeen=false;   // card videos start cold; fetched + played only once .dm approaches
+  const DMV=[]; let dmSeen=false;   // card videos buffer on build; they play only while .dm is near the viewport
   function getCard(idx){
     if(_cardCache[idx]) return _cardCache[idx];
     let [url,title]=CARDS[idx];
@@ -248,7 +248,7 @@
     // playing video -> VideoTexture (auto-updates each frame). Cloudinary crops to the card aspect so nothing stretches.
     const vid=document.createElement("video");
     vid.crossOrigin="anonymous"; vid.muted=true; vid.defaultMuted=true; vid.loop=true; vid.playsInline=true;
-    vid.setAttribute("muted",""); vid.setAttribute("playsinline",""); vid.setAttribute("webkit-playsinline",""); vid.preload="none";
+    vid.setAttribute("muted",""); vid.setAttribute("playsinline",""); vid.setAttribute("webkit-playsinline",""); vid.preload="auto";   // buffer as soon as the helix is built (the loader starts it well ahead of the section)
     vid.style.cssText="position:fixed;left:-9999px;top:0;width:2px;height:2px;opacity:0;pointer-events:none";
     (document.body||document.documentElement).appendChild(vid);
     vid.src=url; DMV.push(vid); if(dmSeen){ const pr=vid.play(); if(pr&&pr.catch) pr.catch(function(){}); }
@@ -432,21 +432,9 @@
   function pinProgress(){ const r=pin.getBoundingClientRect(); const total=pin.offsetHeight-innerHeight; return clamp(-r.top/total,0,1); }
   let gSmooth=0, last=performance.now();
 
-  // fast-scroll freeze: while the section is being scrolled through quickly, pause the six
-  // texture videos (a paused video keeps its last frame - invisible while cards are moving)
-  // and resume ~0.3s after the scroll settles. Six concurrent decodes only when actually watched.
-  let dmFast=false, dmCalmT=0, _gPrev=-1;
-  function dmSetFast(fast){
-    if(fast===dmFast) return; dmFast=fast;
-    if(fast){ DMV.forEach(function(v){ if(!v.paused) v.pause(); }); }
-    else if(dmVisible){ DMV.forEach(function(v,i){ setTimeout(function(){ if(dmVisible&&!dmFast){ const p=v.play(); if(p&&p.catch) p.catch(function(){}); } }, i*60); }); }
-  }
   function tick(now){
     if(!dmVisible){ last=now; requestAnimationFrame(tick); return; }   // idle off-screen: no geometry math, no WebGL render
     const dt=Math.min(0.05,(now-last)/1000); last=now;
-    { const gNow=gSmooth; const gv=_gPrev<0?0:Math.abs(gNow-_gPrev); _gPrev=gNow;
-      if(gv>0.002){ if(dmCalmT){ clearTimeout(dmCalmT); dmCalmT=0; } dmSetFast(true); }
-      else if(dmFast && !dmCalmT){ dmCalmT=setTimeout(function(){ dmCalmT=0; dmSetFast(false); }, 300); } }
     gSmooth += (pinProgress()-gSmooth)*(1-Math.pow(0.001, dt));    // ≈0.1/frame, matches Lenis
     const g=gSmooth;
     const P=Math.min(1, g/RIB_P_END);
