@@ -70,7 +70,7 @@ for i, c in enumerate(PAGES):
 </section>
 <section class="dx"><div class="dx-in">{secs}
 <div class="dx-f" itemscope itemtype="https://schema.org/FAQPage"><h2>Questions we get asked</h2>{faqs}</div>
-<div class="dx-c"><a class="dx-b" href="/contact">Book a free consultation</a><a class="dx-l" href="/{c["parent"]}">{e(parent["h1"])} services</a></div>
+<div class="dx-c"><a class="dx-b" href="/contact">Book a free consultation</a></div>
 </div></section>'''
     assert not any(ch in lineup + pairs for ch in '—–'), c['slug']
     open(os.path.join(D, f'{c["slug"]}-lineup.html'), 'w', encoding='utf-8').write(lineup)

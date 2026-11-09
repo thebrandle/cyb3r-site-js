@@ -1,0 +1,81 @@
+<style>
+/* Service page "3" pairs (bennettandclive.com clients list): two columns of what the service covers,
+   meeting at the centre; the CYB3R 3 rides the middle of the screen and the rows part around it as the
+   page scrolls. Behaviour: hosted service-pairs.js. --bp-lh = row height, --bp-mh = height of the 3. */
+.bp{--bp-bg:#1A232D;--bp-ink:#fff;--bp-accent:#39F1E0;--bp-lh:1.16;--bp-mh:1.3em;position:relative;overflow:hidden;overflow:clip;
+  background:var(--bp-bg);color:var(--bp-ink);padding:clamp(72px,14vh,160px) 0 clamp(40px,8vh,96px);font-family:Inter,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.bp,.bp *{box-sizing:border-box}
+.bp-wrap{position:relative;font-size:3.125vw;line-height:var(--bp-lh);letter-spacing:-.04em}
+.bp-list{list-style:none;margin:0;padding:0}
+.bp-row{display:flex;justify-content:center;column-gap:1.4vw;white-space:nowrap;margin:0;padding:0;
+  font-size:inherit;line-height:inherit;font-weight:inherit;letter-spacing:inherit;opacity:1}   /* the theme sizes and dims every <li> */
+.bp-l,.bp-r{flex:0 0 50%;font-weight:300;letter-spacing:-.03em;will-change:transform}
+.bp-l{text-align:right}
+.bp .bp-b{font-weight:700;letter-spacing:-.04em}
+/* the 3 travels between the first and last row centres, held at the middle of the screen in between */
+.bp-track{position:absolute;left:0;right:0;top:calc(var(--bp-lh)*.5em - var(--bp-mh)/2);bottom:calc(var(--bp-lh)*.5em - var(--bp-mh)/2);
+  pointer-events:none}
+.bp-mark{position:sticky;top:calc(50vh - var(--bp-mh)/2);display:block;width:calc(var(--bp-mh)*.804);height:var(--bp-mh);margin:0 auto;
+  color:var(--bp-accent)}
+.bp-mark svg{display:block;width:100%;height:100%}
+.bp.bp-pre .bp-mark{visibility:hidden}
+/* "View all" under the list: same side padding as the site's sections, the link itself keeps the site classes */
+.bp-more{padding:0 2% 50px}
+@media (max-width:767px){.bp{--bp-mh:1.45em;padding-top:clamp(28px,5vh,44px)}.bp-wrap{font-size:4.4vw}.bp-row{column-gap:3vw}}
+@media (prefers-reduced-motion:reduce){.bp-track{display:none}}
+</style>
+<section class="bp bp-pre" aria-labelledby="bp-h">
+<h2 id="bp-h" class="sr-only">What our SEO and Google Ads agency covers</h2>
+<div class="bp-wrap">
+<ul class="bp-list" role="list">
+<li class="bp-row"><span class="bp-l bp-b">SEO agency</span> <span class="bp-r">London &amp; Dubai</span></li>
+<li class="bp-row"><span class="bp-l">SEO services</span> <span class="bp-r bp-b">Technical SEO</span></li>
+<li class="bp-row"><span class="bp-l bp-b">Local SEO</span> <span class="bp-r">Maps rankings</span></li>
+<li class="bp-row"><span class="bp-l">SEO audits</span> <span class="bp-r bp-b">Keyword research</span></li>
+<li class="bp-row"><span class="bp-l bp-b">On-page SEO</span> <span class="bp-r">Content strategy</span></li>
+<li class="bp-row"><span class="bp-l">Link building</span> <span class="bp-r bp-b">Digital PR</span></li>
+<li class="bp-row"><span class="bp-l bp-b">Schema markup</span> <span class="bp-r">Core Web Vitals</span></li>
+<li class="bp-row"><span class="bp-l">Google Ads agency</span> <span class="bp-r bp-b">PPC management</span></li>
+<li class="bp-row"><span class="bp-l bp-b">Search campaigns</span> <span class="bp-r">Performance Max</span></li>
+<li class="bp-row"><span class="bp-l">Google Shopping</span> <span class="bp-r bp-b">YouTube ads</span></li>
+<li class="bp-row"><span class="bp-l bp-b">Display ads</span> <span class="bp-r">Remarketing</span></li>
+<li class="bp-row"><span class="bp-l">Pay per click</span> <span class="bp-r bp-b">Bid strategy</span></li>
+<li class="bp-row"><span class="bp-l bp-b">Ad copywriting</span> <span class="bp-r">Landing pages</span></li>
+<li class="bp-row"><span class="bp-l">Conversion tracking</span> <span class="bp-r bp-b">Tag Manager</span></li>
+<li class="bp-row"><span class="bp-l bp-b">Call tracking</span> <span class="bp-r">Lead quality</span></li>
+<li class="bp-row"><span class="bp-l">SEO &amp; PPC reporting</span> <span class="bp-r bp-b">Dashboards</span></li>
+</ul>
+<div class="bp-track" aria-hidden="true"><span class="bp-mark"><svg viewBox="400 205 1600 1990" focusable="false"><path fill="currentColor" d="M973.766 1120.05C1023.48 1026.79 1076.58 940.226 1130.61 849.918C1195.94 739.307 1261.83 629.029 1328.27 519.085L1433.24 343.718C1449.26 317.308 1466.84 286.575 1485.54 262.113C1489.72 255.693 1498.15 253.606 1505.62 253.227C1548.69 251.037 1593.46 252.456 1636.51 252.635L1882.92 252.001C1917.1 251.938 1961.94 254.487 1994 252.831C1971.53 284.848 1948.35 324.941 1927.21 358.629C1887.54 420.643 1848.2 482.863 1809.19 545.287C1718.37 688.645 1622.08 833.786 1535.79 979.531C1559.26 981.557 1579.3 988.064 1602.08 993.349C1997.08 1085.01 2084.76 1603.63 1885.03 1908C1786.81 2057.68 1631.77 2131.9 1458.48 2164.67C1420.2 2171.91 1410.12 2174.01 1359.47 2179.34L1303.48 2184.67C1271.48 2187.33 1289.32 2184.67 1212 2190H1154.18C1138.18 2188.45 1122.18 2190 1098.19 2187.33C1115.6 2181.74 1111.7 2182.06 1127.52 2179.34C1127.52 2179.34 1156.03 2187.43 1143.51 2184.67L1098.19 2187.33C1042.49 2179.74 985.71 2177.75 929.221 2168.36C565.456 2107.83 397.916 1905.12 405.229 1533.91C580.129 1533.06 755.034 1533.17 929.934 1534.24C933.536 1651.27 946.564 1799.33 1034.49 1884.86C1085.09 1934.07 1133.31 1951.56 1203.21 1951.6C1266.14 1951.63 1325.68 1928.59 1369.43 1883.35C1450.47 1799.55 1476.85 1651.28 1474.75 1539.32C1472.64 1426.29 1456.76 1290.49 1370.55 1208.3C1298.95 1140.04 1222.6 1135.19 1129.42 1127.02C1075.07 1122.25 1028.27 1119.41 973.766 1120.05Z"/><path fill="currentColor" d="M694.468 210.744C843.459 193.91 977.968 300.834 995.177 449.781C1012.39 598.728 905.805 733.509 756.902 751.096C607.465 768.748 472.094 661.699 454.823 512.218C437.55 362.734 544.94 227.637 694.468 210.744Z"/></svg></span></div>
+</div>
+</section>
+<style>
+/* body copy + FAQ under the pairs (same rules as dubai.css) */
+/* Dubai pages: copy and FAQ under the pairs */
+.dx{background:#1A232D;color:#fff;padding:clamp(40px,7vh,96px) 2% clamp(48px,8vh,110px);font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased}
+.dx *{box-sizing:border-box}
+.dx-in{max-width:1240px;margin:0 auto}
+.dx-s{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(16px,4vw,72px);padding:clamp(34px,4.4vw,64px) 0;border-top:1px solid rgba(255,255,255,.14)}
+.dx h2{margin:0;font-family:inherit;font-size:clamp(28px,2.9vw,44px);font-weight:500;line-height:1.14;letter-spacing:-.03em;color:#fff;text-wrap:balance;text-transform:none}
+.dx p{margin:0 0 1em;font-family:inherit;font-size:clamp(16px,1.2vw,18px);font-weight:400;line-height:1.62;letter-spacing:0;color:rgba(255,255,255,.76);opacity:1;text-wrap:pretty}
+.dx p:last-child{margin-bottom:0}
+.dx-f{padding-top:clamp(34px,4.4vw,64px);border-top:1px solid rgba(255,255,255,.14)}
+.dx-f>h2{margin-bottom:clamp(20px,2.4vw,34px)}
+.dx details{border-top:1px solid rgba(255,255,255,.14)}
+.dx details:last-of-type{border-bottom:1px solid rgba(255,255,255,.14)}
+.dx summary{position:relative;display:block;padding:22px 44px 22px 0;cursor:pointer;list-style:none;font-size:clamp(18px,1.5vw,22px);font-weight:500;line-height:1.3;letter-spacing:-.015em;color:#fff}
+.dx summary::-webkit-details-marker{display:none}
+.dx summary::after{content:"+";position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:26px;font-weight:300;color:#39F1E0}
+.dx details[open] summary::after{content:"\2212"}
+.dx details>div{padding:0 44px 24px 0;max-width:820px}
+.dx-c{display:flex;flex-wrap:wrap;align-items:center;gap:14px 28px;margin-top:clamp(30px,3.6vw,52px)}
+.dx-b{display:inline-block;padding:17px 26px;background:#39F1E0;color:#0F0E0E;font-size:16px;font-weight:600;line-height:1;text-decoration:none;transition:background-color .3s ease}
+.dx-b:hover{background:#fff;color:#0F0E0E}
+@media (max-width:767px){.dx-s{grid-template-columns:1fr}.dx{padding-left:20px;padding-right:20px}}
+.dx summary{text-wrap:balance}
+</style>
+<section class="dx"><div class="dx-in"><div class="dx-s"><h2>Be found by people who are already looking</h2><div><p>Search is where buyers tell you exactly what they want. SEO earns you a place in the organic results over time; Google Ads puts you at the top today. Run together, they cover the whole search page and share what they learn: the terms that convert in ads show where to invest in content, and organic rankings bring down what you pay for clicks.</p><p>As an SEO and Google Ads agency in London and Dubai, we run both, so you get one plan and one set of numbers instead of two suppliers pulling in different directions.</p></div></div><div class="dx-s"><h2>How our SEO works</h2><div><p>We begin with an SEO audit and keyword research, then fix the technical problems that hold a site back: crawling, indexing, site speed, Core Web Vitals and schema markup. On-page SEO and a content strategy follow, built around the searches your buyers actually make, including local SEO and Google Maps for businesses that serve an area.</p><p>Link building and digital PR then grow your authority, so the pages that matter can rank for competitive terms.</p></div></div><div class="dx-s"><h2>How we manage Google Ads</h2><div><p>Every account starts with conversion tracking in Tag Manager and GA4, including calls and form leads, so Google optimises for real enquiries rather than cheap clicks. We then build Search, Performance Max, Shopping, YouTube and remarketing campaigns, write the ad copy and improve the landing pages. Each week we review search terms, bids and lead quality, and you see the same dashboards we do.</p></div></div>
+<div class="dx-f" itemscope itemtype="https://schema.org/FAQPage"><h2>Questions we get asked</h2><details itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><summary itemprop="name">Should I invest in SEO or Google Ads?</summary><div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Usually both. Google Ads brings enquiries quickly while SEO builds rankings that keep paying off. We set the balance based on your budget and how fast you need results.</p></div></details><details itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><summary itemprop="name">How long does SEO take to work?</summary><div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Technical fixes can help within weeks, but most sites see meaningful ranking gains over several months. It depends on competition and where your site starts.</p></div></details><details itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><summary itemprop="name">How much does SEO and PPC management cost?</summary><div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Ad spend goes directly to Google. Our fee is agreed up front based on the size of the account and the SEO work involved.</p></div></details><details itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><summary itemprop="name">Do you offer local SEO?</summary><div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Yes. We optimise your Google Business Profile, location pages and local citations so you appear in Maps and local results.</p></div></details><details itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><summary itemprop="name">Will I own my Google Ads account and data?</summary><div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Yes. Your account, analytics and campaign history stay yours, and you have full access at all times.</p></div></details></div>
+<div class="dx-c"><a class="dx-b" href="/contact">Book a free consultation</a></div>
+</div></section>
+<div class="bp-more"><div class="container"><a data-wf--button-arrow--variant="second" href="/services" aria-label="View all services" class="button-arrow w-variant-6632bb10-76fa-59ca-dc99-473964798be3 projectscta w-inline-block"><div class="button-title-flex w-variant-6632bb10-76fa-59ca-dc99-473964798be3"><div class="button-small-name w-variant-6632bb10-76fa-59ca-dc99-473964798be3">View all</div><div class="button-small-name w-variant-6632bb10-76fa-59ca-dc99-473964798be3">View all</div></div><img width="9" aria-hidden="true" alt="Arrow icon" src="https://cdn.prod.website-files.com/6a293cec4280dd8c699d4d08/6a293cee4280dd8c699d5138_arrows.png" loading="lazy" class="arrow-gray"></a></div></div>
