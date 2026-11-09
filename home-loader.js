@@ -7,6 +7,7 @@
  * v2: the heavy chain (three.js ~600KB + engine + its card videos) is DEFERRED off the
  * critical path - it starts when the sections near the viewport (900px lead) or shortly
  * after window load, whichever comes first. Only the tiny CSS loads up front.
+ * v4: starts 300 ms after load (or 2500px ahead) so the helix videos are buffered before you reach them.
  * v3: the engine comes straight from cyb3r-site-js at a pinned commit, so a new engine needs only a new loader
  * version (the site-head RULES remap only touches cyb3r-services-section URLs). */
 (function () {
@@ -17,15 +18,15 @@
   function j(u, c) { var s = d.createElement('script'); s.src = u; if (c) s.onload = c; h.appendChild(s); }
   function start() {
     if (started) return; started = 1;
-    j('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', function () { j('https://cdn.jsdelivr.net/gh/thebrandle/cyb3r-site-js@5eb68ba8249ebd07addad2567d50bd13853a20c0/cyb3r-sections.js'); });
+    j('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', function () { j('https://cdn.jsdelivr.net/gh/thebrandle/cyb3r-site-js@7a8dd590ddc9e00602936234d797d3c041767cf7/cyb3r-sections.js'); });
   }
   if ('IntersectionObserver' in window) {
     var io = new IntersectionObserver(function (es) {
       for (var i = 0; i < es.length; i++) if (es[i].isIntersecting) { io.disconnect(); start(); return; }
-    }, { rootMargin: '900px' });
+    }, { rootMargin: '2500px' });
     var roots = d.querySelectorAll('.wk,.dm');
     for (var i = 0; i < roots.length; i++) io.observe(roots[i]);
   }
-  function late() { setTimeout(start, 2200); }
+  function late() { setTimeout(start, 300); }
   if (d.readyState === 'complete') late(); else addEventListener('load', late);
 })();
