@@ -8,7 +8,7 @@ e=lambda s:html.escape(s,quote=False)
 for slug,p in PAGES.items():
     secs=''.join(f'<div class="dx-s"><h2>{e(h)}</h2><div>'+''.join(f'<p>{e(x)}</p>' for x in ps)+'</div></div>' for h,ps in p['sections'])
     faq=''.join(f'<details itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><summary itemprop="name">{e(q)}</summary><div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">{e(a)}</p></div></details>' for q,a in p['faq'])
-    dx=style+f'<section class="dx"><div class="dx-in">{secs}\n<div class="dx-f" itemscope itemtype="https://schema.org/FAQPage"><h2>Questions we get asked</h2>{faq}</div>\n<div class="dx-c"><a class="dx-b" href="/contact">Book a free consultation</a></div>\n</div></section>\n'
+    dx=style+f'<section class="dx"><div class="dx-in">{secs}\n<div class="dx-f" itemscope itemtype="https://schema.org/FAQPage"><h2>Questions we get asked</h2>{faq}</div>\n</div></section>\n'
     live=urllib.request.urlopen(f'https://www.cyb3rmedia.com/{slug}?v={random.random()}').read().decode()
     i=live.find('<style>\n/* Service page "3" pairs'); j=live.find('<div class="bp-more">',i); k=live.find('</a></div></div>',j)+16
     old=live[i:k]+'\n'
